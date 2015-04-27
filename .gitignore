@@ -1,0 +1,8 @@
+*.swp
+*.swo
+*.*~
+*.log
+
+src-js
+node_modules
+bower_components
