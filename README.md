@@ -19,28 +19,12 @@ gulp
 
 ### Examples
 
-JQuery, lodash, angular, skeletor.css and shift-components are available in the
-example folder:
+JQuery, lodash, angular, skeletor.css and shift-components are loaded automagically for
+every examples.
 
-```jade
-doctype
-html.no-js
-  head
-    title Shift Sortable Demo
+An example should be composed of a stylus file, a jade file and a coffee file.
 
-    meta(charset='utf-8')
-    meta(http-equiv='X-UA-Compatible', content='IE=edge')
-    meta(name='description', content='')
-    meta(name='viewport', content='width=device-width, initial-scale=1')
-
-    link(rel='stylesheet', href='css/normalize.css')
-    link(rel='stylesheet', href='css/skeletor.css')
-
-    script(src='js/angular.js')
-    script(src='js/jquery.js')
-    script(src='js/shift-components.js')
-
-```
+See [sortable](src/sortable/example/)
 
 ### Clean
 
@@ -49,4 +33,3 @@ Delete `src-js` and `build` folders
 ```sh
 gulp clean
 ```
-
