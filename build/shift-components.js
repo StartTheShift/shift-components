@@ -1,20 +1,5 @@
 
 /**
-UI components for SHIFT applications
-
-@requires momentJS
-@requires lodash
-@requires jQuery
-@requires shift.components.sortable
-
-@module shift.components
-
-@link sortable/
- */
-angular.module('shift.components', ['shift.components.sortable']);
-
-
-/**
 Sortable directive to allow drag n' drop sorting of an array of object
 
 @module shift.components.sortable
@@ -32,7 +17,9 @@ position fixed.
 ul
   li(
     ng-repeat = "element in list"
-    shiftSortable = "list"
+    shift-sortable = "list"
+    shift-sortable-change = "onListOrderChange"
+    shift-sortable-fixed = "true"
   ) {{ element.name }}
 ```
  */

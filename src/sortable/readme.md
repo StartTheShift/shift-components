@@ -14,6 +14,8 @@ Sortable directive to allow drag n' drop sorting of an array of object
 ul
   li(
     ng-repeat = "element in list"
-    shiftSortable = "list"
+    shift-sortable = "list"
+    shift-sortable-change = "onListOrderChange"
+    shift-sortable-fixed = "true"
   ) {{ element.name }}
 ```

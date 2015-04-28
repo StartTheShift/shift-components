@@ -3,7 +3,8 @@
 *.*~
 *.log
 
-src-js
+.src-js
 node_modules
 bower_components
+.examples
 examples

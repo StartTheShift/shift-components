@@ -16,7 +16,9 @@ position fixed.
 ul
   li(
     ng-repeat = "element in list"
-    shiftSortable = "list"
+    shift-sortable = "list"
+    shift-sortable-change = "onListOrderChange"
+    shift-sortable-fixed = "true"
   ) {{ element.name }}
 ```
 ###
@@ -26,8 +28,6 @@ angular.module 'shift.components.sortable', []
     scope:
       shiftSortable: '='
       shiftSortableChange: '&'
-      # if the sortable element container is in a fixed element like a modal
-      # (aka. scrolling doesn't move it) set shift-sortable-fixed to true
       shiftSortableFixed: '='
     link: (scope, element, attrs) ->
       container = element[0]
