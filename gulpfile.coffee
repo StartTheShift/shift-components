@@ -14,25 +14,25 @@ BUILD_DEST = 'build'
 
 # Create docs next to coffee files
 gulp.task 'docs', ['coffee'], ->
-	gulp.src 'src-js/**/*.js'
-		.pipe jsdoc2md({'private': true})
-		.on 'error', (err) ->
-			console.log "jsdoc2md failed: #{err.message}"
-		.pipe rename (path) ->
-			path.basename = "readme"
-			path.extname = '.md'
-		.pipe gulp.dest('src')
+  gulp.src 'src-js/**/*.js'
+    .pipe jsdoc2md({'private': true})
+    .on 'error', (err) ->
+      console.log "jsdoc2md failed: #{err.message}"
+    .pipe rename (path) ->
+      path.basename = "readme"
+      path.extname = '.md'
+    .pipe gulp.dest('src')
 
 # Generate single lib file, minified with sourcemap
 gulp.task 'build', ['coffee'], ->
   gulp.src './src-js/**/*.js'
-  	.pipe concat('shift-components.js')
-  	.pipe gulp.dest(BUILD_DEST)
-  	.pipe sourceMap.init()
-  	.pipe uglify()
-  	.pipe rename(extname: '.min.js')
-  	.pipe sourceMap.write('./')
-  	.pipe gulp.dest(BUILD_DEST)
+    .pipe concat('shift-components.js')
+    .pipe gulp.dest(BUILD_DEST)
+    .pipe sourceMap.init()
+    .pipe uglify()
+    .pipe rename(extname: '.min.js')
+    .pipe sourceMap.write('./')
+    .pipe gulp.dest(BUILD_DEST)
 
 # Translate Coffee into JS
 gulp.task 'coffee', ['clean'], ->
@@ -41,13 +41,16 @@ gulp.task 'coffee', ['clean'], ->
     .pipe(gulp.dest('src-js'));
 
 gulp.task 'clean', (done) ->
-  del ['src/**/*.md', 'src-js', 'examples', 'build'], done
+  del ['src/**/*.md', 'src-js', 'build'], done
+
+gulp.task 'cleanExamples', (done) ->
+  del ['examples'], done
 
 # Monitor changes on coffee files, trigger default on
 # change
-gulp.task 'watch', ['coffee', 'docs', 'examples'], ->
-	gulp.watch ['src/**/*.coffee'], ['coffee', 'docs']
-	gulp.watch ['src/**/*.jade'], ['examples']
+gulp.task 'watch', ['build', 'docs', 'examples'], ->
+  gulp.watch ['src/**/*.coffee'], ['coffee', 'docs']
+  gulp.watch ['src/**/*.jade'], ['examples']
 
 # Translate coffee file into JS and generate MarkDown doc
 gulp.task 'default', (cb) ->
@@ -60,7 +63,7 @@ gulp.task 'connect', ->
     livereload: true
   }
 
-gulp.task 'examples', ['build'], ->
+gulp.task 'examples', ['cleanExamples', 'build'], ->
   gulp.src([
       'bower_components/skeletor/dist/skeletor.css'
       'bower_components/normalize.css/normalize.css'
@@ -71,7 +74,7 @@ gulp.task 'examples', ['build'], ->
 
   gulp.src([
       'build/shift-components.js'
-      'node_modules/angular/angular.js'
+      'bower_components/angular/angular.js'
       'bower_components/jquery/dist/jquery.js'
       'bower_components/lodash/lodash.js'
     ])
@@ -80,10 +83,10 @@ gulp.task 'examples', ['build'], ->
     .pipe gulp.dest('examples/js')
 
   gulp.src('src/**/*.jade')
-  	.pipe jade()
+    .pipe jade()
     .pipe rename (path) ->
       path.dirname = '/'
-  	.pipe gulp.dest('examples')
+    .pipe gulp.dest('examples')
     .pipe connect.reload()
 
 

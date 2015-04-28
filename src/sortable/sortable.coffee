@@ -17,114 +17,120 @@ ul
   li(
     ng-repeat = "element in list"
     shiftSortable = "list"
-  )	{{ element.name }}
+  ) {{ element.name }}
 ```
 ###
 angular.module 'shift.components.sortable', []
-	.directive 'shiftSortable', ->
-	  restrict: 'A'
-	  scope:
-	    shiftSortable: '='
-	    shiftSortableChange: '&'
-	    # if the sortable element container is in a fixed element like a modal
-	    # (aka. scrolling doesn't move it) set shift-sortable-fixed to true
-	    shiftSortableFixed: '='
-	  link: (scope, element, attrs) ->
-	    container = element[0]
-	    dragging = null
-	    start_position = null
-	    hovered_element = null
+  .directive 'shiftSortable', ->
+    restrict: 'A'
+    scope:
+      shiftSortable: '='
+      shiftSortableChange: '&'
+      # if the sortable element container is in a fixed element like a modal
+      # (aka. scrolling doesn't move it) set shift-sortable-fixed to true
+      shiftSortableFixed: '='
+    link: (scope, element, attrs) ->
+      container = element[0]
+      dragging = null
+      start_position = null
+      hovered_element = null
 
-	    placeholder = document.createElement('div')
-	    placeholder.className = 'placeholder'
+      placeholder = document.createElement('div')
+      placeholder.className = 'placeholder'
 
-	    getElementAt = (x, y) ->
-	      # Adjust position if element is fixed on the screen
-	      if scope.shiftSortableFixed
-	        y -= $(window).scrollTop()
-	        x -= $(window).scrollLeft()
+      getElementAt = (x, y) ->
+        # Adjust position if element is fixed on the screen
+        if scope.shiftSortableFixed
+          y -= $(window).scrollTop()
+          x -= $(window).scrollLeft()
 
-	      for element in container.children
-	        coord = element.getBoundingClientRect()
-	        if x > coord.left and x < coord.right and y > coord.top and y < coord.bottom
-	          return element unless element.getAttribute('shift-sortable-still')
+        for element in container.children
+          coord = element.getBoundingClientRect()
+          if x > coord.left and x < coord.right and y > coord.top and y < coord.bottom
+            return element unless element.getAttribute('shift-sortable-still')
 
-	    isInsideContainer = (x, y) ->
-	      # Adjust position if element is fixed on the screen
-	      if scope.shiftSortableFixed
-	        y -= $(window).scrollTop()
-	        x -= $(window).scrollLeft()
+      isInsideContainer = (x, y) ->
+        # Adjust position if element is fixed on the screen
+        if scope.shiftSortableFixed
+          y -= $(window).scrollTop()
+          x -= $(window).scrollLeft()
 
-	      coord = container.getBoundingClientRect()
-	      return x > coord.left and x < coord.right and y > coord.top and y < coord.bottom
+        coord = container.getBoundingClientRect()
+        return x > coord.left and x < coord.right and y > coord.top and y < coord.bottom
 
-	    isAfterLastElement = (x, y) ->
-	      # Adjust position if element is fixed on the screen
-	      if scope.shiftSortableFixed
-	        y -= $(window).scrollTop()
-	        x -= $(window).scrollLeft()
+      isAfterLastElement = (x, y) ->
+        # Adjust position if element is fixed on the screen
+        if scope.shiftSortableFixed
+          y -= $(window).scrollTop()
+          x -= $(window).scrollLeft()
 
-	      coord = container.children[container.children.length - 1].getBoundingClientRect()
-	      # check if pointer in a 25% bottom and right zone of the object
-	      x_offset = (coord.right - coord.left) * .50
-	      y_offset = (coord.bottom - coord.top) * .50
+        coord = container.children[container.children.length - 1].getBoundingClientRect()
+        # check if pointer in a 25% bottom and right zone of the object
+        x_offset = (coord.right - coord.left) * .50
+        y_offset = (coord.bottom - coord.top) * .50
 
-	      return (x > coord.right - x_offset and y > coord.top) or (x > coord.left and y > coord.bottom - y_offset)
+        return (x > coord.right - x_offset and y > coord.top) or (x > coord.left and y > coord.bottom - y_offset)
 
-	    grab = (event) ->
-	      event.preventDefault() # prevent text selection while dragging
+      grab = (event) ->
+        event.preventDefault() # prevent text selection while dragging
 
-	      if event.target in container.children and not event.target.getAttribute('shift-sortable-still')
-	        dragging = event.target
-	        start_position = $(dragging).index()
+        if event.target in container.children and not event.target.getAttribute('shift-sortable-still')
+          dragging = event.target
+          start_position = $(dragging).index()
 
-	        window.addEventListener 'mousemove', move
-	        window.addEventListener 'mouseup', release
+          placeholder.style.width = dragging.style.width = "#{dragging.clientWidth}px"
+          placeholder.style.height = dragging.style.height = "#{dragging.clientHeight}px"
 
-	        container.insertBefore placeholder, dragging
-	        document.body.appendChild dragging
-	        $(dragging).addClass('dragging')
+          window.addEventListener 'mousemove', move
+          window.addEventListener 'mouseup', release
 
-	      return false # prevent text selection while dragging
+          container.insertBefore placeholder, dragging
+          document.body.appendChild dragging
+          $(dragging).addClass('dragging')
 
-	    move = (event) ->
-	      event.preventDefault() # prevent text selection while dragging
+          # grabing is also moving
+          move event
 
-	      dragging.style.left = "#{event.pageX}px"
-	      dragging.style.top = "#{event.pageY}px"
+        return false # prevent text selection while dragging
 
-	      return false unless isInsideContainer(event.pageX, event.pageY)
+      move = (event) ->
+        event.preventDefault() # prevent text selection while dragging
 
-	      if isAfterLastElement(event.pageX, event.pageY)
-	        container.appendChild placeholder
-	      else
-	        elt = getElementAt(event.pageX, event.pageY)
-	        if elt? and elt isnt hovered_element
-	          hovered_element = elt
-	          container.insertBefore placeholder, elt
+        dragging.style.left = "#{event.pageX}px"
+        dragging.style.top = "#{event.pageY}px"
 
-	      return false # prevent text selection while dragging
+        return false unless isInsideContainer(event.pageX, event.pageY)
 
-	    release = (event) ->
-	      end_position = $(placeholder).index()
+        if isAfterLastElement(event.pageX, event.pageY)
+          container.appendChild placeholder
+        else
+          elt = getElementAt(event.pageX, event.pageY)
+          if elt? and elt isnt hovered_element
+            hovered_element = elt
+            container.insertBefore placeholder, elt
 
-	      # DOM: replace placeholder by element and remove its styles
-	      $(dragging).removeClass 'dragging'
-	      container.insertBefore dragging, placeholder
-	      container.removeChild placeholder
-	      dragging.style.left = ''
-	      dragging.style.top = ''
-	      dragging = null
+        return false # prevent text selection while dragging
 
-	      window.removeEventListener 'mousemove', move
-	      window.removeEventListener 'mouseup', release
+      release = (event) ->
+        end_position = $(placeholder).index()
 
-	      # now that everything is back in place in the dom, trigger a digest
-	      if end_position isnt start_position
-	        # move the element in the provided list and trigger a digest cycle
-	        scope.$apply ->
-	          record = scope.shiftSortable.splice(start_position, 1)[0]
-	          scope.shiftSortable.splice(end_position, 0, record)
-	          scope.shiftSortableChange?()
+        # DOM: replace placeholder by element and remove its styles
+        $(dragging).removeClass 'dragging'
+        container.insertBefore dragging, placeholder
+        container.removeChild placeholder
+        dragging.style.left = placeholder.style.width = dragging.style.width = ''
+        dragging.style.top = placeholder.style.height = dragging.style.height = ''
+        dragging = null
 
-	    container.addEventListener 'mousedown', grab
+        window.removeEventListener 'mousemove', move
+        window.removeEventListener 'mouseup', release
+
+        # now that everything is back in place in the dom, trigger a digest
+        if end_position isnt start_position
+          # move the element in the provided list and trigger a digest cycle
+          scope.$apply ->
+            record = scope.shiftSortable.splice(start_position, 1)[0]
+            scope.shiftSortable.splice(end_position, 0, record)
+            scope.shiftSortableChange?()
+
+      container.addEventListener 'mousedown', grab

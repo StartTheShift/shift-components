@@ -16,44 +16,33 @@ html.no-js
     script(src='js/shift-components.js')
 
     style.
-      body{
-        margin: 20px;
-      }
-
       .sortable-container{
         position: relative;
-        padding: 10px;
-        border: 1px solid #333;
-        margin: 20px;
         width: 400px;
       }
 
       .sortable-element{
-        border: 1px solid #666;
         background: #999;
         color: white;
         padding: 10px;
         margin: 5px;
         vertical-align: middle;
+        border-radius: 5px;
       }
 
       .dragging{
         position: absolute;
         box-shadow: 3px 3px 3px rgba(0,0,0,.5);
-        margin-left: -50px;
-        margin-top: -25px;
         cursor: move;
       }
 
       .placeholder{
-        height: 40px;
-        background: #aaa;
+        border: 2px #888 dashed;
       }
 
       .inline-sortable .sortable-element,
       .inline-sortable .placeholder{
         display: inline-block;
-        min-width: 60px;
         vertical-align: middle;
       }
 
@@ -75,7 +64,7 @@ html.no-js
 
     a.button(href = "/") Back
 
-    #layout(ng-controller="SortableCtrl")
+    div(ng-controller="SortableCtrl")
       h3.content-header Scope
 
       .code
@@ -90,7 +79,7 @@ html.no-js
         span.sortable-element(ng-repeat = "item in items") {{ item }}
 
     script.
-      angular.module('sortableDemo', ['shift.components.sortable'])
+      angular.module('sortableDemo', ['shift.components'])
         .controller('SortableCtrl', function($scope){
           $scope.items = ['item 1', 'item 2', 'item 3', 'item 4',
             'item 5', 'item 6', 'item 7', 'item 8'];

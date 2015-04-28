@@ -15,5 +15,5 @@ ul
   li(
     ng-repeat = "element in list"
     shiftSortable = "list"
-  )	{{ element.name }}
+  ) {{ element.name }}
 ```

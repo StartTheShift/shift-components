@@ -3,6 +3,8 @@
 UI components for SHIFT applications
 
 @requires momentJS
+@requires lodash
+@requires jQuery
 @requires shift.components.sortable
 
 @module shift.components
@@ -31,7 +33,7 @@ ul
   li(
     ng-repeat = "element in list"
     shiftSortable = "list"
-  )	{{ element.name }}
+  ) {{ element.name }}
 ```
  */
 var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -95,11 +97,14 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
         if ((ref = event.target, indexOf.call(container.children, ref) >= 0) && !event.target.getAttribute('shift-sortable-still')) {
           dragging = event.target;
           start_position = $(dragging).index();
+          placeholder.style.width = dragging.style.width = dragging.clientWidth + "px";
+          placeholder.style.height = dragging.style.height = dragging.clientHeight + "px";
           window.addEventListener('mousemove', move);
           window.addEventListener('mouseup', release);
           container.insertBefore(placeholder, dragging);
           document.body.appendChild(dragging);
           $(dragging).addClass('dragging');
+          move(event);
         }
         return false;
       };
@@ -128,8 +133,8 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
         $(dragging).removeClass('dragging');
         container.insertBefore(dragging, placeholder);
         container.removeChild(placeholder);
-        dragging.style.left = '';
-        dragging.style.top = '';
+        dragging.style.left = placeholder.style.width = dragging.style.width = '';
+        dragging.style.top = placeholder.style.height = dragging.style.height = '';
         dragging = null;
         window.removeEventListener('mousemove', move);
         window.removeEventListener('mouseup', release);
