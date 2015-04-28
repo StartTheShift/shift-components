@@ -2,15 +2,23 @@
 /**
 UI components for SHIFT applications
 
+@requires momentJS
+@requires shift.components.sortable
+
 @module shift.components
+
+@link sortable/
  */
-angular.module('shift.components', ['sortable']);
+angular.module('shift.components', ['shift.components.sortable']);
 
 
 /**
 Sortable directive to allow drag n' drop sorting of an array of object
 
 @module shift.components.sortable
+
+@requires momentJS
+@requires lodash
 
 @param {array} shiftSortable Array of sortable object
 @param {function} shiftSortableChange Called when order is changed

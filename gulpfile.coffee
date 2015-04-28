@@ -7,6 +7,8 @@ runSequence = require 'run-sequence'
 concat = require 'gulp-concat'
 sourceMap = require 'gulp-sourcemaps'
 jsdoc2md = require 'gulp-jsdoc-to-markdown'
+connect = require 'gulp-connect'
+jade = require 'gulp-jade'
 
 BUILD_DEST = 'build'
 
@@ -39,13 +41,49 @@ gulp.task 'coffee', ->
     .pipe(gulp.dest('src-js'));
 
 gulp.task 'clean', (done) ->
-  del ['./build', 'src/**/*.md', './src-js'], done
+  del ['src/**/*.md', 'src-js', 'examples'], done
 
 # Monitor changes on coffee files, trigger default on
 # change
-gulp.task 'watch', ['default'], ->
-	gulp.watch ['src/**/*.coffee'], ['default']
+gulp.task 'watch', ['coffee', 'docs', 'examples'], ->
+	gulp.watch ['src/**/*.coffee'], ['coffee', 'docs']
+	gulp.watch ['src/**/*.jade'], ['examples']
 
 # Translate coffee file into JS and generate MarkDown doc
 gulp.task 'default', (cb) ->
-  runSequence 'clean', ['coffee', 'docs'], cb
+  runSequence 'clean', ['watch', 'connect'], cb
+
+# Web serving of examples
+gulp.task 'connect', ->
+  connect.server {
+    root: 'examples',
+    livereload: true
+  }
+
+gulp.task 'examples', ['build'], ->
+  gulp.src([
+      'bower_components/skeletor/dist/skeletor.css'
+      'bower_components/normalize.css/normalize.css'
+    ])
+    .pipe rename (path) ->
+      path.dirname = '/'
+    .pipe gulp.dest('examples/css')
+
+  gulp.src([
+      'build/shift-components.js'
+      'node_modules/angular/angular.js'
+      'bower_components/jquery/dist/jquery.js'
+      'bower_components/lodash/lodash.js'
+    ])
+    .pipe rename (path) ->
+      path.dirname = '/'
+    .pipe gulp.dest('examples/js')
+
+  gulp.src('src/**/*.jade')
+  	.pipe jade()
+    .pipe rename (path) ->
+      path.dirname = '/'
+  	.pipe gulp.dest('examples')
+    .pipe connect.reload()
+
+

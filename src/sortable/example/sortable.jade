@@ -1,0 +1,90 @@
+doctype
+html.no-js
+  head
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    title
+    meta(name='description', content='')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+    link(rel='stylesheet', href='css/normalize.css')
+    link(rel='stylesheet', href='css/skeletor.css')
+
+    script(src='js/angular.js')
+    script(src='js/jquery.js')
+    script(src='js/shift-components.js')
+
+    style.
+      .sortable-container{
+        position: relative;
+        padding: 10px;
+        border: 1px solid #333;
+        margin: 20px;
+        width: 400px;
+      }
+
+      .sortable-element{
+        border: 1px solid #666;
+        background: #999;
+        color: white;
+        padding: 10px;
+        margin: 5px;
+        vertical-align: middle;
+      }
+
+      .dragging{
+        position: absolute;
+        box-shadow: 3px 3px 3px rgba(0,0,0,.5);
+        margin-left: -50px;
+        margin-top: -25px;
+        cursor: move;
+      }
+
+      .placeholder{
+        height: 40px;
+        background: #aaa;
+      }
+
+      .inline-sortable .sortable-element,
+      .inline-sortable .placeholder{
+        display: inline-block;
+        min-width: 60px;
+        vertical-align: middle;
+      }
+
+      .code {
+        color: #eee;
+        background: #454343;
+        border: 1px solid #e1e7f1;
+        position: relative;
+        padding: 20px;
+        z-index: 1;
+        margin: 24px 0;
+        -webkit-border-radius: 6px;
+        border-radius: 6px;
+        overflow: hidden;
+        font-family: mono;
+      }
+
+  body(ng-app="sortableDemo")
+
+    #layout(ng-controller="SortableCtrl")
+      h3.content-header Scope view
+
+      .code
+        {{ items }}
+
+      h3.content-header Drag n Drop
+
+      .panel.sortable-container(shift-sortable = "items")
+        .sortable-element(ng-repeat = "item in items") {{ item }}
+
+
+      .panel.inline-sortable.sortable-container(shift-sortable = "items")
+        span.sortable-element(ng-repeat = "item in items") {{ item }}
+
+    script.
+      angular.module('sortableDemo', ['shift.components.sortable'])
+        .controller('SortableCtrl', function($scope){
+          $scope.items = ['item 1', 'item 2', 'item 3', 'item 4',
+            'item 5', 'item 6', 'item 7', 'item 8'];
+        })

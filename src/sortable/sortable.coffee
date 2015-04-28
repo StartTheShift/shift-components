@@ -3,6 +3,9 @@ Sortable directive to allow drag n' drop sorting of an array of object
 
 @module shift.components.sortable
 
+@requires momentJS
+@requires lodash
+
 @param {array} shiftSortable Array of sortable object
 @param {function} shiftSortableChange Called when order is changed
 @param {Boolean} shiftSortableFixed Set to true if the container is CSS
