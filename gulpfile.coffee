@@ -35,13 +35,13 @@ gulp.task 'build', ['coffee'], ->
   	.pipe gulp.dest(BUILD_DEST)
 
 # Translate Coffee into JS
-gulp.task 'coffee', ->
+gulp.task 'coffee', ['clean'], ->
   gulp.src('./src/**/*.coffee')
     .pipe(coffee({bare: true}))
     .pipe(gulp.dest('src-js'));
 
 gulp.task 'clean', (done) ->
-  del ['src/**/*.md', 'src-js', 'examples'], done
+  del ['src/**/*.md', 'src-js', 'examples', 'build'], done
 
 # Monitor changes on coffee files, trigger default on
 # change

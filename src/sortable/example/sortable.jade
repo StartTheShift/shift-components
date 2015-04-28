@@ -1,11 +1,13 @@
 doctype
 html.no-js
   head
+    title Shift Sortable Demo
+
     meta(charset='utf-8')
     meta(http-equiv='X-UA-Compatible', content='IE=edge')
-    title
     meta(name='description', content='')
     meta(name='viewport', content='width=device-width, initial-scale=1')
+
     link(rel='stylesheet', href='css/normalize.css')
     link(rel='stylesheet', href='css/skeletor.css')
 
@@ -14,6 +16,10 @@ html.no-js
     script(src='js/shift-components.js')
 
     style.
+      body{
+        margin: 20px;
+      }
+
       .sortable-container{
         position: relative;
         padding: 10px;
@@ -67,17 +73,18 @@ html.no-js
 
   body(ng-app="sortableDemo")
 
+    a.button(href = "/") Back
+
     #layout(ng-controller="SortableCtrl")
-      h3.content-header Scope view
+      h3.content-header Scope
 
       .code
-        {{ items }}
+        | {{ items }}
 
       h3.content-header Drag n Drop
 
       .panel.sortable-container(shift-sortable = "items")
         .sortable-element(ng-repeat = "item in items") {{ item }}
-
 
       .panel.inline-sortable.sortable-container(shift-sortable = "items")
         span.sortable-element(ng-repeat = "item in items") {{ item }}
