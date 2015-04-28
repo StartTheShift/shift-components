@@ -45,7 +45,7 @@ gulp.task 'build', ['coffee'], ->
 
 # Translate Coffee into JS
 gulp.task 'coffee', ['clean'], ->
-  gulp.src('./src/*/*.coffee')
+  gulp.src(['./src/*/*.coffee', './src/components.coffee'])
     .pipe(coffee({bare: true}))
     .pipe(gulp.dest('.src-js'));
 
