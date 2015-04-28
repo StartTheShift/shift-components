@@ -78,8 +78,10 @@ angular.module 'shift.components.sortable', []
           dragging = event.target
           start_position = $(dragging).index()
 
-          placeholder.style.width = dragging.style.width = "#{dragging.clientWidth}px"
-          placeholder.style.height = dragging.style.height = "#{dragging.clientHeight}px"
+          placeholder.style.width =  "#{dragging.clientWidth}px"
+          placeholder.style.height =  "#{dragging.clientHeight}px"
+          dragging.style.minWidth = "#{$(dragging).width()}px"
+          dragging.style.minHeight = "#{$(dragging).height()}px"
 
           window.addEventListener 'mousemove', move
           window.addEventListener 'mouseup', release
@@ -96,8 +98,8 @@ angular.module 'shift.components.sortable', []
       move = (event) ->
         event.preventDefault() # prevent text selection while dragging
 
-        dragging.style.left = "#{event.pageX - 20 }px"
-        dragging.style.top = "#{event.pageY - 20 }px"
+        dragging.style.left = "#{event.pageX - 10 }px"
+        dragging.style.top = "#{event.pageY - 10 }px"
 
         return false unless isInsideContainer(event.pageX, event.pageY)
 
@@ -118,8 +120,8 @@ angular.module 'shift.components.sortable', []
         $(dragging).removeClass 'dragging'
         container.insertBefore dragging, placeholder
         container.removeChild placeholder
-        dragging.style.left = placeholder.style.width = dragging.style.width = ''
-        dragging.style.top = placeholder.style.height = dragging.style.height = ''
+        dragging.style.left = placeholder.style.width = dragging.style.minWidth = ''
+        dragging.style.top = placeholder.style.height = dragging.style.minHeight = ''
         dragging = null
 
         window.removeEventListener 'mousemove', move
