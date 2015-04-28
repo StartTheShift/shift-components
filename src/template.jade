@@ -1,0 +1,87 @@
+doctype
+html.no-js
+  head
+    title Shift Components
+
+    meta(charset='utf-8')
+    meta(http-equiv='X-UA-Compatible', content='IE=edge')
+    meta(name='description', content='')
+    meta(name='viewport', content='width=device-width, initial-scale=1')
+
+    link(rel='stylesheet', href='css/normalize.css')
+    //- link(rel='stylesheet', href='css/skeletor.css')
+    link(rel='stylesheet', href='css/prism.css')
+
+    script(src='js/angular.js')
+    script(src='js/jquery.js')
+
+    script(src='js/prism.js')
+    script(src='js/prism-coffeescript.js')
+    script(src='js/prism-jade.js')
+    script(src='js/prism-stylus.js')
+
+    script(src='js/shift-components.js')
+
+    style.
+      body {
+        width: 80%;
+        margin: 20px auto;
+        font-family: Impact, Charcoal, sans-serif;
+      }
+
+      h1, h2, h3 {
+        border-bottom: 1px solid #ddd;
+        padding: 10px;
+      }
+
+      code.code {
+        background: #eee;
+        padding: 10px;
+        line-height: 1.2em;
+        font-family: "Lucida Console", Monaco, monospace, mono;
+        color: #666;
+        margin: 10px;
+      }
+
+      .panel {
+        border-radius: 10px;
+        padding: 10px;
+        background: #eee;
+        margin: 20px 10px;
+      }
+
+
+    // inject:css
+    // endinject
+
+
+  body(ng-app="examples")
+
+    a.button(href = "/") Back
+
+    div
+      // inject:html
+      // endinject
+
+
+    h2 Sources
+    h3 CoffeeScript
+    pre
+      code.language-coffeescript
+        // inject:coffee
+        // endinject
+
+    h3 Jade
+    pre
+      code.language-jade
+        // inject:jade
+        // endinject
+
+    h3 Stylus
+    pre
+      code.language-stylus
+        // inject:stylus
+        // endinject
+
+    // inject:js
+    // endinject
