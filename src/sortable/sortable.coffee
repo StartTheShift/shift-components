@@ -96,8 +96,8 @@ angular.module 'shift.components.sortable', []
       move = (event) ->
         event.preventDefault() # prevent text selection while dragging
 
-        dragging.style.left = "#{event.pageX}px"
-        dragging.style.top = "#{event.pageY}px"
+        dragging.style.left = "#{event.pageX - 20 }px"
+        dragging.style.top = "#{event.pageY - 20 }px"
 
         return false unless isInsideContainer(event.pageX, event.pageY)
 

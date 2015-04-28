@@ -113,8 +113,8 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
       move = function(event) {
         var elt;
         event.preventDefault();
-        dragging.style.left = event.pageX + "px";
-        dragging.style.top = event.pageY + "px";
+        dragging.style.left = (event.pageX - 20) + "px";
+        dragging.style.top = (event.pageY - 20) + "px";
         if (!isInsideContainer(event.pageX, event.pageY)) {
           return false;
         }
