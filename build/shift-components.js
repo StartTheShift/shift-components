@@ -24,8 +24,6 @@ Sortable directive to allow drag n' drop sorting of an array of object
 
 @param {array} shiftSortable Array of sortable object
 @param {function} shiftSortableChange Called when order is changed
-@param {Boolean} shiftSortableFixed Set to true if the container is CSS
-position fixed.
 
 @example
 ```jade
@@ -34,7 +32,6 @@ ul
     ng-repeat = "element in list"
     shift-sortable = "list"
     shift-sortable-change = "onListOrderChange"
-    shift-sortable-fixed = "true"
   ) {{ element.name }}
 ```
  */
@@ -45,8 +42,7 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
     restrict: 'A',
     scope: {
       shiftSortable: '=',
-      shiftSortableChange: '&',
-      shiftSortableFixed: '='
+      shiftSortableChange: '&'
     },
     link: function(scope, element, attrs) {
       var container, dragging, getElementAt, grab, hovered_element, isAfterLastElement, isInsideContainer, move, placeholder, release, start_position;
@@ -58,10 +54,8 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
       placeholder.className = 'placeholder';
       getElementAt = function(x, y) {
         var coord, i, len, ref;
-        if (scope.shiftSortableFixed) {
-          y -= $(window).scrollTop();
-          x -= $(window).scrollLeft();
-        }
+        y -= $(window).scrollTop();
+        x -= $(window).scrollLeft();
         ref = container.children;
         for (i = 0, len = ref.length; i < len; i++) {
           element = ref[i];
@@ -75,19 +69,15 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
       };
       isInsideContainer = function(x, y) {
         var coord;
-        if (scope.shiftSortableFixed) {
-          y -= $(window).scrollTop();
-          x -= $(window).scrollLeft();
-        }
+        y -= $(window).scrollTop();
+        x -= $(window).scrollLeft();
         coord = container.getBoundingClientRect();
         return x > coord.left && x < coord.right && y > coord.top && y < coord.bottom;
       };
       isAfterLastElement = function(x, y) {
         var coord, x_offset, y_offset;
-        if (scope.shiftSortableFixed) {
-          y -= $(window).scrollTop();
-          x -= $(window).scrollLeft();
-        }
+        y -= $(window).scrollTop();
+        x -= $(window).scrollLeft();
         coord = container.children[container.children.length - 1].getBoundingClientRect();
         x_offset = (coord.right - coord.left) * .50;
         y_offset = (coord.bottom - coord.top) * .50;

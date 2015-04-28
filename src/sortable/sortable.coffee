@@ -8,8 +8,6 @@ Sortable directive to allow drag n' drop sorting of an array of object
 
 @param {array} shiftSortable Array of sortable object
 @param {function} shiftSortableChange Called when order is changed
-@param {Boolean} shiftSortableFixed Set to true if the container is CSS
-position fixed.
 
 @example
 ```jade
@@ -18,7 +16,6 @@ ul
     ng-repeat = "element in list"
     shift-sortable = "list"
     shift-sortable-change = "onListOrderChange"
-    shift-sortable-fixed = "true"
   ) {{ element.name }}
 ```
 ###
@@ -28,7 +25,6 @@ angular.module 'shift.components.sortable', []
     scope:
       shiftSortable: '='
       shiftSortableChange: '&'
-      shiftSortableFixed: '='
     link: (scope, element, attrs) ->
       container = element[0]
       dragging = null
@@ -40,9 +36,8 @@ angular.module 'shift.components.sortable', []
 
       getElementAt = (x, y) ->
         # Adjust position if element is fixed on the screen
-        if scope.shiftSortableFixed
-          y -= $(window).scrollTop()
-          x -= $(window).scrollLeft()
+        y -= $(window).scrollTop()
+        x -= $(window).scrollLeft()
 
         for element in container.children
           coord = element.getBoundingClientRect()
@@ -51,18 +46,16 @@ angular.module 'shift.components.sortable', []
 
       isInsideContainer = (x, y) ->
         # Adjust position if element is fixed on the screen
-        if scope.shiftSortableFixed
-          y -= $(window).scrollTop()
-          x -= $(window).scrollLeft()
+        y -= $(window).scrollTop()
+        x -= $(window).scrollLeft()
 
         coord = container.getBoundingClientRect()
         return x > coord.left and x < coord.right and y > coord.top and y < coord.bottom
 
       isAfterLastElement = (x, y) ->
         # Adjust position if element is fixed on the screen
-        if scope.shiftSortableFixed
-          y -= $(window).scrollTop()
-          x -= $(window).scrollLeft()
+        y -= $(window).scrollTop()
+        x -= $(window).scrollLeft()
 
         coord = container.children[container.children.length - 1].getBoundingClientRect()
         # check if pointer in a 25% bottom and right zone of the object

@@ -7,7 +7,6 @@ Sortable directive to allow drag n' drop sorting of an array of object
 | --- | --- | --- |
 | shiftSortable | <code>array</code> | Array of sortable object |
 | shiftSortableChange | <code>function</code> | Called when order is changed |
-| shiftSortableFixed | <code>Boolean</code> | Set to true if the container is CSS position fixed. |
 
 **Example**  
 ```jade
@@ -16,6 +15,5 @@ ul
     ng-repeat = "element in list"
     shift-sortable = "list"
     shift-sortable-change = "onListOrderChange"
-    shift-sortable-fixed = "true"
   ) {{ element.name }}
 ```
