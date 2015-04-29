@@ -8,4 +8,18 @@ div(ng-controller="CalendarCtrl")
 
   h2 Date
 
-  shift-calendar.naked(date="date")
+  shift-calendar.naked(
+    date = "date"
+    date-change = "onDateChange(date)"
+    date-validator = "dateValidator"
+  )
+
+  div
+    button.button.inline(
+      ng-click = "endOfYear()"
+    ) end of year
+
+    button.button.inline(
+      ng-click = "beginingOfYear()"
+    ) begining of year
+

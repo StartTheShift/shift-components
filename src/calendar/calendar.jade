@@ -21,8 +21,8 @@
 
     tbody(ng-click="selectDate($event)")
       tr(ng-repeat="week in weeks track by $index")
-        td.available(
+        td(
           ng-repeat = "day in week track by $index"
-          ng-class = "{active: day.is_active, off: day.is_off }"
+          ng-class = "{active: day.is_active, off: day.is_off, available: day.is_valid, invalid: !day.is_valid}"
           data-iso = "{{ day.iso_8061 }}"
         ) {{ day.day_of_the_month }}

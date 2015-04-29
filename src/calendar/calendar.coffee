@@ -8,12 +8,15 @@ Calendar directive displays the date and changes it on click.
 
 @param {moment} date A moment object, default to now
 @param {function} dateChange Called when date is changed
+@param {function} dateValidator A method returning a Boolean indicating if
+the selected date is valid or not
 
 @example
 ```jade
 shift-calendar(
   date = "date"
   date-change = "onDateChange(date)"
+  date-validator = "isValidDate"
 )
 ```
 ###
@@ -25,28 +28,39 @@ angular.module 'shift.components.calendar', []
       scope:
         date: '='
         dateChange: '&'
+        dateValidator: '='
 
       link: (scope) ->
         if not moment.isMoment(scope.date)
-          scope.date = moment()
+          updateDate moment().startOf('day')
 
         scope.goToNextMonth = ->
-          scope.date.add(1, 'month')
-          buildCalendarScope()
+          next_month = moment(scope.date).add(1, 'month')
+          updateDate next_month
 
         scope.goToPreviousMonth = ->
-          scope.date.subtract(1, 'month')
-          buildCalendarScope()
+          previous_month = moment(scope.date).subtract(1, 'month')
+          updateDate previous_month
 
         scope.selectDate = ($event) ->
-          $event.preventDefault()
+          updateDate moment event.target.getAttribute('data-iso')
 
-          date_iso_8061 = event.target.getAttribute('data-iso')
+        isValidDate = (date) ->
+          return false unless moment.isMoment(date) and date.isValid()
 
-          if date_iso_8061?
-            scope.date = moment(date_iso_8061)
+          if scope.dateValidator?
+            return scope.dateValidator date
+          return true
+
+        updateDate = (date) ->
+          if isValidDate(date)
+            scope.date = date
             buildCalendarScope()
-            dateChange?()
+            scope.dateChange()
+
+        scope.$watch 'date', (new_value, old_value) ->
+          return if new_value is old_value
+          buildCalendarScope()
 
         do buildCalendarScope = ->
           scope.weeks = []
@@ -70,6 +84,7 @@ angular.module 'shift.components.calendar', []
               is_off: scope.date.month() isnt date.month()
               # we want to compare the day and ignore the time
               is_active: date.format('YYYY-MM-DD') is scope.date.format('YYYY-MM-DD')
+              is_valid: isValidDate(date)
             }
 
             date.add(1, 'day')
