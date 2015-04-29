@@ -9,21 +9,25 @@ html.no-js
     meta(name='viewport', content='width=device-width, initial-scale=1')
 
     link(rel='stylesheet', href='css/normalize.css')
-    //- link(rel='stylesheet', href='css/skeletor.css')
+    link(rel='stylesheet', href='css/skeletor.css')
     link(rel='stylesheet', href='css/prism.css')
 
     script(src='js/angular.js')
     script(src='js/shift-components.js')
 
     script(src='js/jquery.js')
+    script(src='js/moment.js')
 
     script(src='js/prism.js')
     script(src='js/prism-coffeescript.js')
+    script(src='js/prism-javascript.js')
     script(src='js/prism-jade.js')
     script(src='js/prism-stylus.js')
 
+    link(rel="stylesheet" href="http://use.typekit.net/c/af2d3e/1w;proxima-nova,2,cdb:T:n1,cdj:T:n3,cdg:T:n4,cdd:T:n6,cdW:T:n7,cdY:T:n8,cdT:T:n9/d?3bb2a6e53c9684ffdc9a98ff1f5b2a62be32f57674629b256bf45cc5d898a62662fbbd3e3a2e1721b8f23960bf145620a53da5bca87ff5f0b5d1feccd5c48f29e252669e73fdb97b7646a767c5e3a528ca192bc8977c2af1d224252ffe8113d87d8a469444cc0c84950bc3b1e5f56cb924ad6e48522b60acfed6f0df77cbb3930cea6ef1045745b2a46e93504adf437e84c34dc6368a9648831ad8a85a9ddea62d2f8e3152bda1d618c8bee580b47dc73b8f7e5645109670033fd417847336a8558206c61076c2d848e5d2e783e3f484fd64a821149365c249ea79c88129cefba3e93839c567c13e216957493666b871cb0a65fad265d7a929e83c0d42b73d3b23b3bbb32dd2aae872f6b869b56ebdc09e836d617809fb708c771565d4cd92d10c5f97378b86ea" media="all")
+
     style.
-      body {
+      .page {
         width: 80%;
         margin: 20px auto;
         font-family: Impact, Charcoal, sans-serif;
@@ -57,37 +61,66 @@ html.no-js
         text-align: right;
       }
 
+      code{
+        font-weight: normal;
+      }
+
+      .token{
+        display: inline-block;
+        -webkit-box-orient: inherit;
+        -moz-box-orient: inherit;
+        -o-box-orient: inherit;
+        -webkit-box-lines: inherit;
+        -moz-box-lines: inherit;
+        -o-box-lines: inherit;
+        -webkit-flex-flow: inherit;
+        -ms-flex-flow: inherit;
+        flex-flow: inherit;
+        background: inherit;
+        border: none;
+        height: auto;
+        line-height: normal;
+        -webkit-box-sizing: inherit;
+        -moz-box-sizing: inherit;
+        box-sizing: inherit;
+        -webkit-border-radius: 0;
+        border-radius: 0;
+        color: inherit;
+        margin-bottom: 0;
+        -webkit-box-shadow: none;
+        box-shadow: none;
+      }
 
     // inject:css
     // endinject
 
   body
+    .page
+      a.button(href = "/") Back
 
-    a.button(href = "/") Back
+      div(ng-app="examples")
+        // inject:html
+        // endinject
 
-    div(ng-app="examples")
-      // inject:html
+      h2 This example sources
+
+      .code-name CoffeeScript
+      pre
+        code.language-coffeescript
+          // inject:coffee
+          // endinject
+
+      .code-name Jade
+      pre
+        code.language-jade
+          // inject:jade
+          // endinject
+
+      .code-name Stylus
+      pre
+        code.language-stylus
+          // inject:stylus
+          // endinject
+
+      // inject:js
       // endinject
-
-    h2 This example sources
-
-    .code-name CoffeeScript
-    pre
-      code.language-coffeescript
-        // inject:coffee
-        // endinject
-
-    .code-name Jade
-    pre
-      code.language-jade
-        // inject:jade
-        // endinject
-
-    .code-name Stylus
-    pre
-      code.language-stylus
-        // inject:stylus
-        // endinject
-
-    // inject:js
-    // endinject

@@ -1,0 +1,11 @@
+div(ng-controller="CalendarCtrl")
+  h1 Shift Calendar
+
+  h2 Scope
+
+  code.code
+    | $scope.date = {{date}} // (moment object)
+
+  h2 Date
+
+  shift-calendar.naked(date="date")
