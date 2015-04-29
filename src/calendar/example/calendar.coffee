@@ -1,7 +1,5 @@
 angular.module('examples', ['shift.components'])
   .controller 'CalendarCtrl', ($scope) ->
-    $scope.date = moment().startOf 'day'
-
     min_date = moment().startOf('year').subtract(1, 'day')
     max_date = moment().endOf('year').add(1, 'day')
 

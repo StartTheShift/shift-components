@@ -113,7 +113,7 @@ angular.module 'shift.components.calendar', []
 
             date.add(1, 'day')
 
-        if scope.dateAllowNull and not moment.isMoment(scope.date)
+        if not scope.dateAllowNull and not moment.isMoment(scope.date)
           scope.date = moment()
 
         if moment.isMoment(scope.date)
