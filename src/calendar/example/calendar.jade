@@ -1,7 +1,7 @@
 div(ng-controller="CalendarCtrl")
   h1 Shift Calendar
-  p.
-    A directive to display and input a date through a calendar.
+  p
+    | A directive to display and input a date through a calendar.
 
   h2 Date
 
@@ -9,16 +9,21 @@ div(ng-controller="CalendarCtrl")
     date = "date"
     date-change = "onDateChange(date)"
     date-validator = "dateValidator"
+    date-allow-null = "true"
   )
 
   div
     button.button.inline(
-      ng-click = "endOfYear()"
-    ) end of year
-
-    button.button.inline(
       ng-click = "beginingOfYear()"
     ) begining of year
+
+    button.button.inline(
+      ng-click = "today()"
+    ) today
+
+    button.button.inline(
+      ng-click = "endOfQuarter()"
+    ) end of quarter
 
   h3 Scope
   pre

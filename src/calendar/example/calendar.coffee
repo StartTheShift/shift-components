@@ -12,11 +12,14 @@ angular.module('examples', ['shift.components'])
     $scope.dateValidator = (date) ->
       return date.isBetween min_date, max_date, 'day'
 
+    $scope.today = ->
+      $scope.date = moment()
+
     $scope.beginingOfYear = ->
       $scope.date = moment().startOf('year')
 
-    $scope.endOfYear = ->
-      $scope.date = moment().endOf('year')
+    $scope.endOfQuarter = ->
+      $scope.date = moment().endOf('quarter')
 
     # Calendar Range example
     $scope.start_date = moment().startOf 'week'

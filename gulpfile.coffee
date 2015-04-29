@@ -107,7 +107,7 @@ gulp.task 'combine_minifiy', ['compile_coffee', 'compile_template'], ->
 Delete all the compiled coffee and jade
 ###
 gulp.task 'clean', (done) ->
-  del ['src/**/*.md', COMPILED_SRC, BUILD_DEST, EXAMPLES_DEST], done
+  del ['src/**/*.md', COMPILED_SRC, BUILD_DEST, EXAMPLES_DEST, COMPILED_EXAMPLES], done
 
 ###
 Monitor changes on coffee files, trigger default on change
@@ -123,7 +123,7 @@ gulp.task 'watch', ['combine_minifiy', 'markdown_docs', 'examples'], ->
     'src/*/example/*.jade'
     'src/*/example/*.styl'
     'src/*/example/*.coffee'
-  ], ['compile_coffee', 'compile_template', 'markdown_docs', 'examples']
+  ], ['combine_minifiy', 'markdown_docs', 'examples']
 
 
 ###

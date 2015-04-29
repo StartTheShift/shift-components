@@ -1,6 +1,10 @@
 ###*
 Calendar directive displays the date and changes it on click.
 
+Note that moment(moment_object) is heavily used to clone a date instead of
+just passing the reference (since date is a moment object). It allows simpler
+date handeling without the the risk of impacting associated dates.
+
 @module shift.components.calendar
 
 @requires momentJS
@@ -12,6 +16,7 @@ Calendar directive displays the date and changes it on click.
 the selected date is valid or not
 @param {function} dateHightlight Method returning a Boolean to highlight
 a days on the calendar.
+@param {Boolean} dateAllowNull Indicate if the date can be set to null
 
 @example
 ```jade
@@ -20,6 +25,7 @@ shift-calendar(
   date-change = "onDateChange(date)"
   date-validator = "isValidDate"
   date-highlight = "isSpecialDay"
+  date-allow-null = "true"
 )
 ```
 ###
@@ -33,13 +39,9 @@ angular.module 'shift.components.calendar', []
         dateChange: '&'
         dateValidator: '='
         dateHightlight: '='
+        dateAllowNull: '='
 
       link: (scope) ->
-        if not moment.isMoment(scope.date)
-          updateDate moment().startOf('day')
-
-        scope.showing_date = moment(scope.date)
-
         scope.goToNextMonth = ->
           scope.showing_date.add(1, 'month')
           buildCalendarScope()
@@ -48,12 +50,18 @@ angular.module 'shift.components.calendar', []
           scope.showing_date.subtract(1, 'month')
           buildCalendarScope()
 
-        scope.goToDate = ->
+        scope.goToSelectedDate = ->
           scope.showing_date = moment(scope.date)
           buildCalendarScope()
 
         scope.selectDate = ($event) ->
           updateDate moment event.target.getAttribute('data-iso')
+
+        scope.setNull = ->
+          return unless scope.dateAllowNull
+          scope.date = null
+          buildCalendarScope()
+          scope.dateChange()
 
         isValidDate = (date) ->
           return false unless moment.isMoment(date) and date.isValid()
@@ -70,12 +78,12 @@ angular.module 'shift.components.calendar', []
             scope.dateChange()
 
         scope.$watch 'date', (new_value, old_value) ->
-          return if new_value is old_value
-          updateDate(new_value)
+            return if new_value is old_value
+            updateDate(new_value)
 
         scope.getClass = (date) ->
           return {
-           active: scope.date.isSame(date, 'day')
+           active: scope.date?.isSame(date, 'day')
            off: not scope.showing_date.isSame(date, 'month')
            available: isValidDate(date)
            invalid: not isValidDate(date)
@@ -105,6 +113,13 @@ angular.module 'shift.components.calendar', []
 
             date.add(1, 'day')
 
+        if scope.dateAllowNull and not moment.isMoment(scope.date)
+          scope.date = moment()
 
-          undefined
+        if moment.isMoment(scope.date)
+          updateDate scope.date
+          scope.showing_date = moment(scope.date)
+        else
+          scope.showing_date = moment().startOf('day')
+
   ]

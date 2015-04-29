@@ -5,13 +5,22 @@
         th(ng-click="goToPreviousMonth()")
           i.fa.fa-chevron-left
 
-        th.month(colspan='4') {{ showing_date.format('MMM YYYY') }}
-
-        th(ng-click="goToDate()")
+        th
           i.fa.fa-dot-circle-o(
+            ng-if = "date"
             title = "go to {{ date.format('MMMM Do, YYYY') }}"
             ng-hide = "showing_date.isSame(date, 'month')"
+            ng-click="goToSelectedDate()"
           )
+
+        th.month(colspan='3') {{ showing_date.format('MMM YYYY') }}
+
+        th
+          i(
+            title = "Unset date"
+            ng-click = "setNull()"
+            ng-if = "date && dateAllowNull"
+          ).fa.fa-times
 
         th(ng-click="goToNextMonth()")
           i.fa.fa-chevron-right
