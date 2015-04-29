@@ -89,7 +89,6 @@ angular.module('shift.components.calendar', []).directive('shiftCalendar', [
         });
         return (buildCalendarScope = function() {
           var date, day_of_the_month, day_of_the_week, end_date, week;
-          scope.weeks = [];
           date = moment(scope.date).startOf('month').startOf('week');
           end_date = moment(scope.date).endOf('month').endOf('week');
           scope.weeks = [];

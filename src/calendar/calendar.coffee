@@ -63,8 +63,6 @@ angular.module 'shift.components.calendar', []
           buildCalendarScope()
 
         do buildCalendarScope = ->
-          scope.weeks = []
-
           date = moment(scope.date).startOf('month').startOf('week')
           end_date = moment(scope.date).endOf('month').endOf('week')
 
