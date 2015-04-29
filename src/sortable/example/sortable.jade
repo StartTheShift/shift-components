@@ -7,7 +7,10 @@ div(ng-controller="SortableCtrl")
 
   h3 Drag n Drop
 
-  .panel.sortable-container(shift-sortable = "items")
+  .panel.sortable-container(
+    shift-sortable = "items"
+    shift-sortable-change = "onItemOrderChange(items)"
+  )
     .sortable-element(ng-repeat = "item in items") {{ item }}
 
   .panel.inline-sortable.sortable-container(shift-sortable = "items")

@@ -10,10 +10,9 @@ Sortable directive to allow drag n' drop sorting of an array of object
 
 **Example**  
 ```jade
-ul
-  li(
-    ng-repeat = "element in list"
-    shift-sortable = "list"
-    shift-sortable-change = "onListOrderChange"
-  ) {{ element.name }}
+ul(
+  shift-sortable = "list"
+  shift-sortable-change = "onListOrderChange(list)"
+)
+  li(ng-repeat = "element in list") {{ element.name }}
 ```

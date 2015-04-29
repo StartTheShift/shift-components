@@ -27,12 +27,11 @@ Sortable directive to allow drag n' drop sorting of an array of object
 
 @example
 ```jade
-ul
-  li(
-    ng-repeat = "element in list"
-    shift-sortable = "list"
-    shift-sortable-change = "onListOrderChange"
-  ) {{ element.name }}
+ul(
+  shift-sortable = "list"
+  shift-sortable-change = "onListOrderChange(list)"
+)
+  li(ng-repeat = "element in list") {{ element.name }}
 ```
  */
 var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };

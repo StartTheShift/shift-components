@@ -10,3 +10,6 @@ angular.module('examples', ['shift.components'])
       'item 7'
       'item 8'
     ]
+
+    $scope.onItemOrderChange = (elements) ->
+      console.log 'change', elements
