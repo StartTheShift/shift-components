@@ -1,14 +1,11 @@
 div(ng-controller="CalendarCtrl")
   h1 Shift Calendar
-
-  h2 Scope
-
-  code.code
-    | $scope.date = {{date}} // (moment object)
+  p.
+    A directive to display and input a date through a calendar.
 
   h2 Date
 
-  shift-calendar.naked(
+  shift-calendar.naked.single-calendar(
     date = "date"
     date-change = "onDateChange(date)"
     date-validator = "dateValidator"
@@ -23,3 +20,41 @@ div(ng-controller="CalendarCtrl")
       ng-click = "beginingOfYear()"
     ) begining of year
 
+  h3 Scope
+  pre
+    code.code
+      | // moment object
+      | $scope.date = {{date}}
+
+  h2 Date Range
+
+  shift-calendar.naked.range-calendar(
+    date = "start_date"
+    date-validator = "dateValidator"
+    date-hightlight = "isDateInRange"
+    date-change = "startDateChange(start_date)"
+  )
+
+  shift-calendar.naked.range-calendar(
+    date = "stop_date"
+    date-validator = "dateValidator"
+    date-hightlight = "isDateInRange"
+    date-change = "stopDateChange(stop_date)"
+  )
+
+  div
+    button.button.inline(
+      ng-click = "last90Days()"
+    ) Last 90 days
+
+    button.button.inline(
+      ng-click = "lastWeek()"
+    ) Last week
+
+  h3 Scope
+  pre
+    code.code
+      | // moment objects
+      | $scope.start_date = {{start_date}}
+      | $scope.stop_date = {{stop_date}}
+      | $scope.stop_date.diff($scope.start_date, 'day') = {{ stop_date.diff(start_date, 'days') }}

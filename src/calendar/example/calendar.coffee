@@ -5,6 +5,7 @@ angular.module('examples', ['shift.components'])
     min_date = moment().startOf('year').subtract(1, 'day')
     max_date = moment().endOf('year').add(1, 'day')
 
+    # Regular Calendar example
     $scope.onDateChange = (date) ->
       console.log date
 
@@ -16,3 +17,29 @@ angular.module('examples', ['shift.components'])
 
     $scope.endOfYear = ->
       $scope.date = moment().endOf('year')
+
+    # Calendar Range example
+    $scope.start_date = moment().startOf 'week'
+    $scope.stop_date = moment().endOf 'week'
+
+    $scope.startDateChange = (date) ->
+      if date.isAfter $scope.stop_date
+        $scope.stop_date = moment(date)
+
+    $scope.stopDateChange = (date) ->
+      if date.isBefore $scope.start_date
+        $scope.start_date = moment(date)
+
+    $scope.isDateInRange = (date) ->
+      return true if date.isSame $scope.start_date, 'day'
+      return true if date.isSame $scope.stop_date, 'day'
+
+      return date.isBetween $scope.start_date, $scope.stop_date, 'day'
+
+    $scope.last90Days = ->
+      $scope.stop_date = moment().startOf 'day'
+      $scope.start_date = moment($scope.stop_date).subtract(90, 'day')
+
+    $scope.lastWeek = ->
+      $scope.stop_date = moment().startOf 'week'
+      $scope.start_date = moment($scope.stop_date).subtract(1, 'week')

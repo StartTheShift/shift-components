@@ -8,8 +8,10 @@ Calendar directive displays the date and changes it on click.
 
 @param {moment} date A moment object, default to now
 @param {function} dateChange Called when date is changed
-@param {function} dateValidator A method returning a Boolean indicating if
+@param {function} dateValidator Method returning a Boolean indicating if
 the selected date is valid or not
+@param {function} dateHightlight Method returning a Boolean to highlight
+a days on the calendar.
 
 @example
 ```jade
@@ -17,6 +19,7 @@ shift-calendar(
   date = "date"
   date-change = "onDateChange(date)"
   date-validator = "isValidDate"
+  date-highlight = "isSpecialDay"
 )
 ```
 ###
@@ -29,18 +32,25 @@ angular.module 'shift.components.calendar', []
         date: '='
         dateChange: '&'
         dateValidator: '='
+        dateHightlight: '='
 
       link: (scope) ->
         if not moment.isMoment(scope.date)
           updateDate moment().startOf('day')
 
+        scope.showing_date = moment(scope.date)
+
         scope.goToNextMonth = ->
-          next_month = moment(scope.date).add(1, 'month')
-          updateDate next_month
+          scope.showing_date.add(1, 'month')
+          buildCalendarScope()
 
         scope.goToPreviousMonth = ->
-          previous_month = moment(scope.date).subtract(1, 'month')
-          updateDate previous_month
+          scope.showing_date.subtract(1, 'month')
+          buildCalendarScope()
+
+        scope.goToDate = ->
+          scope.showing_date = moment(scope.date)
+          buildCalendarScope()
 
         scope.selectDate = ($event) ->
           updateDate moment event.target.getAttribute('data-iso')
@@ -55,37 +65,46 @@ angular.module 'shift.components.calendar', []
         updateDate = (date) ->
           if isValidDate(date)
             scope.date = date
+            scope.showing_date = moment(date)
             buildCalendarScope()
             scope.dateChange()
 
         scope.$watch 'date', (new_value, old_value) ->
           return if new_value is old_value
-          buildCalendarScope()
+          updateDate(new_value)
+
+        scope.getClass = (date) ->
+          return {
+           active: scope.date.isSame(date, 'day')
+           off: not scope.showing_date.isSame(date, 'month')
+           available: isValidDate(date)
+           invalid: not isValidDate(date)
+           highlight: scope.dateHightlight?(date)
+          }
 
         do buildCalendarScope = ->
-          date = moment(scope.date).startOf('month').startOf('week')
-          end_date = moment(scope.date).endOf('month').endOf('week')
+          date = moment(scope.showing_date).startOf('month').startOf('week')
+          end_date = moment(scope.showing_date).endOf('month').endOf('week')
 
           scope.weeks = []
-          while date < end_date
+          while true
             day_of_the_week = date.day() # from 0 to 6, 0 being sunday
             day_of_the_month = date.date() # from 1 and up to 31
 
+
             if day_of_the_week is 0
+              break if scope.weeks.length > 5
               week = []
               scope.weeks.push week
 
             week.push {
               iso_8061: date.format()
               day_of_the_month: day_of_the_month
-              # is the month for this date off the selected date's month?
-              is_off: scope.date.month() isnt date.month()
-              # we want to compare the day and ignore the time
-              is_active: date.format('YYYY-MM-DD') is scope.date.format('YYYY-MM-DD')
-              is_valid: isValidDate(date)
+              date: moment(date)
             }
 
             date.add(1, 'day')
+
 
           undefined
   ]

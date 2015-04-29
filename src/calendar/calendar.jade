@@ -3,12 +3,18 @@
     thead
       tr
         th(ng-click="goToPreviousMonth()")
-          i.fa.fa-arrow-left
+          i.fa.fa-chevron-left
 
-        th.month(colspan='5') {{ date.format('MMM Do, YY') }}
+        th.month(colspan='4') {{ showing_date.format('MMM YYYY') }}
+
+        th(ng-click="goToDate()")
+          i.fa.fa-dot-circle-o(
+            title = "go to {{ date.format('MMMM Do, YYYY') }}"
+            ng-hide = "showing_date.isSame(date, 'month')"
+          )
 
         th(ng-click="goToNextMonth()")
-          i.fa.fa-arrow-right
+          i.fa.fa-chevron-right
 
       tr
         th Su
@@ -23,6 +29,6 @@
       tr(ng-repeat="week in weeks track by $index")
         td(
           ng-repeat = "day in week track by $index"
-          ng-class = "{active: day.is_active, off: day.is_off, available: day.is_valid, invalid: !day.is_valid}"
+          ng-class = "getClass(day.date)"
           data-iso = "{{ day.iso_8061 }}"
         ) {{ day.day_of_the_month }}

@@ -25,8 +25,10 @@ Calendar directive displays the date and changes it on click.
 
 @param {moment} date A moment object, default to now
 @param {function} dateChange Called when date is changed
-@param {function} dateValidator A method returning a Boolean indicating if
+@param {function} dateValidator Method returning a Boolean indicating if
 the selected date is valid or not
+@param {function} dateHightlight Method returning a Boolean to highlight
+a days on the calendar.
 
 @example
 ```jade
@@ -34,6 +36,7 @@ shift-calendar(
   date = "date"
   date-change = "onDateChange(date)"
   date-validator = "isValidDate"
+  date-highlight = "isSpecialDay"
 )
 ```
  */
@@ -45,22 +48,26 @@ angular.module('shift.components.calendar', []).directive('shiftCalendar', [
       scope: {
         date: '=',
         dateChange: '&',
-        dateValidator: '='
+        dateValidator: '=',
+        dateHightlight: '='
       },
       link: function(scope) {
         var buildCalendarScope, isValidDate, updateDate;
         if (!moment.isMoment(scope.date)) {
           updateDate(moment().startOf('day'));
         }
+        scope.showing_date = moment(scope.date);
         scope.goToNextMonth = function() {
-          var next_month;
-          next_month = moment(scope.date).add(1, 'month');
-          return updateDate(next_month);
+          scope.showing_date.add(1, 'month');
+          return buildCalendarScope();
         };
         scope.goToPreviousMonth = function() {
-          var previous_month;
-          previous_month = moment(scope.date).subtract(1, 'month');
-          return updateDate(previous_month);
+          scope.showing_date.subtract(1, 'month');
+          return buildCalendarScope();
+        };
+        scope.goToDate = function() {
+          scope.showing_date = moment(scope.date);
+          return buildCalendarScope();
         };
         scope.selectDate = function($event) {
           return updateDate(moment(event.target.getAttribute('data-iso')));
@@ -77,6 +84,7 @@ angular.module('shift.components.calendar', []).directive('shiftCalendar', [
         updateDate = function(date) {
           if (isValidDate(date)) {
             scope.date = date;
+            scope.showing_date = moment(date);
             buildCalendarScope();
             return scope.dateChange();
           }
@@ -85,26 +93,36 @@ angular.module('shift.components.calendar', []).directive('shiftCalendar', [
           if (new_value === old_value) {
             return;
           }
-          return buildCalendarScope();
+          return updateDate(new_value);
         });
+        scope.getClass = function(date) {
+          return {
+            active: scope.date.isSame(date, 'day'),
+            off: !scope.showing_date.isSame(date, 'month'),
+            available: isValidDate(date),
+            invalid: !isValidDate(date),
+            highlight: typeof scope.dateHightlight === "function" ? scope.dateHightlight(date) : void 0
+          };
+        };
         return (buildCalendarScope = function() {
           var date, day_of_the_month, day_of_the_week, end_date, week;
-          date = moment(scope.date).startOf('month').startOf('week');
-          end_date = moment(scope.date).endOf('month').endOf('week');
+          date = moment(scope.showing_date).startOf('month').startOf('week');
+          end_date = moment(scope.showing_date).endOf('month').endOf('week');
           scope.weeks = [];
-          while (date < end_date) {
+          while (true) {
             day_of_the_week = date.day();
             day_of_the_month = date.date();
             if (day_of_the_week === 0) {
+              if (scope.weeks.length > 5) {
+                break;
+              }
               week = [];
               scope.weeks.push(week);
             }
             week.push({
               iso_8061: date.format(),
               day_of_the_month: day_of_the_month,
-              is_off: scope.date.month() !== date.month(),
-              is_active: date.format('YYYY-MM-DD') === scope.date.format('YYYY-MM-DD'),
-              is_valid: isValidDate(date)
+              date: moment(date)
             });
             date.add(1, 'day');
           }
@@ -119,7 +137,7 @@ angular.module('shift.components.calendar', []).directive('shiftCalendar', [
 
 angular.module('shift.components.calendar').run(['$templateCache', function($templateCache) {
 
-  $templateCache.put('calendar/calendar.html', '<div class="calendar"><table class="table-condensed"><thead><tr><th ng-click="goToPreviousMonth()"><i class="fa fa-arrow-left"></i></th><th colspan="5" class="month">{{ date.format(\'MMM Do, YY\') }}</th><th ng-click="goToNextMonth()"><i class="fa fa-arrow-right"></i></th></tr><tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr></thead><tbody ng-click="selectDate($event)"><tr ng-repeat="week in weeks track by $index"><td ng-repeat="day in week track by $index" ng-class="{active: day.is_active, off: day.is_off, available: day.is_valid, invalid: !day.is_valid}" data-iso="{{ day.iso_8061 }}">{{ day.day_of_the_month }}</td></tr></tbody></table></div>');
+  $templateCache.put('calendar/calendar.html', '<div class="calendar"><table class="table-condensed"><thead><tr><th ng-click="goToPreviousMonth()"><i class="fa fa-chevron-left"></i></th><th colspan="4" class="month">{{ showing_date.format(\'MMM YYYY\') }}</th><th ng-click="goToDate()"><i title="go to {{ date.format(\'MMMM Do, YYYY\') }}" ng-hide="showing_date.isSame(date, \'month\')" class="fa fa-dot-circle-o"></i></th><th ng-click="goToNextMonth()"><i class="fa fa-chevron-right"></i></th></tr><tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr></thead><tbody ng-click="selectDate($event)"><tr ng-repeat="week in weeks track by $index"><td ng-repeat="day in week track by $index" ng-class="getClass(day.date)" data-iso="{{ day.iso_8061 }}">{{ day.day_of_the_month }}</td></tr></tbody></table></div>');
 
 }]);
 

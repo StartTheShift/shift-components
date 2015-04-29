@@ -1,10 +1,28 @@
-.calendar{
+.single-calendar{
   .table-condensed{
-      border-radius: 5px;
-      border: 1px solid #eee;
-      padding: 10px;
+    border-radius: 5px;
+    border: 1px solid #eee;
+    padding: 10px;
   }
   .invalid{
     visibility: hidden;
+  }
+}
+
+.range-calendar{
+  display: inline-block;
+  width: auto;
+  vertical-align: top;
+
+  .table-condensed{
+    border-radius: 5px;
+    border: 1px solid #eee;
+    padding: 10px;
+  }
+  .invalid{
+    opacity: .5;
+  }
+  .highlight{
+    background: #CDE7E5;
   }
 }
