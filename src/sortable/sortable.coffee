@@ -1,5 +1,5 @@
 ###*
-Sortable directive to allow drag n' drop sorting of an array of object
+Sortable directive to allow drag n' drop sorting of an array.
 
 @module shift.components.sortable
 
@@ -12,10 +12,10 @@ Sortable directive to allow drag n' drop sorting of an array of object
 @example
 ```jade
 ul(
-  shift-sortable = "list"
-  shift-sortable-change = "onListOrderChange(list)"
+  shift-sortable = "list_of_object"
+  shift-sortable-change = "onListOrderChange(list_of_object)"
 )
-  li(ng-repeat = "element in list") {{ element.name }}
+  li(ng-repeat = "element in list_of_object") {{ element.name }}
 ```
 ###
 angular.module 'shift.components.sortable', []
@@ -33,35 +33,40 @@ angular.module 'shift.components.sortable', []
       placeholder = document.createElement('div')
       placeholder.className = 'placeholder'
 
+      last_element = {} # dummy object to detect if the element is last
+
       getElementAt = (x, y) ->
-        # Adjust position if element is fixed on the screen
-        y -= $(window).scrollTop()
-        x -= $(window).scrollLeft()
+        last = container.children[container.children.length - 1]
 
-        for element in container.children
+        for element, index in container.children
           coord = element.getBoundingClientRect()
-          if x > coord.left and x < coord.right and y > coord.top and y < coord.bottom
-            return element unless element.getAttribute('shift-sortable-still')
+          if isInside(x, y, coord)
+            if isBefore(x, y, coord)
+              return element
+            else if element is last
+              return last_element
+            else
+              return container.children[index + 1]
 
-      isInsideContainer = (x, y) ->
+      # Return true if the point defined by x, y is above the diagonal formed by
+      # the bottom left to the top right corner of the rectange object.
+      isBefore = (x, y, rectange) ->
         # Adjust position if element is fixed on the screen
         y -= $(window).scrollTop()
         x -= $(window).scrollLeft()
 
-        coord = container.getBoundingClientRect()
-        return x > coord.left and x < coord.right and y > coord.top and y < coord.bottom
+        rel_x = x - rectange.left
+        rel_y = rectange.top + rectange.height - y
 
-      isAfterLastElement = (x, y) ->
+        return rel_y > (rel_x / rectange.width) * rectange.height
+
+      # Return true if the point defined by x, y is inside the rectangle
+      isInside = (x, y, rectange) ->
         # Adjust position if element is fixed on the screen
         y -= $(window).scrollTop()
         x -= $(window).scrollLeft()
 
-        coord = container.children[container.children.length - 1].getBoundingClientRect()
-        # check if pointer in a 25% bottom and right zone of the object
-        x_offset = (coord.right - coord.left) * .50
-        y_offset = (coord.bottom - coord.top) * .50
-
-        return (x > coord.right - x_offset and y > coord.top) or (x > coord.left and y > coord.bottom - y_offset)
+        return x > rectange.left and x < rectange.right and y > rectange.top and y < rectange.bottom
 
       grab = (event) ->
         event.preventDefault() # prevent text selection while dragging
@@ -93,13 +98,13 @@ angular.module 'shift.components.sortable', []
         dragging.style.left = "#{event.pageX - 10 }px"
         dragging.style.top = "#{event.pageY - 10 }px"
 
-        return false unless isInsideContainer(event.pageX, event.pageY)
+        return false unless isInside(event.pageX, event.pageY, container.getBoundingClientRect())
 
-        if isAfterLastElement(event.pageX, event.pageY)
-          container.appendChild placeholder
-        else
-          elt = getElementAt(event.pageX, event.pageY)
-          if elt? and elt isnt hovered_element
+        elt = getElementAt(event.pageX, event.pageY)
+        if elt?
+          if elt is last_element
+            container.appendChild placeholder
+          else if elt isnt hovered_element
             hovered_element = elt
             container.insertBefore placeholder, elt
 
@@ -125,6 +130,6 @@ angular.module 'shift.components.sortable', []
           scope.$apply ->
             record = scope.shiftSortable.splice(start_position, 1)[0]
             scope.shiftSortable.splice(end_position, 0, record)
-            scope.shiftSortableChange?()
+            scope.shiftSortableChange()
 
       container.addEventListener 'mousedown', grab

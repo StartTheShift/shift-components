@@ -164,7 +164,7 @@ angular.module('shift.components.calendar').run(['$templateCache', function($tem
 }]);
 
 /**
-Sortable directive to allow drag n' drop sorting of an array of object
+Sortable directive to allow drag n' drop sorting of an array.
 
 @module shift.components.sortable
 
@@ -177,10 +177,10 @@ Sortable directive to allow drag n' drop sorting of an array of object
 @example
 ```jade
 ul(
-  shift-sortable = "list"
-  shift-sortable-change = "onListOrderChange(list)"
+  shift-sortable = "list_of_object"
+  shift-sortable-change = "onListOrderChange(list_of_object)"
 )
-  li(ng-repeat = "element in list") {{ element.name }}
+  li(ng-repeat = "element in list_of_object") {{ element.name }}
 ```
  */
 var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
@@ -193,43 +193,44 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
       shiftSortableChange: '&'
     },
     link: function(scope, element, attrs) {
-      var container, dragging, getElementAt, grab, hovered_element, isAfterLastElement, isInsideContainer, move, placeholder, release, start_position;
+      var container, dragging, getElementAt, grab, hovered_element, isBefore, isInside, last_element, move, placeholder, release, start_position;
       container = element[0];
       dragging = null;
       start_position = null;
       hovered_element = null;
       placeholder = document.createElement('div');
       placeholder.className = 'placeholder';
+      last_element = {};
       getElementAt = function(x, y) {
-        var coord, i, len, ref;
-        y -= $(window).scrollTop();
-        x -= $(window).scrollLeft();
+        var coord, i, index, last, len, ref;
+        last = container.children[container.children.length - 1];
         ref = container.children;
-        for (i = 0, len = ref.length; i < len; i++) {
-          element = ref[i];
+        for (index = i = 0, len = ref.length; i < len; index = ++i) {
+          element = ref[index];
           coord = element.getBoundingClientRect();
-          if (x > coord.left && x < coord.right && y > coord.top && y < coord.bottom) {
-            if (!element.getAttribute('shift-sortable-still')) {
+          if (isInside(x, y, coord)) {
+            if (isBefore(x, y, coord)) {
               return element;
+            } else if (element === last) {
+              return last_element;
+            } else {
+              return container.children[index + 1];
             }
           }
         }
       };
-      isInsideContainer = function(x, y) {
-        var coord;
+      isBefore = function(x, y, rectange) {
+        var rel_x, rel_y;
         y -= $(window).scrollTop();
         x -= $(window).scrollLeft();
-        coord = container.getBoundingClientRect();
-        return x > coord.left && x < coord.right && y > coord.top && y < coord.bottom;
+        rel_x = x - rectange.left;
+        rel_y = rectange.top + rectange.height - y;
+        return rel_y > (rel_x / rectange.width) * rectange.height;
       };
-      isAfterLastElement = function(x, y) {
-        var coord, x_offset, y_offset;
+      isInside = function(x, y, rectange) {
         y -= $(window).scrollTop();
         x -= $(window).scrollLeft();
-        coord = container.children[container.children.length - 1].getBoundingClientRect();
-        x_offset = (coord.right - coord.left) * .50;
-        y_offset = (coord.bottom - coord.top) * .50;
-        return (x > coord.right - x_offset && y > coord.top) || (x > coord.left && y > coord.bottom - y_offset);
+        return x > rectange.left && x < rectange.right && y > rectange.top && y < rectange.bottom;
       };
       grab = function(event) {
         var ref;
@@ -255,14 +256,14 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
         event.preventDefault();
         dragging.style.left = (event.pageX - 10) + "px";
         dragging.style.top = (event.pageY - 10) + "px";
-        if (!isInsideContainer(event.pageX, event.pageY)) {
+        if (!isInside(event.pageX, event.pageY, container.getBoundingClientRect())) {
           return false;
         }
-        if (isAfterLastElement(event.pageX, event.pageY)) {
-          container.appendChild(placeholder);
-        } else {
-          elt = getElementAt(event.pageX, event.pageY);
-          if ((elt != null) && elt !== hovered_element) {
+        elt = getElementAt(event.pageX, event.pageY);
+        if (elt != null) {
+          if (elt === last_element) {
+            container.appendChild(placeholder);
+          } else if (elt !== hovered_element) {
             hovered_element = elt;
             container.insertBefore(placeholder, elt);
           }
@@ -285,7 +286,7 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
             var record;
             record = scope.shiftSortable.splice(start_position, 1)[0];
             scope.shiftSortable.splice(end_position, 0, record);
-            return typeof scope.shiftSortableChange === "function" ? scope.shiftSortableChange() : void 0;
+            return scope.shiftSortableChange();
           });
         }
       };

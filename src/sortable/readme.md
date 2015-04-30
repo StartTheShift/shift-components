@@ -1,6 +1,6 @@
 <a name="shift.components.module_sortable"></a>
 ## sortable
-Sortable directive to allow drag n' drop sorting of an array of object
+Sortable directive to allow drag n' drop sorting of an array.
 
 
 | Param | Type | Description |
@@ -11,8 +11,8 @@ Sortable directive to allow drag n' drop sorting of an array of object
 **Example**  
 ```jade
 ul(
-  shift-sortable = "list"
-  shift-sortable-change = "onListOrderChange(list)"
+  shift-sortable = "list_of_object"
+  shift-sortable-change = "onListOrderChange(list_of_object)"
 )
-  li(ng-repeat = "element in list") {{ element.name }}
+  li(ng-repeat = "element in list_of_object") {{ element.name }}
 ```
