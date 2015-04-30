@@ -8,12 +8,14 @@ Sortable directive to allow drag n' drop sorting of an array.
 
 @param {array} shiftSortable Array of sortable object
 @param {function} shiftSortableChange Called when order is changed
+@param {string} shiftSortableHandle CSS selector to grab the element (optional)
 
 @example
 ```jade
 ul(
   shift-sortable = "list_of_object"
   shift-sortable-change = "onListOrderChange(list_of_object)"
+  shift-sortable-handle = ".grab-icon"
 )
   li(ng-repeat = "element in list_of_object") {{ element.name }}
 ```
@@ -24,16 +26,16 @@ angular.module 'shift.components.sortable', []
     scope:
       shiftSortable: '='
       shiftSortableChange: '&'
+      shiftSortableHandle: '@'
     link: (scope, element, attrs) ->
       container = element[0]
       dragging = null
       start_position = null
       hovered_element = null
+      last_element = {} # dummy object to detect if the element is last
 
       placeholder = document.createElement('div')
       placeholder.className = 'placeholder'
-
-      last_element = {} # dummy object to detect if the element is last
 
       getElementAt = (x, y) ->
         last = container.children[container.children.length - 1]
@@ -70,13 +72,22 @@ angular.module 'shift.components.sortable', []
 
       grab = (event) ->
         event.preventDefault() # prevent text selection while dragging
+        target = event.target
 
-        if event.target in container.children and not event.target.getAttribute('shift-sortable-still')
-          dragging = event.target
+        if scope.shiftSortableHandle?
+          return unless target.matches scope.shiftSortableHandle
+          while target.parentElement isnt container
+            target = target.parentElement
+
+        if target in container.children
+          dragging = target
           start_position = $(dragging).index()
 
-          placeholder.style.width =  "#{dragging.clientWidth}px"
-          placeholder.style.height =  "#{dragging.clientHeight}px"
+          # getting size information with padding for the placholder
+          placeholder.style.width = "#{dragging.clientWidth}px"
+          placeholder.style.height = "#{dragging.clientHeight}px"
+
+          # getting size information without padding for the flying element
           dragging.style.minWidth = "#{$(dragging).width()}px"
           dragging.style.minHeight = "#{$(dragging).height()}px"
 

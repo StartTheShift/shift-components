@@ -1,14 +1,16 @@
 angular.module('examples', ['shift.components'])
   .controller 'SortableCtrl', ($scope) ->
     $scope.items = [
-      'item 1'
-      'item 2'
-      'item 3'
-      'item 4'
-      'item 5'
-      'item 6'
-      'item 7'
-      'item 8'
+      'Tokyo'
+      'Jakarta'
+      'Seoul'
+      'Delhi'
+      'Shanghai'
+      'Manila'
+      'Karachi'
+      'New York'
+      'Sao Paulo'
+      'Mexico City'
     ]
 
     $scope.onItemOrderChange = (elements) ->

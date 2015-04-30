@@ -18,5 +18,12 @@ div(ng-controller="SortableCtrl")
   )
     .sortable-element(ng-repeat = "item in items") {{ item }}
 
-  .panel.inline-sortable.sortable-container(shift-sortable = "items")
-    span.sortable-element(ng-repeat = "item in items") {{ item }}
+  h2 Drag n Drop with handle
+
+  .panel.inline-sortable.sortable-container(
+      shift-sortable = "items"
+      shift-sortable-handle = "i.fa-align-justify"
+    )
+    span.sortable-element(ng-repeat = "item in items")
+      i.fa.fa-align-justify
+      |  {{ item }}

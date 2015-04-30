@@ -173,12 +173,14 @@ Sortable directive to allow drag n' drop sorting of an array.
 
 @param {array} shiftSortable Array of sortable object
 @param {function} shiftSortableChange Called when order is changed
+@param {string} shiftSortableHandle CSS selector to grab the element (optional)
 
 @example
 ```jade
 ul(
   shift-sortable = "list_of_object"
   shift-sortable-change = "onListOrderChange(list_of_object)"
+  shift-sortable-handle = ".grab-icon"
 )
   li(ng-repeat = "element in list_of_object") {{ element.name }}
 ```
@@ -190,7 +192,8 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
     restrict: 'A',
     scope: {
       shiftSortable: '=',
-      shiftSortableChange: '&'
+      shiftSortableChange: '&',
+      shiftSortableHandle: '@'
     },
     link: function(scope, element, attrs) {
       var container, dragging, getElementAt, grab, hovered_element, isBefore, isInside, last_element, move, placeholder, release, start_position;
@@ -198,9 +201,9 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
       dragging = null;
       start_position = null;
       hovered_element = null;
+      last_element = {};
       placeholder = document.createElement('div');
       placeholder.className = 'placeholder';
-      last_element = {};
       getElementAt = function(x, y) {
         var coord, i, index, last, len, ref;
         last = container.children[container.children.length - 1];
@@ -233,10 +236,19 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
         return x > rectange.left && x < rectange.right && y > rectange.top && y < rectange.bottom;
       };
       grab = function(event) {
-        var ref;
+        var target;
         event.preventDefault();
-        if ((ref = event.target, indexOf.call(container.children, ref) >= 0) && !event.target.getAttribute('shift-sortable-still')) {
-          dragging = event.target;
+        target = event.target;
+        if (scope.shiftSortableHandle != null) {
+          if (!target.matches(scope.shiftSortableHandle)) {
+            return;
+          }
+          while (target.parentElement !== container) {
+            target = target.parentElement;
+          }
+        }
+        if (indexOf.call(container.children, target) >= 0) {
+          dragging = target;
           start_position = $(dragging).index();
           placeholder.style.width = dragging.clientWidth + "px";
           placeholder.style.height = dragging.clientHeight + "px";
