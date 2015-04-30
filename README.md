@@ -26,10 +26,25 @@ An example should be composed of a stylus file, a jade file and a coffee file.
 
 See [sortable](src/sortable/example/)
 
-### Clean
+## Fix
 
-Delete `src-js` and `build` folders
+There is a potential bug in gulp-inject, reming line feed from stream. The result
+is very long examples in the example page. An issue was created on the repository:
 
-```sh
-gulp clean
+https://github.com/klei/gulp-inject/issues/101
+
+As a quick workaround the bug, you can edit the file located at
+`node_modules/gulp-inject/src/inject/index.js` and prepend the return value with
+a straight string return:
+
+```js
+           .concat(files.reduce(function transformFile (lines, file, i) {
+             var filepath = getFilepath(file, target, opt);
+             var transformedContents = opt.transform(filepath, file, i, files.length, target);
+             if (typeof transformedContents !== 'string') {
+               return lines;
+             }
+             # Return the string directly
+             return transformedContents;
+             # return lines.concat(transformedContents.split(/\r?\n/g));
 ```
