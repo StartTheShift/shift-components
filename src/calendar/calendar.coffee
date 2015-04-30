@@ -55,7 +55,7 @@ angular.module 'shift.components.calendar', []
           buildCalendarScope()
 
         scope.selectDate = ($event) ->
-          updateDate moment event.target.getAttribute('data-iso')
+          updateDate moment $event.target.getAttribute('data-iso')
 
         scope.setNull = ->
           return unless scope.dateAllowNull

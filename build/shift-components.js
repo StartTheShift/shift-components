@@ -73,7 +73,7 @@ angular.module('shift.components.calendar', []).directive('shiftCalendar', [
           return buildCalendarScope();
         };
         scope.selectDate = function($event) {
-          return updateDate(moment(event.target.getAttribute('data-iso')));
+          return updateDate(moment($event.target.getAttribute('data-iso')));
         };
         scope.setNull = function() {
           if (!scope.dateAllowNull) {
