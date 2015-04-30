@@ -1,0 +1,49 @@
+.calendar
+  table.table-condensed
+    thead
+      tr
+        th(
+          title = "previous month"
+          ng-click = "goToPreviousMonth()"
+        )
+          i.fa.fa-chevron-left
+
+        th
+          i.fa.fa-dot-circle-o(
+            ng-if = "date"
+            title = "go to {{ date.format('MMMM Do, YYYY') }}"
+            ng-hide = "showing_date.isSame(date, 'month')"
+            ng-click = "goToSelectedDate()"
+          )
+
+        th.month(colspan='3') {{ showing_date.format('MMM YYYY') }}
+
+        th
+          i(
+            title = "Unset date"
+            ng-click = "setNull()"
+            ng-if = "date && dateAllowNull"
+          ).fa.fa-times
+
+        th(
+          title = "next month"
+          ng-click = "goToNextMonth()"
+        )
+          i.fa.fa-chevron-right
+
+      tr
+        th Su
+        th Mo
+        th Tu
+        th We
+        th Th
+        th Fr
+        th Sa
+
+    tbody(ng-click="selectDate($event)")
+      tr(ng-repeat="week in weeks track by $index")
+        td(
+          ng-repeat = "day in week track by $index"
+          ng-class = "getClass(day.date)"
+          data-iso = "{{ day.iso_8061 }}"
+        ) {{ day.day_of_the_month }}

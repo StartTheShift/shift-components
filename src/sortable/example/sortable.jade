@@ -1,0 +1,22 @@
+div(ng-controller="SortableCtrl")
+  h1 Shift Sortable Drag n Drop
+
+  p
+    | Sortable directive to allow drag n' drop sorting of an array.
+
+
+  h2 Scope
+
+  code.code
+    | $scope.items = {{items}}
+
+  h2 Drag n Drop
+
+  .panel.sortable-container(
+    shift-sortable = "items"
+    shift-sortable-change = "onItemOrderChange(items)"
+  )
+    .sortable-element(ng-repeat = "item in items") {{ item }}
+
+  .panel.inline-sortable.sortable-container(shift-sortable = "items")
+    span.sortable-element(ng-repeat = "item in items") {{ item }}
