@@ -1,28 +1,33 @@
-div(ng-controller="SelectCtrl")
+div(ng-controller="ExampleCtrl")
   h1 Shift Select
 
   p
     | Item select
 
-  select(
-    ng-options = "state for state in states"
-    ng-model = "q.state"
-  )
-
-  input(
-    ng-model = "q.city"
-    type = "text"
-    ng-keydown = "show_autocomplete = true"
-  )
-
-  shift-select(
-    ng-show = "show_autocomplete"
+  my-typeahead(
     options = "options"
-    filter = "q"
-    selected = "selected"
-    on-select = "show_autocomplete = false"
-    template = "{{ city }}, {{ state }}"
+    filter-attribute = "city"
   )
+
+  //- select(
+  //-   ng-options = "state for state in states"
+  //-   ng-model = "q.state"
+  //- )
+
+  //- input(
+  //-   ng-model = "q.city"
+  //-   type = "text"
+  //-   ng-keydown = "show_autocomplete = true"
+  //- )
+
+  //- shift-select(
+  //-   ng-show = "show_autocomplete"
+  //-   options = "options"
+  //-   filter = "q"
+  //-   selected = "selected"
+  //-   on-select = "show_autocomplete = false"
+  //-   template = "{{ city }}, {{ state }}"
+  //- )
 
   h2 Scope
 

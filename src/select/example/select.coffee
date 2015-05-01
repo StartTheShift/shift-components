@@ -1,5 +1,67 @@
 angular.module('examples', ['shift.components'])
-  .controller 'SelectCtrl',
+  .directive 'myTypeahead', ->
+    restrict: 'E'
+
+    template: '''
+      <input ng-model="query" type="text"/>
+      <shift-select
+        ng-show = "show_select_menu"
+        options = "options"
+        filter = "query"
+        selected = "selected"
+        on-select = "onSelect(selected)"
+        template = "{{template}}"
+       />
+    '''
+
+    scope:
+      options: '='
+      filter: '='
+      filter_attribute: '@filterAttribute'
+      option_template: '@optionTemplate'
+
+    link: (scope, element, attrs) ->
+      scope.show_select_menu = false
+
+      do listen = ->
+        input = angular.element element.find 'input'
+        input.bind 'focus', ->
+          scope.show_select_menu = true
+          scope.$digest()
+
+        input.bind 'blur', ->
+          scope.show_select_menu = false
+          scope.$digest()
+
+        input.bind 'keyup', (event) ->
+          char = String.fromCharCode event.which or event.keyCode
+
+          return unless /[a-zA-Z0-9-_ ]/.test char
+
+          scope.show_select_menu = true
+          scope.$digest()
+
+      query_object = {}
+      query_string = ''
+      Object.defineProperty scope, 'query',
+        get: ->
+          return query_object[scope.filter_attribute] if scope.filter_attribute?
+          return query_string
+
+        set: (value) ->
+          if scope.filter_attribute?
+            query_object[scope.filter_attribute] = value[scope.filter_attribute] or value
+
+          else query_string = value
+
+      scope.onSelect = (value) ->
+        scope.query = value
+        scope.show_select_menu = false
+        scope.$digest()
+
+      scope.$on '$destroy', -> input.off()
+
+  .controller 'ExampleCtrl',
     (
       $scope
     ) ->
@@ -20,6 +82,3 @@ angular.module('examples', ['shift.components'])
         {state: 'ny', city: 'Syracuse', population: 145151}
         {state: 'ny', city: 'Albany', population: 97660}
       ]
-
-      $scope.$watch 'show_autocomplete', (new_value, old_value) ->
-        console.log new_value, old_value

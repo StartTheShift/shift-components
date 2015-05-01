@@ -36,6 +36,10 @@ angular.module 'shift.components.select', []
         scope.$watch 'filter', (new_value, old_value) ->
           return if new_value is old_value
 
+          if not new_value
+            scope.filtered_options = []
+            return
+
           scope.position = -1
 
           filterOptions()
@@ -77,7 +81,7 @@ angular.module 'shift.components.select', []
           for own key of scope.filter
             scope.filter[key] = scope.selected[key]
 
-          scope.onSelect()
+          scope.onSelect {selected: scope.selected}
 
         scope.getClass = (index) ->
           return {
