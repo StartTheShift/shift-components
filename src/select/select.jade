@@ -1,0 +1,7 @@
+.select-container(ng-if="filtered_options.length")
+  .select-option(
+    ng-repeat = "option in filtered_options"
+    ng-class = "getClass($index)"
+    ng-click = "select($index)"
+  )
+    | {{ display(option) }}

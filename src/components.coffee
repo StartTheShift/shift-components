@@ -6,6 +6,7 @@ UI components for SHIFT applications
 @requires jQuery
 @requires shift.components.sortable
 @requires shift.components.calendar
+@requires shift.components.select
 
 @module shift.components
 
@@ -15,4 +16,5 @@ UI components for SHIFT applications
 angular.module 'shift.components', [
   'shift.components.sortable'
   'shift.components.calendar'
+  'shift.components.select'
 ]

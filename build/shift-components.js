@@ -7,12 +7,32 @@ UI components for SHIFT applications
 @requires jQuery
 @requires shift.components.sortable
 @requires shift.components.calendar
+@requires shift.components.select
 
 @module shift.components
 
 @link sortable/
  */
-angular.module('shift.components', ['shift.components.sortable', 'shift.components.calendar']);
+angular.module('shift.components', ['shift.components.sortable', 'shift.components.calendar', 'shift.components.select']);
+
+
+/**
+An autocomplete directive to suggest matching object as you type
+ */
+angular.module('shift.components.autocomplete', []).directive('shiftAutocomplete', [
+  function() {
+    return {
+      restrict: 'E',
+      scope: {
+        source: '=',
+        query: '='
+      },
+      link: function(scope) {
+        return void 0;
+      }
+    };
+  }
+]);
 
 
 /**
@@ -306,3 +326,106 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
     }
   };
 });
+
+
+/**
+A directive that displays a list of option, navigation using arrow keys + enter or mouse click.
+ */
+var hasProp = {}.hasOwnProperty;
+
+angular.module('shift.components.select', []).directive('shiftSelect', [
+  '$compile', '$filter', '$timeout', function($compile, $filter, $timeout) {
+    return {
+      restrict: 'E',
+      templateUrl: 'select/select.html',
+      scope: {
+        template: '@',
+        options: '=',
+        filter: '=',
+        selected: '=',
+        onSelect: '&'
+      },
+      link: function(scope, element) {
+        var DOWN_KEY, ENTER_KEY, UP_KEY, filterOptions, onKeyDown, startListening, stopListening;
+        UP_KEY = 38;
+        DOWN_KEY = 40;
+        ENTER_KEY = 13;
+        scope.position = -1;
+        scope.display = function(option) {
+          return option.city;
+          return $compile(scope.template, option);
+        };
+        scope.$watch('filter', function(new_value, old_value) {
+          if (new_value === old_value) {
+            return;
+          }
+          scope.position = -1;
+          return filterOptions();
+        }, true);
+        (filterOptions = function() {
+          return scope.filtered_options = $filter('filter')(scope.options, scope.filter);
+        })();
+        onKeyDown = function(event) {
+          var key_code;
+          if (!scope.filtered_options.length) {
+            return;
+          }
+          key_code = event.which || event.keyCode;
+          if (key_code !== UP_KEY && key_code !== DOWN_KEY && key_code !== ENTER_KEY) {
+            return;
+          }
+          switch (key_code) {
+            case UP_KEY:
+              scope.position -= 1;
+              break;
+            case DOWN_KEY:
+              scope.position += 1;
+              break;
+            default:
+              if (scope.position > -1) {
+                scope.select(scope.position);
+              }
+          }
+          scope.position = Math.max(0, scope.position);
+          scope.position = Math.min(scope.filtered_options.length - 1, scope.position);
+          scope.$apply();
+          event.preventDefault();
+          event.stopPropagation();
+          return false;
+        };
+        scope.select = function(index) {
+          var key, ref;
+          scope.position = index;
+          scope.selected = scope.filtered_options[scope.position];
+          ref = scope.filter;
+          for (key in ref) {
+            if (!hasProp.call(ref, key)) continue;
+            scope.filter[key] = scope.selected[key];
+          }
+          return scope.onSelect();
+        };
+        scope.getClass = function(index) {
+          return {
+            'selected': index === scope.position
+          };
+        };
+        (startListening = function() {
+          return document.addEventListener('keydown', onKeyDown);
+        })();
+        stopListening = function() {
+          return document.removeEventListener('keydown', onKeyDown);
+        };
+        scope.$on('$destroy', stopListening);
+        return void 0;
+      }
+    };
+  }
+]);
+
+'use strict';
+
+angular.module('shift.components.select').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('select/select.html', '<div ng-if="filtered_options.length" class="select-container"><div ng-repeat="option in filtered_options" ng-class="getClass($index)" ng-click="select($index)" class="select-option">{{ display(option) }}</div></div>');
+
+}]);
