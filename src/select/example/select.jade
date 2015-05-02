@@ -7,27 +7,10 @@ div(ng-controller="ExampleCtrl")
   my-typeahead(
     options = "options"
     filter-attribute = "city"
+    selected = "selected"
   )
-
-  //- select(
-  //-   ng-options = "state for state in states"
-  //-   ng-model = "q.state"
-  //- )
-
-  //- input(
-  //-   ng-model = "q.city"
-  //-   type = "text"
-  //-   ng-keydown = "show_autocomplete = true"
-  //- )
-
-  //- shift-select(
-  //-   ng-show = "show_autocomplete"
-  //-   options = "options"
-  //-   filter = "q"
-  //-   selected = "selected"
-  //-   on-select = "show_autocomplete = false"
-  //-   template = "{{ city }}, {{ state }}"
-  //- )
+    strong {{option.city}}
+    span &nbsp; {{option.state}}
 
   h2 Scope
 

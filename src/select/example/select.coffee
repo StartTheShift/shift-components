@@ -1,65 +1,72 @@
 angular.module('examples', ['shift.components'])
-  .directive 'myTypeahead', ->
-    restrict: 'E'
 
-    template: '''
-      <input ng-model="query" type="text"/>
-      <shift-select
-        ng-show = "show_select_menu"
-        options = "options"
-        filter = "query"
-        selected = "selected"
-        on-select = "onSelect(selected)"
-        template = "{{template}}"
-       />
-    '''
+  .directive 'myTypeahead', [
+    '$compile'
+    '$timeout'
+    (
+      $compile
+      $timeout
+    ) ->
+      restrict: 'E'
+      transclude: true
 
-    scope:
-      options: '='
-      filter: '='
-      filter_attribute: '@filterAttribute'
-      option_template: '@optionTemplate'
+      template: '''
+        <input ng-model="query"
+          ng-focus = "show_select_menu = true"
+          ng-blur = "hide($event)"
+          type="text"/>
+      '''
 
-    link: (scope, element, attrs) ->
-      scope.show_select_menu = false
+      scope:
+        options: '='
+        filter: '='
+        filter_attribute: '@filterAttribute'
+        selected: '='
 
-      do listen = ->
-        input = angular.element element.find 'input'
-        input.bind 'focus', ->
-          scope.show_select_menu = true
-          scope.$digest()
+      link: (scope, element, attrs, ctrl, transclude) ->
 
-        input.bind 'blur', ->
-          scope.show_select_menu = false
-          scope.$digest()
+        do attachSelectMenu = ->
+          shift_select = angular.element document.createElement 'shift-select'
+          shift_select.attr
+            'ng-show': 'show_select_menu'
+            'options': 'options'
+            'filter': 'query'
+            'selected': 'selected'
+            'on-select': 'onSelect(selected)'
+            'ng-mousedown': 'mouseDown(true)'
+            'ng-mouseup': 'mouseDown(false)'
 
-        input.bind 'keyup', (event) ->
-          char = String.fromCharCode event.which or event.keyCode
+          # Create a new scope to transclude + compile the template with (we don't
+          # want the child directives directly modifying the scope of myTypeahead)
+          shift_select_scope = scope.$new()
 
-          return unless /[a-zA-Z0-9-_ ]/.test char
+          # Attach the transcluded template to shift-select
+          transclude shift_select_scope, (clone) ->
+            shift_select.append clone
 
-          scope.show_select_menu = true
-          scope.$digest()
+          # Finally, add shift-select to the myTypeahead element
+          element.append shift_select
 
-      query_object = {}
-      query_string = ''
-      Object.defineProperty scope, 'query',
-        get: ->
-          return query_object[scope.filter_attribute] if scope.filter_attribute?
-          return query_string
+          $compile(shift_select) shift_select_scope
 
-        set: (value) ->
-          if scope.filter_attribute?
-            query_object[scope.filter_attribute] = value[scope.filter_attribute] or value
-
-          else query_string = value
-
-      scope.onSelect = (value) ->
-        scope.query = value
         scope.show_select_menu = false
-        scope.$digest()
+        mouse_down = false
 
-      scope.$on '$destroy', -> input.off()
+        scope.mouseDown = (down) ->
+          mouse_down = down
+
+        scope.hide = ($event) ->
+          unless mouse_down
+            scope.show_select_menu = false
+
+        scope.onSelect = (selected) ->
+          scope.selected = selected
+          scope.query = selected?[scope.filter_attribute]
+
+        scope.$watch 'query', (new_value, old_value) ->
+          return if new_value is old_value
+          scope.selected = null if scope.query isnt scope.selected?[scope.filter_attribute]
+      ]
 
   .controller 'ExampleCtrl',
     (
