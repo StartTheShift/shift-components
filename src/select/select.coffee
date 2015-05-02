@@ -10,6 +10,10 @@ angular.module 'shift.components.select', []
       $compile
       $filter
     ) ->
+      UP_KEY = 38
+      DOWN_KEY = 40
+      ENTER_KEY = 13
+
       restrict: 'E'
       transclude: true
 
@@ -39,15 +43,10 @@ angular.module 'shift.components.select', []
           option.append clone
 
         select_container.append option
-
         element.append select_container
 
         $compile(select_container) scope
         $compile(option) scope
-
-        UP_KEY = 38
-        DOWN_KEY = 40
-        ENTER_KEY = 13
 
         scope.position = -1
 
