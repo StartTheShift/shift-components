@@ -16,6 +16,7 @@ path = require 'path'
 inject = require 'gulp-inject'
 ngtemplate = require 'gulp-ngtemplate'
 htmlmin = require 'gulp-htmlmin'
+karma = require 'gulp-karma'
 
 BUILD_DEST = 'build'
 EXAMPLES_DEST = 'examples'
@@ -123,7 +124,8 @@ gulp.task 'watch', ['combine_minifiy', 'markdown_docs', 'examples'], ->
     'src/*/example/*.jade'
     'src/*/example/*.styl'
     'src/*/example/*.coffee'
-  ], ['combine_minifiy', 'markdown_docs', 'examples']
+    'src/*/test/*.coffee'
+  ], ['combine_minifiy', 'markdown_docs', 'examples', 'test']
 
 
 ###
@@ -136,6 +138,21 @@ gulp.task 'connect', ->
     livereload: true
   }
 
+###
+Test
+###
+gulp.task 'test', ->
+  gulp.src [
+    'bower_components/angular/angular.js'
+    'bower_components/angular-mocks/angular-mocks.js'
+    'build/shift-components.js'
+    'src/*/test/*.{mock,spec}.coffee'
+  ]
+  .pipe karma
+    configFile: 'karma.conf.coffee',
+    action: 'run'
+  .on 'error', (err) ->
+    throw err
 
 ###
 Generates the examples HTML files located in the examples folder.
@@ -224,4 +241,4 @@ gulp.task 'examples', ['combine_minifiy', 'compile_example'], ->
 
 # Translate coffee file into JS and generate MarkDown doc
 gulp.task 'default', (cb) ->
-  runSequence 'clean', ['watch', 'connect'], cb
+  runSequence 'clean', ['watch', 'connect'], 'test', cb
