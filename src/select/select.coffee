@@ -83,10 +83,24 @@ angular.module 'shift.components.select', []
             scope.position = Math.max 0, scope.position
             scope.position = Math.min scope.filtered_options.length - 1, scope.position
 
+            autoScroll()
+
           event.preventDefault()
           event.stopPropagation()
 
           return false
+
+        autoScroll = ->
+          container_elt = element[0].children[0]
+          option_elt = container_elt.children[scope.position]
+          option_pos = option_elt.getBoundingClientRect()
+          container_pos = container_elt.getBoundingClientRect()
+
+          # TODO: Find something less arbitrary than 5px margin
+          if option_pos.bottom > container_pos.bottom
+            container_elt.scrollTop += option_pos.bottom - container_pos.bottom + 5
+          if option_pos.top < container_pos.top
+            container_elt.scrollTop += option_pos.top - container_pos.top - 5
 
         scope.select = (index) ->
           scope.position = index
