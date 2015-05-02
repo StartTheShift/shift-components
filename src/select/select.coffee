@@ -37,6 +37,7 @@ angular.module 'shift.components.select', []
           'ng-repeat': 'option in filtered_options'
           'ng-class': 'getClass($index)'
           'ng-click': 'select($index)'
+          'ng-mouseenter': 'setPosition($index)'
 
         # Transclude the template to the base option element
         transclude scope, (clone, scope) ->
@@ -93,6 +94,9 @@ angular.module 'shift.components.select', []
 
           scope.onSelect {selected: scope.selected}
 
+        scope.setPosition = ($index) ->
+          scope.position = $index
+
         scope.getClass = (index) ->
           return {
             'selected': index is scope.position
@@ -100,7 +104,6 @@ angular.module 'shift.components.select', []
 
         do startListening = ->
           document.addEventListener 'keydown', onKeyDown
-
 
         stopListening = ->
           document.removeEventListener 'keydown', onKeyDown
