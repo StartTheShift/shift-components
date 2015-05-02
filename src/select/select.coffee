@@ -3,9 +3,6 @@ A directive that displays a list of option, navigation using arrow keys + enter 
 ###
 
 angular.module 'shift.components.select', []
-  .directive 'shiftSelectOption', ->
-    restrict: 'A'
-
   .directive 'shiftSelect', [
     '$compile'
     '$filter'
