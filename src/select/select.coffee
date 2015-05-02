@@ -6,11 +6,9 @@ angular.module 'shift.components.select', []
   .directive 'shiftSelect', [
     '$compile'
     '$filter'
-    '$timeout'
     (
       $compile
       $filter
-      $timeout
     ) ->
       restrict: 'E'
       transclude: true

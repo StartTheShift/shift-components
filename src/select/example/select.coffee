@@ -2,10 +2,8 @@ angular.module('examples', ['shift.components'])
 
   .directive 'myTypeahead', [
     '$compile'
-    '$timeout'
     (
       $compile
-      $timeout
     ) ->
       restrict: 'E'
       transclude: true
