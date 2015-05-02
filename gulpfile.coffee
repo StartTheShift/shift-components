@@ -14,6 +14,7 @@ stylus = require 'gulp-stylus'
 fs = require 'fs'
 path = require 'path'
 inject = require 'gulp-inject'
+ngAnnotate = require 'gulp-ng-annotate'
 ngtemplate = require 'gulp-ngtemplate'
 htmlmin = require 'gulp-htmlmin'
 
@@ -70,6 +71,7 @@ gulp.task 'compile_template', ['compile_coffee', 'clean'], ->
 gulp.task 'compile_coffee', ['clean'], ->
   gulp.src ['src/*/*.coffee', 'src/components.coffee']
     .pipe coffee({bare: true})
+    .pipe ngAnnotate({single_quotes: true})
     .pipe gulp.dest('.src-js')
 
 
