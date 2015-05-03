@@ -10,7 +10,7 @@ module.exports = (config) ->
     # gulp-karma ignores this files list since we provide file paths to gulp.src
     # files: []
 
-    reporters: ['progress']
+    reporters: ['mocha']
 
     preprocessors:
       'src/**/*.{mock,spec}.coffee': ['coffee']
