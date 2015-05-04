@@ -69,7 +69,7 @@ gulp.task 'compile_template', ['clean'], ->
     .pipe gulp.dest(COMPILED_SRC)
 
 gulp.task 'compile_coffee', ['clean'], ->
-  merge gulp.src(['src/*/*.coffee', 'src/components.coffee'])
+  gulp.src(['src/*/*.coffee', 'src/components.coffee'])
     .pipe coffee({bare: true})
     .pipe ngAnnotate({single_quotes: true})
     .pipe gulp.dest(COMPILED_SRC)
