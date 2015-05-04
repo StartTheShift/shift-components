@@ -1,6 +1,19 @@
 ###*
 Typeahead directive displaying a set of option to choose from as input changes.
 
+The transcluded object attributes are prepend with `option.`. In the case of the
+example, the sources are
+
+```coffee
+$scope.sources = [
+  {state: 'ca', city: 'Los Angeles', population: 3884307}
+  ...
+]
+```
+
+in the transcluded template section, you would then access the population information
+through `{{ option.population }}`
+
 @module shift.components.typeahead
 
 @requires shift.components.select
@@ -14,8 +27,12 @@ Typeahead directive displaying a set of option to choose from as input changes.
 shift-typeahead(
   sources = "list_of_object"
   filterAttribute = "city"
-  selected = "selected_option"
+  selected = "selected_city"
 )
+  strong {{option.city}}
+  span &nbsp; {{option.state}}
+  div
+    i pop. {{option.population}}
 ```
 ###
 angular.module 'shift.components.typeahead', ['shift.components.select']
