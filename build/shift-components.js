@@ -48,114 +48,112 @@ shift-calendar(
 )
 ```
  */
-angular.module('shift.components.calendar', []).directive('shiftCalendar', [
-  function() {
-    return {
-      restrict: 'E',
-      templateUrl: 'calendar/calendar.html',
-      scope: {
-        date: '=',
-        dateChange: '&',
-        dateValidator: '=',
-        dateHightlight: '=',
-        dateAllowNull: '='
-      },
-      link: function(scope) {
-        var buildCalendarScope, isValidDate, updateDate;
-        scope.goToNextMonth = function() {
-          scope.showing_date.add(1, 'month');
-          return buildCalendarScope();
-        };
-        scope.goToPreviousMonth = function() {
-          scope.showing_date.subtract(1, 'month');
-          return buildCalendarScope();
-        };
-        scope.goToSelectedDate = function() {
-          scope.showing_date = moment(scope.date);
-          return buildCalendarScope();
-        };
-        scope.selectDate = function($event) {
-          return updateDate(moment($event.target.getAttribute('data-iso')));
-        };
-        scope.setNull = function() {
-          if (!scope.dateAllowNull) {
-            return;
-          }
-          scope.date = null;
+angular.module('shift.components.calendar', []).directive('shiftCalendar', function() {
+  return {
+    restrict: 'E',
+    templateUrl: 'calendar/calendar.html',
+    scope: {
+      date: '=',
+      dateChange: '&',
+      dateValidator: '=',
+      dateHightlight: '=',
+      dateAllowNull: '='
+    },
+    link: function(scope) {
+      var buildCalendarScope, isValidDate, updateDate;
+      scope.goToNextMonth = function() {
+        scope.showing_date.add(1, 'month');
+        return buildCalendarScope();
+      };
+      scope.goToPreviousMonth = function() {
+        scope.showing_date.subtract(1, 'month');
+        return buildCalendarScope();
+      };
+      scope.goToSelectedDate = function() {
+        scope.showing_date = moment(scope.date);
+        return buildCalendarScope();
+      };
+      scope.selectDate = function($event) {
+        return updateDate(moment($event.target.getAttribute('data-iso')));
+      };
+      scope.setNull = function() {
+        if (!scope.dateAllowNull) {
+          return;
+        }
+        scope.date = null;
+        buildCalendarScope();
+        return scope.dateChange();
+      };
+      isValidDate = function(date) {
+        if (!(moment.isMoment(date) && date.isValid())) {
+          return false;
+        }
+        if (scope.dateValidator != null) {
+          return scope.dateValidator(date);
+        }
+        return true;
+      };
+      updateDate = function(date) {
+        if (isValidDate(date)) {
+          scope.date = date;
+          scope.showing_date = moment(date);
           buildCalendarScope();
           return scope.dateChange();
+        }
+      };
+      scope.$watch('date', function(new_value, old_value) {
+        if (new_value === old_value) {
+          return;
+        }
+        return updateDate(new_value);
+      });
+      scope.getClass = function(date) {
+        var ref;
+        return {
+          active: (ref = scope.date) != null ? ref.isSame(date, 'day') : void 0,
+          off: !scope.showing_date.isSame(date, 'month'),
+          available: isValidDate(date),
+          invalid: !isValidDate(date),
+          highlight: typeof scope.dateHightlight === "function" ? scope.dateHightlight(date) : void 0
         };
-        isValidDate = function(date) {
-          if (!(moment.isMoment(date) && date.isValid())) {
-            return false;
-          }
-          if (scope.dateValidator != null) {
-            return scope.dateValidator(date);
-          }
-          return true;
-        };
-        updateDate = function(date) {
-          if (isValidDate(date)) {
-            scope.date = date;
-            scope.showing_date = moment(date);
-            buildCalendarScope();
-            return scope.dateChange();
-          }
-        };
-        scope.$watch('date', function(new_value, old_value) {
-          if (new_value === old_value) {
-            return;
-          }
-          return updateDate(new_value);
-        });
-        scope.getClass = function(date) {
-          var ref;
-          return {
-            active: (ref = scope.date) != null ? ref.isSame(date, 'day') : void 0,
-            off: !scope.showing_date.isSame(date, 'month'),
-            available: isValidDate(date),
-            invalid: !isValidDate(date),
-            highlight: typeof scope.dateHightlight === "function" ? scope.dateHightlight(date) : void 0
-          };
-        };
-        (buildCalendarScope = function() {
-          var date, day_of_the_month, day_of_the_week, end_date, results, week;
-          date = moment(scope.showing_date).startOf('month').startOf('week');
-          end_date = moment(scope.showing_date).endOf('month').endOf('week');
-          scope.weeks = [];
-          results = [];
-          while (true) {
-            day_of_the_week = date.day();
-            day_of_the_month = date.date();
-            if (day_of_the_week === 0) {
-              if (scope.weeks.length > 5) {
-                break;
-              }
-              week = [];
-              scope.weeks.push(week);
+      };
+      (buildCalendarScope = function() {
+        var date, day_of_the_month, day_of_the_week, end_date, results, week;
+        date = moment(scope.showing_date).startOf('month').startOf('week');
+        end_date = moment(scope.showing_date).endOf('month').endOf('week');
+        scope.weeks = [];
+        results = [];
+        while (true) {
+          day_of_the_week = date.day();
+          day_of_the_month = date.date();
+          if (day_of_the_week === 0) {
+            if (scope.weeks.length > 5) {
+              break;
             }
-            week.push({
-              iso_8061: date.format(),
-              day_of_the_month: day_of_the_month,
-              date: moment(date)
-            });
-            results.push(date.add(1, 'day'));
+            week = [];
+            scope.weeks.push(week);
           }
-          return results;
-        })();
-        if (!scope.dateAllowNull && !moment.isMoment(scope.date)) {
-          scope.date = moment();
+          week.push({
+            iso_8061: date.format(),
+            day_of_the_month: day_of_the_month,
+            date: moment(date)
+          });
+          results.push(date.add(1, 'day'));
         }
-        if (moment.isMoment(scope.date)) {
-          updateDate(scope.date);
-          return scope.showing_date = moment(scope.date);
-        } else {
-          return scope.showing_date = moment().startOf('day');
-        }
+        return results;
+      })();
+      if (!scope.dateAllowNull && !moment.isMoment(scope.date)) {
+        scope.date = moment();
       }
-    };
-  }
-]);
+      if (moment.isMoment(scope.date)) {
+        updateDate(scope.date);
+        return scope.showing_date = moment(scope.date);
+      } else {
+        return scope.showing_date = moment().startOf('day');
+      }
+    }
+  };
+});
 
 'use strict';
 
@@ -191,113 +189,111 @@ options is emtpy.
       i pop. {{option.population}}
 ```
  */
-angular.module('shift.components.select', []).directive('shiftSelect', [
-  '$compile', function($compile) {
-    var DOWN_KEY, ENTER_KEY, UP_KEY;
-    UP_KEY = 38;
-    DOWN_KEY = 40;
-    ENTER_KEY = 13;
-    return {
-      restrict: 'E',
-      transclude: true,
-      scope: {
-        options: '=',
-        selected: '=',
-        onSelect: '&'
-      },
-      link: function(scope, element, attrs, ctrl, transclude) {
-        var autoScroll, onKeyDown, option, select_container, startListening, stopListening;
-        select_container = angular.element(document.createElement('div'));
-        select_container.addClass('select-container');
-        select_container.attr({
-          'ng-if': '!selected && options.length'
+angular.module('shift.components.select', []).directive('shiftSelect', function($compile) {
+  var DOWN_KEY, ENTER_KEY, UP_KEY;
+  UP_KEY = 38;
+  DOWN_KEY = 40;
+  ENTER_KEY = 13;
+  return {
+    restrict: 'E',
+    transclude: true,
+    scope: {
+      options: '=',
+      selected: '=',
+      onSelect: '&'
+    },
+    link: function(scope, element, attrs, ctrl, transclude) {
+      var autoScroll, onKeyDown, option, select_container, startListening, stopListening;
+      select_container = angular.element(document.createElement('div'));
+      select_container.addClass('select-container');
+      select_container.attr({
+        'ng-if': '!selected && options.length'
+      });
+      option = angular.element(document.createElement('div'));
+      option.addClass('select-option');
+      option.attr({
+        'ng-repeat': 'option in options',
+        'ng-class': 'getClass($index)',
+        'ng-click': 'select($index)',
+        'ng-mouseenter': 'setPosition($index)'
+      });
+      transclude(scope, function(clone, scope) {
+        return option.append(clone);
+      });
+      select_container.append(option);
+      element.append(select_container);
+      $compile(select_container)(scope);
+      $compile(option)(scope);
+      scope.position = -1;
+      onKeyDown = function(event) {
+        var key_code, ref;
+        if (!((ref = scope.options) != null ? ref.length : void 0)) {
+          return;
+        }
+        key_code = event.which || event.keyCode;
+        if (key_code !== UP_KEY && key_code !== DOWN_KEY && key_code !== ENTER_KEY) {
+          return;
+        }
+        scope.$apply(function() {
+          switch (key_code) {
+            case UP_KEY:
+              scope.position -= 1;
+              break;
+            case DOWN_KEY:
+              scope.position += 1;
+              break;
+            default:
+              if (scope.position > -1) {
+                scope.select(scope.position);
+              }
+          }
+          scope.position = Math.max(0, scope.position);
+          scope.position = Math.min(scope.options.length - 1, scope.position);
+          return autoScroll();
         });
-        option = angular.element(document.createElement('div'));
-        option.addClass('select-option');
-        option.attr({
-          'ng-repeat': 'option in options',
-          'ng-class': 'getClass($index)',
-          'ng-click': 'select($index)',
-          'ng-mouseenter': 'setPosition($index)'
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      };
+      autoScroll = function() {
+        var container_elt, container_pos, option_elt, option_pos;
+        container_elt = element[0].children[0];
+        option_elt = container_elt.children[scope.position];
+        option_pos = option_elt.getBoundingClientRect();
+        container_pos = container_elt.getBoundingClientRect();
+        if (option_pos.bottom > container_pos.bottom) {
+          container_elt.scrollTop += option_pos.bottom - container_pos.bottom;
+        }
+        if (option_pos.top < container_pos.top) {
+          return container_elt.scrollTop += option_pos.top - container_pos.top;
+        }
+      };
+      scope.select = function(index) {
+        scope.position = index;
+        scope.selected = scope.options[scope.position];
+        return scope.onSelect({
+          selected: scope.selected
         });
-        transclude(scope, function(clone, scope) {
-          return option.append(clone);
-        });
-        select_container.append(option);
-        element.append(select_container);
-        $compile(select_container)(scope);
-        $compile(option)(scope);
-        scope.position = -1;
-        onKeyDown = function(event) {
-          var key_code, ref;
-          if (!((ref = scope.options) != null ? ref.length : void 0)) {
-            return;
-          }
-          key_code = event.which || event.keyCode;
-          if (key_code !== UP_KEY && key_code !== DOWN_KEY && key_code !== ENTER_KEY) {
-            return;
-          }
-          scope.$apply(function() {
-            switch (key_code) {
-              case UP_KEY:
-                scope.position -= 1;
-                break;
-              case DOWN_KEY:
-                scope.position += 1;
-                break;
-              default:
-                if (scope.position > -1) {
-                  scope.select(scope.position);
-                }
-            }
-            scope.position = Math.max(0, scope.position);
-            scope.position = Math.min(scope.options.length - 1, scope.position);
-            return autoScroll();
-          });
-          event.preventDefault();
-          event.stopPropagation();
-          return false;
+      };
+      scope.setPosition = function($index) {
+        return scope.position = $index;
+      };
+      scope.getClass = function(index) {
+        return {
+          'selected': index === scope.position
         };
-        autoScroll = function() {
-          var container_elt, container_pos, option_elt, option_pos;
-          container_elt = element[0].children[0];
-          option_elt = container_elt.children[scope.position];
-          option_pos = option_elt.getBoundingClientRect();
-          container_pos = container_elt.getBoundingClientRect();
-          if (option_pos.bottom > container_pos.bottom) {
-            container_elt.scrollTop += option_pos.bottom - container_pos.bottom;
-          }
-          if (option_pos.top < container_pos.top) {
-            return container_elt.scrollTop += option_pos.top - container_pos.top;
-          }
-        };
-        scope.select = function(index) {
-          scope.position = index;
-          scope.selected = scope.options[scope.position];
-          return scope.onSelect({
-            selected: scope.selected
-          });
-        };
-        scope.setPosition = function($index) {
-          return scope.position = $index;
-        };
-        scope.getClass = function(index) {
-          return {
-            'selected': index === scope.position
-          };
-        };
-        (startListening = function() {
-          return document.addEventListener('keydown', onKeyDown);
-        })();
-        stopListening = function() {
-          return document.removeEventListener('keydown', onKeyDown);
-        };
-        scope.$on('$destroy', stopListening);
-        return void 0;
-      }
-    };
-  }
-]);
+      };
+      (startListening = function() {
+        return document.addEventListener('keydown', onKeyDown);
+      })();
+      stopListening = function() {
+        return document.removeEventListener('keydown', onKeyDown);
+      };
+      scope.$on('$destroy', stopListening);
+      return void 0;
+    }
+  };
+});
 
 
 /**
@@ -482,71 +478,69 @@ shift-typeahead(
     i pop. {{option.population}}
 ```
  */
-angular.module('shift.components.typeahead', ['shift.components.select']).directive('shiftTypeahead', [
-  '$compile', '$filter', function($compile, $filter) {
-    return {
-      restrict: 'E',
-      transclude: true,
-      templateUrl: 'typeahead/typeahead.html',
-      scope: {
-        source: '=',
-        filterAttribute: '@',
-        selected: '='
-      },
-      link: function(scope, element, attrs, ctrl, transclude) {
-        var filterOptions, mouse_down, shift_select, shift_select_scope;
-        shift_select = angular.element(document.createElement('shift-select'));
-        shift_select.attr({
-          'ng-show': 'show_select_menu',
-          'options': 'options',
-          'selected': 'selected',
-          'on-select': 'onSelect(selected)',
-          'ng-mousedown': 'mouseDown(true)',
-          'ng-mouseup': 'mouseDown(false)'
-        });
-        shift_select_scope = scope.$new();
-        transclude(shift_select_scope, function(clone) {
-          return shift_select.append(clone);
-        });
-        element.append(shift_select);
-        $compile(shift_select)(shift_select_scope);
-        filterOptions = function() {
-          var filter;
-          if (scope.query) {
-            filter = {};
-            filter[scope.filterAttribute] = scope.query;
-            return scope.options = $filter('filter')(scope.source, filter).slice(0, 6);
-          } else {
-            return scope.options = [];
-          }
-        };
-        mouse_down = false;
-        scope.mouseDown = function(is_down) {
-          return mouse_down = is_down;
-        };
-        scope.hide = function($event) {
-          if (!mouse_down) {
-            return scope.show_select_menu = false;
-          }
-        };
-        scope.onSelect = function(selected) {
-          scope.selected = selected;
-          return scope.query = selected != null ? selected[scope.filterAttribute] : void 0;
-        };
-        return scope.$watch('query', function(new_value, old_value) {
-          var ref;
-          if (new_value === old_value) {
-            return;
-          }
-          if (scope.query !== ((ref = scope.selected) != null ? ref[scope.filterAttribute] : void 0)) {
-            scope.selected = null;
-          }
-          return filterOptions();
-        });
-      }
-    };
-  }
-]);
+angular.module('shift.components.typeahead', ['shift.components.select']).directive('shiftTypeahead', function($compile, $filter) {
+  return {
+    restrict: 'E',
+    transclude: true,
+    templateUrl: 'typeahead/typeahead.html',
+    scope: {
+      source: '=',
+      filterAttribute: '@',
+      selected: '='
+    },
+    link: function(scope, element, attrs, ctrl, transclude) {
+      var filterOptions, mouse_down, shift_select, shift_select_scope;
+      shift_select = angular.element(document.createElement('shift-select'));
+      shift_select.attr({
+        'ng-show': 'show_select_menu',
+        'options': 'options',
+        'selected': 'selected',
+        'on-select': 'onSelect(selected)',
+        'ng-mousedown': 'mouseDown(true)',
+        'ng-mouseup': 'mouseDown(false)'
+      });
+      shift_select_scope = scope.$new();
+      transclude(shift_select_scope, function(clone) {
+        return shift_select.append(clone);
+      });
+      element.append(shift_select);
+      $compile(shift_select)(shift_select_scope);
+      filterOptions = function() {
+        var filter;
+        if (scope.query) {
+          filter = {};
+          filter[scope.filterAttribute] = scope.query;
+          return scope.options = $filter('filter')(scope.source, filter).slice(0, 6);
+        } else {
+          return scope.options = [];
+        }
+      };
+      mouse_down = false;
+      scope.mouseDown = function(is_down) {
+        return mouse_down = is_down;
+      };
+      scope.hide = function($event) {
+        if (!mouse_down) {
+          return scope.show_select_menu = false;
+        }
+      };
+      scope.onSelect = function(selected) {
+        scope.selected = selected;
+        return scope.query = selected != null ? selected[scope.filterAttribute] : void 0;
+      };
+      return scope.$watch('query', function(new_value, old_value) {
+        var ref;
+        if (new_value === old_value) {
+          return;
+        }
+        if (scope.query !== ((ref = scope.selected) != null ? ref[scope.filterAttribute] : void 0)) {
+          scope.selected = null;
+        }
+        return filterOptions();
+      });
+    }
+  };
+});
 
 'use strict';
 
