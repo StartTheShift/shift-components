@@ -113,7 +113,7 @@ gulp.task 'clean', (done) ->
 ###
 Monitor changes on coffee files, trigger default on change
 ###
-gulp.task 'watch', ['combine_minifiy', 'markdown_docs', 'examples', 'test:protractor'], ->
+gulp.task 'watch', ['combine_minifiy', 'markdown_docs', 'examples'], ->
 
   # Compile, generate docs and examples on coffee and jade changes to the library
   gulp.watch [
@@ -137,7 +137,10 @@ gulp.task 'connect', ->
     livereload: true
   }
 
-gulp.task 'test:protractor', ->
+###
+Run e2e tests
+###
+gulp.task 'test', ['combine_minifiy'], ->
   gulp.src 'src/*/test/*.spec.coffee'
   .pipe protractor
       configFile: 'protractor.conf.coffee',
