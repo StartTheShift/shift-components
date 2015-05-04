@@ -17,6 +17,7 @@ inject = require 'gulp-inject'
 ngAnnotate = require 'gulp-ng-annotate'
 ngtemplate = require 'gulp-ngtemplate'
 htmlmin = require 'gulp-htmlmin'
+bump = require 'gulp-bump'
 
 BUILD_DEST = 'build'
 EXAMPLES_DEST = 'examples'
@@ -113,6 +114,15 @@ gulp.task 'clean', (cb) ->
 
 
 ###
+Bump library minor revision
+###
+gulp.task 'bump', ['build'], ->
+  gulp.src(['./bower.json', './package.json'])
+    .pipe(bump({type:'minor'}))
+    .pipe(gulp.dest('./'));
+
+
+###
 Monitor changes on coffee files, trigger default on change
 ###
 gulp.task 'watch', ['examples', 'markdown_docs'], ->
@@ -127,8 +137,7 @@ gulp.task 'watch', ['examples', 'markdown_docs'], ->
 ###
 Build documentation and JS files (+min and map)
 ###
-gulp.task 'build', ['combine_minifiy', 'markdown_docs'], (cb) ->
-  console.log 'building'
+gulp.task 'build', ['combine_minifiy', 'markdown_docs']
 
 ###
 Web service to browse and auto-reload of examples
