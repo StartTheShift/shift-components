@@ -123,6 +123,15 @@ gulp.task 'bump', ['build'], ->
 
 
 ###
+Bump Patch library minor revision
+###
+gulp.task 'patch', ['build'], ->
+  gulp.src(['./bower.json', './package.json'])
+    .pipe(bump({type:'patch'}))
+    .pipe(gulp.dest('./'));
+
+
+###
 Monitor changes on coffee files, trigger default on change
 ###
 gulp.task 'watch', ['examples', 'markdown_docs'], ->
