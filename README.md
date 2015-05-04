@@ -5,17 +5,17 @@ UI components for SHIFT applications
 
 ### Development
 
-Watch the coffee files in the `src` folder and compile them into
-JavaScript files into the `src-js` folder. Those are then build
-to a single JS file, a minified version and a sourceMap.
-
-Every jade file located in src are compiled into html and stored
-into examples folder. The example folder is being served on
-http://localhost:8080
-
 ```sh
 gulp
 ```
+
+Watch the coffee files in the `src` folder and compile them into
+JavaScript files into the `src-js` folder.
+
+Every jade file located in src folder are compiled into html and stored
+into examples folder. The example folder is being served on
+http://localhost:8080
+
 
 ### Versioning
 
@@ -32,7 +32,7 @@ gulp patch
 ```
 
 Calling `bump` and `patch` will also call a `build`. A call to `build`
-combined all the source files in one JS. Templates are also included through
+combines all the sources in one JS. Templates are also included through
 `$templateCache`.
 
 :warning: Note that calling a build will likely generate merge issues if done
@@ -46,16 +46,18 @@ every examples.
 
 An example should be composed of a stylus file, a jade file and a coffee file.
 
-See [sortable](src/sortable/example/)
+See [sortable](src/sortable/example/) for guidance.
 
 ## Fix
 
-There is a potential bug in gulp-inject, reming line feed from stream. The result
-is very long examples in the example page. An issue was created on the repository:
+There is a potential bug in gulp-inject, removing line breaks from the gulp stream.
+The result is very long one line examples on the example page.
+
+An issue was created on gulp-inject repository:
 
 https://github.com/klei/gulp-inject/issues/101
 
-As a quick workaround the bug, you can edit the file located at
+As a quick workaround to the bug, you can edit the file located at
 `node_modules/gulp-inject/src/inject/index.js` and prepend the return value with
 a straight string return:
 
@@ -66,7 +68,7 @@ a straight string return:
              if (typeof transformedContents !== 'string') {
                return lines;
              }
-             # Return the string directly
+             # Add the following line as a workaround to return the string directly
              return transformedContents;
              # return lines.concat(transformedContents.split(/\r?\n/g));
 ```
