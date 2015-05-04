@@ -27,6 +27,7 @@
     "gulp-inject": "^1.2.0",
     "gulp-jade": "^1.0.0",
     "gulp-jsdoc-to-markdown": "^1.0.2",
+    "gulp-ng-annotate": "^0.5.2",
     "gulp-ngtemplate": "^0.2.3",
     "gulp-rename": "^1.2.2",
     "gulp-sourcemaps": "^1.5.2",
