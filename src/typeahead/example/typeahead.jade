@@ -1,0 +1,22 @@
+div(ng-controller="ExampleCtrl")
+  h1 Shift Typeahead
+
+  p
+    | Typeahead directive to expose filtered options as input changes
+
+  shift-typeahead.typeahead-container(
+    source = "sources"
+    filter-attribute = "city"
+    selected = "selected"
+  )
+    strong {{option.city}}
+    span &nbsp; {{option.state}}
+    div
+      i pop. {{option.population}}
+
+  h2 Scope
+
+  pre
+    code.code
+      | $scope.sources.length = {{sources.length}}
+      | $scope.selected = {{selected}}

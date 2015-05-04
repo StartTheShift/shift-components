@@ -1,0 +1,32 @@
+div(ng-controller="ExampleCtrl")
+  h1 Shift Select
+
+  p
+    | Item select
+
+  select(
+    ng-options = 'state[1] as state[0] for state in states'
+    ng-model = 'state'
+  )
+
+  shift-select(
+    options = "options"
+    selected = "selected"
+  )
+    strong {{option.city}}
+    span &nbsp; {{option.state}}
+    div
+      i pop. {{option.population}}
+
+  button.button(
+    ng-click = "clearSelected()"
+    ng-if = "selected"
+  ) Clear Selection
+
+  h2 Scope
+
+  pre
+    code.code
+      | $scope.options.length = {{options.length}}
+      | $scope.selected = {{selected}}
+      | $scope.state = "{{state}}"

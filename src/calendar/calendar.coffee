@@ -30,7 +30,7 @@ shift-calendar(
 ```
 ###
 angular.module 'shift.components.calendar', []
-  .directive 'shiftCalendar', [
+  .directive 'shiftCalendar',
     ->
       restrict: 'E'
       templateUrl: 'calendar/calendar.html'
@@ -121,5 +121,3 @@ angular.module 'shift.components.calendar', []
           scope.showing_date = moment(scope.date)
         else
           scope.showing_date = moment().startOf('day')
-
-  ]
