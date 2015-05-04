@@ -103,11 +103,14 @@ angular.module 'shift.components.select', []
           option_elt = container_elt.children[scope.position]
           option_pos = option_elt.getBoundingClientRect()
           container_pos = container_elt.getBoundingClientRect()
+          option_style = getComputedStyle(option_elt)
 
           if option_pos.bottom > container_pos.bottom
-            container_elt.scrollTop += option_pos.bottom - container_pos.bottom
+            margin = parseInt option_style.marginBottom, 10
+            container_elt.scrollTop += option_pos.bottom - container_pos.bottom + margin
           if option_pos.top < container_pos.top
-            container_elt.scrollTop += option_pos.top - container_pos.top
+            margin = parseInt option_style.marginTop, 10
+            container_elt.scrollTop += option_pos.top - container_pos.top - margin
 
         scope.select = (index) ->
           scope.position = index
