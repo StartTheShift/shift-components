@@ -189,7 +189,7 @@ options is emtpy.
       i pop. {{option.population}}
 ```
  */
-angular.module('shift.components.select', []).directive('shiftSelect', function($compile) {
+angular.module('shift.components.select', []).directive('shiftSelect', ['$compile', function($compile) {
   var DOWN_KEY, ENTER_KEY, UP_KEY;
   UP_KEY = 38;
   DOWN_KEY = 40;
@@ -296,7 +296,7 @@ angular.module('shift.components.select', []).directive('shiftSelect', function(
       return void 0;
     }
   };
-});
+}]);
 
 
 /**
@@ -481,7 +481,7 @@ shift-typeahead(
     i pop. {{option.population}}
 ```
  */
-angular.module('shift.components.typeahead', ['shift.components.select']).directive('shiftTypeahead', function($compile, $filter) {
+angular.module('shift.components.typeahead', ['shift.components.select']).directive('shiftTypeahead', ['$compile', '$filter', function($compile, $filter) {
   return {
     restrict: 'E',
     transclude: true,
@@ -543,7 +543,7 @@ angular.module('shift.components.typeahead', ['shift.components.select']).direct
       });
     }
   };
-});
+}]);
 
 'use strict';
 
