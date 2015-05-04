@@ -166,10 +166,33 @@ angular.module('shift.components.calendar').run(['$templateCache', function($tem
 }]);
 
 /**
-A directive that displays a list of option, navigation using arrow keys + enter or mouse click.
+A directive that displays a list of option, navigation using arrow
+keys + enter or mouse click.
+
+The options are not displayed anymore if selected has a value or if
+options is emtpy.
+
+@module shift.components.select
+
+@param {array} options Options to be displayed and to choose from
+@param {object} selected Object selected from the options
+@param {function} onSelect Callback triggered when an option has been selected
+
+@example
+```jade
+  shift-select(
+    options = "options"
+    selected = "selected"
+    on-select = "onSelect(selected)"
+  )
+    strong {{option.city}}
+    span &nbsp; {{option.state}}
+    div
+      i pop. {{option.population}}
+```
  */
 angular.module('shift.components.select', []).directive('shiftSelect', [
-  '$compile', '$filter', function($compile, $filter) {
+  '$compile', function($compile) {
     var DOWN_KEY, ENTER_KEY, UP_KEY;
     UP_KEY = 38;
     DOWN_KEY = 40;
@@ -179,7 +202,6 @@ angular.module('shift.components.select', []).directive('shiftSelect', [
       transclude: true,
       scope: {
         options: '=',
-        filter: '=',
         selected: '=',
         onSelect: '&'
       },
