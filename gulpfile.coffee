@@ -16,6 +16,7 @@ path = require 'path'
 inject = require 'gulp-inject'
 ngtemplate = require 'gulp-ngtemplate'
 htmlmin = require 'gulp-htmlmin'
+protractor = require('gulp-protractor').protractor
 
 BUILD_DEST = 'build'
 EXAMPLES_DEST = 'examples'
@@ -112,7 +113,7 @@ gulp.task 'clean', (done) ->
 ###
 Monitor changes on coffee files, trigger default on change
 ###
-gulp.task 'watch', ['combine_minifiy', 'markdown_docs', 'examples'], ->
+gulp.task 'watch', ['combine_minifiy', 'markdown_docs', 'examples', 'test:protractor'], ->
 
   # Compile, generate docs and examples on coffee and jade changes to the library
   gulp.watch [
@@ -136,6 +137,13 @@ gulp.task 'connect', ->
     livereload: true
   }
 
+gulp.task 'test:protractor', ->
+  gulp.src 'src/*/test/*.spec.coffee'
+  .pipe protractor
+      configFile: 'protractor.conf.coffee',
+      args: ['--baseUrl', 'http://127.0.0.1:8000']
+  .on 'error', (err) ->
+    console.log "protractor failed: #{err.message}"
 
 ###
 Generates the examples HTML files located in the examples folder.
