@@ -32,7 +32,6 @@ Jade, Coffee and Stylus compilers:
 - compile_coffee: to compile all the components coffeeScript to JavaScript
 - compile_example: to compile examples into executable demo web-pages
 ###
-
 gulp.task 'compile_example', ['clean'], ->
   html_template = gulp.src('src/template.jade')
     .pipe jade()
@@ -55,8 +54,8 @@ gulp.task 'compile_example', ['clean'], ->
 
   merge html, js, css, html_template
 
-gulp.task 'compile_template', ['compile_coffee', 'clean'], ->
-  merge gulp.src('src/*/*.jade')
+gulp.task 'compile_template', ['clean'], ->
+  gulp.src('src/*/*.jade')
     .pipe jade()
     .pipe htmlmin({collapseWhitespace: true})
     .pipe ngtemplate(
@@ -66,13 +65,13 @@ gulp.task 'compile_template', ['compile_coffee', 'clean'], ->
     )
     .pipe rename (path) ->
       path.basename += "_template"
-    .pipe gulp.dest('.src-js')
+    .pipe gulp.dest(COMPILED_SRC)
 
 gulp.task 'compile_coffee', ['clean'], ->
-  gulp.src ['src/*/*.coffee', 'src/components.coffee']
+  merge gulp.src(['src/*/*.coffee', 'src/components.coffee'])
     .pipe coffee({bare: true})
     .pipe ngAnnotate({single_quotes: true})
-    .pipe gulp.dest('.src-js')
+    .pipe gulp.dest(COMPILED_SRC)
 
 
 ###
@@ -80,8 +79,9 @@ Markdown documentation generator converts docstring in the
 code into a gitHub markdown file (readme.md) and stores it
 in every component.
 ###
-gulp.task 'markdown_docs', ['clean', 'compile_coffee'], ->
-  gulp.src "#{COMPILED_SRC}/**/*.js"
+gulp.task 'markdown_docs', ->
+  gulp.src(['src/*/*.coffee', 'src/components.coffee'])
+    .pipe coffee({bare: true})
     .pipe jsdoc2md({'private': true})
     .on 'error', (err) ->
       console.log "jsdoc2md failed: #{err.message}"
@@ -108,25 +108,27 @@ gulp.task 'combine_minifiy', ['compile_coffee', 'compile_template'], ->
 ###
 Delete all the compiled coffee and jade
 ###
-gulp.task 'clean', (done) ->
-  del ['src/**/*.md', COMPILED_SRC, BUILD_DEST, EXAMPLES_DEST, COMPILED_EXAMPLES], done
+gulp.task 'clean', (cb) ->
+  del [COMPILED_SRC, EXAMPLES_DEST, COMPILED_EXAMPLES], cb
+
 
 ###
 Monitor changes on coffee files, trigger default on change
 ###
-gulp.task 'watch', ['combine_minifiy', 'markdown_docs', 'examples'], ->
+gulp.task 'watch', ['examples', 'markdown_docs'], ->
 
   # Compile, generate docs and examples on coffee and jade changes to the library
   gulp.watch [
-    'src/*/*.coffee'
-    'src/components.coffee'
-    './src/template.jade'
-    './src/*/*.jade'
-    'src/*/example/*.jade'
+    'src/**/*.coffee'
+    'src/**/*.jade'
     'src/*/example/*.styl'
-    'src/*/example/*.coffee'
-  ], ['combine_minifiy', 'markdown_docs', 'examples']
+  ], ['examples', 'markdown_docs']
 
+###
+Build documentation and JS files (+min and map)
+###
+gulp.task 'build', ['combine_minifiy', 'markdown_docs'], (cb) ->
+  console.log 'building'
 
 ###
 Web service to browse and auto-reload of examples
@@ -143,11 +145,15 @@ gulp.task 'connect', ->
 Generates the examples HTML files located in the examples folder.
 Also moves copy of third party dependancies like momentJS and lodash.
 ###
-gulp.task 'examples', ['combine_minifiy', 'compile_example'], ->
+gulp.task 'examples', ['compile_coffee', 'compile_template', 'compile_example'], ->
   getFolders = (dir) ->
     fs.readdirSync(dir)
       .filter (file) ->
         fs.statSync(path.join(dir, file)).isDirectory()
+
+  shift_components = gulp.src "#{COMPILED_SRC}/**/*.js"
+    .pipe concat('shift-components.js')
+    .pipe gulp.dest("#{EXAMPLES_DEST}/js")
 
   third_party_css = gulp.src([
       'bower_components/skeletor/dist/skeletor.css'
@@ -221,9 +227,9 @@ gulp.task 'examples', ['combine_minifiy', 'compile_example'], ->
 
       .pipe gulp.dest EXAMPLES_DEST
 
-  return merge tasks, third_party_js, third_party_css
+  return merge tasks, third_party_js, third_party_css, shift_components
     .pipe connect.reload()
 
-# Translate coffee file into JS and generate MarkDown doc
+
 gulp.task 'default', (cb) ->
   runSequence 'clean', ['watch', 'connect'], cb
