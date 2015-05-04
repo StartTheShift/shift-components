@@ -3,7 +3,7 @@ UI components for SHIFT applications
 
 ## Gulp commands
 
-### default
+### Development
 
 Watch the coffee files in the `src` folder and compile them into
 JavaScript files into the `src-js` folder. Those are then build
@@ -16,6 +16,28 @@ http://localhost:8080
 ```sh
 gulp
 ```
+
+### Versioning
+
+A new component should trigger a minor revision aka `B++` in `A.B.C`.
+
+```sh
+gulp bump
+```
+
+A bug fix should increase the patch aka `C++` in `A.B.C`
+
+```sh
+gulp patch
+```
+
+Calling `bump` and `patch` will also call a `build`. A call to `build`
+combined all the source files in one JS. Templates are also included through
+`$templateCache`.
+
+:warning: Note that calling a build will likely generate merge issues if done
+on a branch other than master. It's highly recommended to only trigger it on
+the master branch post merge.
 
 ### Examples
 
