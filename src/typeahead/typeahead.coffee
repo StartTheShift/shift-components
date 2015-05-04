@@ -36,9 +36,7 @@ shift-typeahead(
 ```
 ###
 angular.module 'shift.components.typeahead', ['shift.components.select']
-  .directive 'shiftTypeahead', [
-    '$compile'
-    '$filter'
+  .directive 'shiftTypeahead',
     (
       $compile
       $filter
@@ -101,4 +99,3 @@ angular.module 'shift.components.typeahead', ['shift.components.select']
           return if new_value is old_value
           scope.selected = null if scope.query isnt scope.selected?[scope.filterAttribute]
           filterOptions()
-      ]

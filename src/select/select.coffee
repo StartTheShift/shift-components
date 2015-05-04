@@ -26,8 +26,7 @@ options is emtpy.
 ###
 
 angular.module 'shift.components.select', []
-  .directive 'shiftSelect', [
-    '$compile'
+  .directive 'shiftSelect',
     (
       $compile
     ) ->
@@ -134,4 +133,3 @@ angular.module 'shift.components.select', []
         scope.$on '$destroy', stopListening
 
         undefined
-  ]
