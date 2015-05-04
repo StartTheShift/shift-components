@@ -1,9 +1,11 @@
 angular.module('examples', ['shift.components'])
 
-  .directive 'myTypeahead', [
+  .directive 'shiftTypeahead', [
     '$compile'
+    '$filter'
     (
       $compile
+      $filter
     ) ->
       restrict: 'E'
       transclude: true
@@ -16,45 +18,49 @@ angular.module('examples', ['shift.components'])
       '''
 
       scope:
-        options: '='
-        filter: '='
+        source: '='
         filter_attribute: '@filterAttribute'
         selected: '='
 
       link: (scope, element, attrs, ctrl, transclude) ->
+        shift_select = angular.element document.createElement 'shift-select'
+        shift_select.attr
+          'ng-show': 'show_select_menu'
+          'options': 'options'
+          'selected': 'selected'
+          'on-select': 'onSelect(selected)'
+          'ng-mousedown': 'mouseDown(true)'
+          'ng-mouseup': 'mouseDown(false)'
 
-        do attachSelectMenu = ->
-          shift_select = angular.element document.createElement 'shift-select'
-          shift_select.attr
-            'ng-show': 'show_select_menu'
-            'options': 'options'
-            'filter': 'query'
-            'selected': 'selected'
-            'on-select': 'onSelect(selected)'
-            'ng-mousedown': 'mouseDown(true)'
-            'ng-mouseup': 'mouseDown(false)'
+        # Create a new scope to transclude + compile the template with (we don't
+        # want the child directives directly modifying the scope of shiftTypeahead)
+        shift_select_scope = scope.$new()
 
-          # Create a new scope to transclude + compile the template with (we don't
-          # want the child directives directly modifying the scope of myTypeahead)
-          shift_select_scope = scope.$new()
+        # Attach the transcluded template to shift-select
+        transclude shift_select_scope, (clone) ->
+          shift_select.append clone
 
-          # Attach the transcluded template to shift-select
-          transclude shift_select_scope, (clone) ->
-            shift_select.append clone
+        # Finally, add shift-select to the shiftTypeahead element
+        element.append shift_select
 
-          # Finally, add shift-select to the myTypeahead element
-          element.append shift_select
+        $compile(shift_select) shift_select_scope
 
-          $compile(shift_select) shift_select_scope
+        filterOptions = ->
+          if scope.query
+            filter = {}
+            filter[scope.filter_attribute] = scope.query
+            scope.options = $filter('filter')(scope.source, filter)[0..5]
 
-        scope.show_select_menu = false
+          # No option displayed if not query entered
+          else
+            scope.options = []
+
         mouse_down = false
-
-        scope.mouseDown = (down) ->
-          mouse_down = down
+        scope.mouseDown = (is_down) ->
+          mouse_down = is_down
 
         scope.hide = ($event) ->
-          unless mouse_down
+          if not mouse_down
             scope.show_select_menu = false
 
         scope.onSelect = (selected) ->
@@ -64,6 +70,7 @@ angular.module('examples', ['shift.components'])
         scope.$watch 'query', (new_value, old_value) ->
           return if new_value is old_value
           scope.selected = null if scope.query isnt scope.selected?[scope.filter_attribute]
+          filterOptions()
       ]
 
   .controller 'ExampleCtrl',
@@ -73,7 +80,7 @@ angular.module('examples', ['shift.components'])
       $scope.state = ''
       $scope.states = ['', 'ca', 'ny']
 
-      $scope.options = [
+      $scope.sources = [
         {state: 'ca', city: 'Los Angeles', population: 3884307}
         {state: 'ca', city: 'San Diego', population: 1355896}
         {state: 'ca', city: 'San Jose', population: 998537}

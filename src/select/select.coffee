@@ -28,13 +28,13 @@ angular.module 'shift.components.select', []
         select_container = angular.element document.createElement 'div'
         select_container.addClass 'select-container'
         select_container.attr
-          'ng-if': '!selected && filtered_options.length'
+          'ng-if': '!selected && options.length'
 
         # Build the base option element
         option = angular.element document.createElement 'div'
         option.addClass 'select-option'
         option.attr
-          'ng-repeat': 'option in filtered_options'
+          'ng-repeat': 'option in options'
           'ng-class': 'getClass($index)'
           'ng-click': 'select($index)'
           'ng-mouseenter': 'setPosition($index)'
@@ -51,19 +51,8 @@ angular.module 'shift.components.select', []
 
         scope.position = -1
 
-        scope.$watch 'filter', (new_value, old_value) ->
-          return if new_value is old_value
-
-          scope.position = -1
-
-          filterOptions()
-        , true
-
-        do filterOptions = ->
-          scope.filtered_options = $filter('filter')(scope.options, scope.filter)
-
         onKeyDown = (event) ->
-          return unless scope.filtered_options?.length
+          return unless scope.options?.length
 
           key_code = event.which or event.keyCode
 
@@ -81,7 +70,7 @@ angular.module 'shift.components.select', []
 
             # limit the movement to the possible range of the options
             scope.position = Math.max 0, scope.position
-            scope.position = Math.min scope.filtered_options.length - 1, scope.position
+            scope.position = Math.min scope.options.length - 1, scope.position
 
             autoScroll()
 
@@ -104,7 +93,7 @@ angular.module 'shift.components.select', []
 
         scope.select = (index) ->
           scope.position = index
-          scope.selected = scope.filtered_options[scope.position]
+          scope.selected = scope.options[scope.position]
 
           scope.onSelect {selected: scope.selected}
 
