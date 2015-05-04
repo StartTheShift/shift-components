@@ -28,8 +28,8 @@ angular.module('examples', ['shift.components'])
         {state: 'ny', city: 'Albany', population: 97660}
       ]
 
-      $scope.clearSelected = ->
-        $scope.selected = null
+      $scope.toggleSelect = (state) ->
+        $scope.show_select = state
 
       do filterOptions = ->
         if $scope.state
@@ -40,3 +40,13 @@ angular.module('examples', ['shift.components'])
       $scope.$watch 'state', (new_value, old_value) ->
         return if new_value is old_value
         filterOptions()
+
+      window.addEventListener 'mouseup', ->
+        $scope.$apply ->
+          $scope.show_select = false;
+
+      window.addEventListener 'keyup', (event) ->
+        if event.which is 27 # ESC key
+          console.log event.which
+          $scope.$apply ->
+            $scope.show_select = false;

@@ -47,7 +47,7 @@ angular.module 'shift.components.select', []
         select_container = angular.element document.createElement 'div'
         select_container.addClass 'select-container'
         select_container.attr
-          'ng-if': '!selected && options.length'
+          'ng-if': 'options.length'
 
         # Build the base option element
         option = angular.element document.createElement 'div'

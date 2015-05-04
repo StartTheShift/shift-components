@@ -53,7 +53,7 @@ angular.module 'shift.components.typeahead', ['shift.components.select']
       link: (scope, element, attrs, ctrl, transclude) ->
         shift_select = angular.element document.createElement 'shift-select'
         shift_select.attr
-          'ng-show': 'show_select_menu'
+          'ng-show': 'show_select_menu && !selected'
           'options': 'options'
           'selected': 'selected'
           'on-select': 'onSelect(selected)'
