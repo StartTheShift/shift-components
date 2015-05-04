@@ -265,10 +265,10 @@ angular.module('shift.components.select', []).directive('shiftSelect', [
           option_pos = option_elt.getBoundingClientRect();
           container_pos = container_elt.getBoundingClientRect();
           if (option_pos.bottom > container_pos.bottom) {
-            container_elt.scrollTop += option_pos.bottom - container_pos.bottom + 5;
+            container_elt.scrollTop += option_pos.bottom - container_pos.bottom;
           }
           if (option_pos.top < container_pos.top) {
-            return container_elt.scrollTop += option_pos.top - container_pos.top - 5;
+            return container_elt.scrollTop += option_pos.top - container_pos.top;
           }
         };
         scope.select = function(index) {
