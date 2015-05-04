@@ -3,15 +3,9 @@ angular.module('examples', ['shift.components'])
   .controller 'ExampleCtrl',
     (
       $scope
-      $filter
     ) ->
       $scope.state = ''
-
-      $scope.states = [
-        ['All states', '']
-        ['California', 'ca']
-        ['New York', 'ny']
-      ]
+      $scope.states = ['', 'ca', 'ny']
 
       $scope.sources = [
         {state: 'ca', city: 'Los Angeles', population: 3884307}
@@ -27,16 +21,3 @@ angular.module('examples', ['shift.components'])
         {state: 'ny', city: 'Syracuse', population: 145151}
         {state: 'ny', city: 'Albany', population: 97660}
       ]
-
-      $scope.clearSelected = ->
-        $scope.selected = null
-
-      do filterOptions = ->
-        if $scope.state
-          $scope.options = $filter('filter')($scope.sources, {state: $scope.state})
-        else
-          $scope.options = $scope.sources
-
-      $scope.$watch 'state', (new_value, old_value) ->
-        return if new_value is old_value
-        filterOptions()

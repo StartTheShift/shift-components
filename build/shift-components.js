@@ -8,31 +8,13 @@ UI components for SHIFT applications
 @requires shift.components.sortable
 @requires shift.components.calendar
 @requires shift.components.select
+@requires shift.components.typeahead
 
 @module shift.components
 
 @link sortable/
  */
-angular.module('shift.components', ['shift.components.sortable', 'shift.components.calendar', 'shift.components.select']);
-
-
-/**
-An autocomplete directive to suggest matching object as you type
- */
-angular.module('shift.components.autocomplete', []).directive('shiftAutocomplete', [
-  function() {
-    return {
-      restrict: 'E',
-      scope: {
-        source: '=',
-        query: '='
-      },
-      link: function(scope) {
-        return void 0;
-      }
-    };
-  }
-]);
+angular.module('shift.components', ['shift.components.sortable', 'shift.components.calendar', 'shift.components.select', 'shift.components.typeahead']);
 
 
 /**
@@ -184,6 +166,119 @@ angular.module('shift.components.calendar').run(['$templateCache', function($tem
 }]);
 
 /**
+A directive that displays a list of option, navigation using arrow keys + enter or mouse click.
+ */
+angular.module('shift.components.select', []).directive('shiftSelect', [
+  '$compile', '$filter', function($compile, $filter) {
+    var DOWN_KEY, ENTER_KEY, UP_KEY;
+    UP_KEY = 38;
+    DOWN_KEY = 40;
+    ENTER_KEY = 13;
+    return {
+      restrict: 'E',
+      transclude: true,
+      scope: {
+        options: '=',
+        filter: '=',
+        selected: '=',
+        onSelect: '&'
+      },
+      link: function(scope, element, attrs, ctrl, transclude) {
+        var autoScroll, onKeyDown, option, select_container, startListening, stopListening;
+        select_container = angular.element(document.createElement('div'));
+        select_container.addClass('select-container');
+        select_container.attr({
+          'ng-if': '!selected && options.length'
+        });
+        option = angular.element(document.createElement('div'));
+        option.addClass('select-option');
+        option.attr({
+          'ng-repeat': 'option in options',
+          'ng-class': 'getClass($index)',
+          'ng-click': 'select($index)',
+          'ng-mouseenter': 'setPosition($index)'
+        });
+        transclude(scope, function(clone, scope) {
+          return option.append(clone);
+        });
+        select_container.append(option);
+        element.append(select_container);
+        $compile(select_container)(scope);
+        $compile(option)(scope);
+        scope.position = -1;
+        onKeyDown = function(event) {
+          var key_code, ref;
+          if (!((ref = scope.options) != null ? ref.length : void 0)) {
+            return;
+          }
+          key_code = event.which || event.keyCode;
+          if (key_code !== UP_KEY && key_code !== DOWN_KEY && key_code !== ENTER_KEY) {
+            return;
+          }
+          scope.$apply(function() {
+            switch (key_code) {
+              case UP_KEY:
+                scope.position -= 1;
+                break;
+              case DOWN_KEY:
+                scope.position += 1;
+                break;
+              default:
+                if (scope.position > -1) {
+                  scope.select(scope.position);
+                }
+            }
+            scope.position = Math.max(0, scope.position);
+            scope.position = Math.min(scope.options.length - 1, scope.position);
+            return autoScroll();
+          });
+          event.preventDefault();
+          event.stopPropagation();
+          return false;
+        };
+        autoScroll = function() {
+          var container_elt, container_pos, option_elt, option_pos;
+          container_elt = element[0].children[0];
+          option_elt = container_elt.children[scope.position];
+          option_pos = option_elt.getBoundingClientRect();
+          container_pos = container_elt.getBoundingClientRect();
+          if (option_pos.bottom > container_pos.bottom) {
+            container_elt.scrollTop += option_pos.bottom - container_pos.bottom + 5;
+          }
+          if (option_pos.top < container_pos.top) {
+            return container_elt.scrollTop += option_pos.top - container_pos.top - 5;
+          }
+        };
+        scope.select = function(index) {
+          scope.position = index;
+          scope.selected = scope.options[scope.position];
+          return scope.onSelect({
+            selected: scope.selected
+          });
+        };
+        scope.setPosition = function($index) {
+          return scope.position = $index;
+        };
+        scope.getClass = function(index) {
+          return {
+            'selected': index === scope.position
+          };
+        };
+        (startListening = function() {
+          return document.addEventListener('keydown', onKeyDown);
+        })();
+        stopListening = function() {
+          return document.removeEventListener('keydown', onKeyDown);
+        };
+        scope.$on('$destroy', stopListening);
+        return void 0;
+      }
+    };
+  }
+]);
+
+
+/**
 Sortable directive to allow drag n' drop sorting of an array.
 
 @module shift.components.sortable
@@ -329,94 +424,86 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
 
 
 /**
-A directive that displays a list of option, navigation using arrow keys + enter or mouse click.
- */
-var hasProp = {}.hasOwnProperty;
+Typeahead directive displaying a set of option to choose from as input changes.
 
-angular.module('shift.components.select', []).directive('shiftSelect', [
-  '$compile', '$filter', '$timeout', function($compile, $filter, $timeout) {
+@module shift.components.typeahead
+
+@requires shift.components.select
+
+@param {array} sources Source of options to be filtered by the input
+@param {string} filterAttribute Name of the attribute for the filter
+@param {object} selected Object selected within the source
+
+@example
+```jade
+shift-typeahead(
+  sources = "list_of_object"
+  filterAttribute = "city"
+  selected = "selected_option"
+)
+```
+ */
+angular.module('shift.components.typeahead', ['shift.components.select']).directive('shiftTypeahead', [
+  '$compile', '$filter', function($compile, $filter) {
     return {
       restrict: 'E',
-      templateUrl: 'select/select.html',
+      transclude: true,
+      templateUrl: 'typeahead/typeahead.html',
       scope: {
-        template: '@',
-        options: '=',
-        filter: '=',
-        selected: '=',
-        onSelect: '&'
+        source: '=',
+        filterAttribute: '@',
+        selected: '='
       },
-      link: function(scope, element) {
-        var DOWN_KEY, ENTER_KEY, UP_KEY, filterOptions, onKeyDown, startListening, stopListening;
-        UP_KEY = 38;
-        DOWN_KEY = 40;
-        ENTER_KEY = 13;
-        scope.position = -1;
-        scope.display = function(option) {
-          return option.city;
-          return $compile(scope.template, option);
+      link: function(scope, element, attrs, ctrl, transclude) {
+        var filterOptions, mouse_down, shift_select, shift_select_scope;
+        shift_select = angular.element(document.createElement('shift-select'));
+        shift_select.attr({
+          'ng-show': 'show_select_menu',
+          'options': 'options',
+          'selected': 'selected',
+          'on-select': 'onSelect(selected)',
+          'ng-mousedown': 'mouseDown(true)',
+          'ng-mouseup': 'mouseDown(false)'
+        });
+        shift_select_scope = scope.$new();
+        transclude(shift_select_scope, function(clone) {
+          return shift_select.append(clone);
+        });
+        element.append(shift_select);
+        $compile(shift_select)(shift_select_scope);
+        filterOptions = function() {
+          var filter;
+          if (scope.query) {
+            filter = {};
+            filter[scope.filterAttribute] = scope.query;
+            return scope.options = $filter('filter')(scope.source, filter).slice(0, 6);
+          } else {
+            return scope.options = [];
+          }
         };
-        scope.$watch('filter', function(new_value, old_value) {
+        mouse_down = false;
+        scope.mouseDown = function(is_down) {
+          return mouse_down = is_down;
+        };
+        scope.hide = function($event) {
+          if (!mouse_down) {
+            return scope.show_select_menu = false;
+          }
+        };
+        scope.onSelect = function(selected) {
+          scope.selected = selected;
+          return scope.query = selected != null ? selected[scope.filterAttribute] : void 0;
+        };
+        return scope.$watch('query', function(new_value, old_value) {
+          var ref;
           if (new_value === old_value) {
             return;
           }
-          scope.position = -1;
+          if (scope.query !== ((ref = scope.selected) != null ? ref[scope.filterAttribute] : void 0)) {
+            scope.selected = null;
+          }
           return filterOptions();
-        }, true);
-        (filterOptions = function() {
-          return scope.filtered_options = $filter('filter')(scope.options, scope.filter);
-        })();
-        onKeyDown = function(event) {
-          var key_code;
-          if (!scope.filtered_options.length) {
-            return;
-          }
-          key_code = event.which || event.keyCode;
-          if (key_code !== UP_KEY && key_code !== DOWN_KEY && key_code !== ENTER_KEY) {
-            return;
-          }
-          switch (key_code) {
-            case UP_KEY:
-              scope.position -= 1;
-              break;
-            case DOWN_KEY:
-              scope.position += 1;
-              break;
-            default:
-              if (scope.position > -1) {
-                scope.select(scope.position);
-              }
-          }
-          scope.position = Math.max(0, scope.position);
-          scope.position = Math.min(scope.filtered_options.length - 1, scope.position);
-          scope.$apply();
-          event.preventDefault();
-          event.stopPropagation();
-          return false;
-        };
-        scope.select = function(index) {
-          var key, ref;
-          scope.position = index;
-          scope.selected = scope.filtered_options[scope.position];
-          ref = scope.filter;
-          for (key in ref) {
-            if (!hasProp.call(ref, key)) continue;
-            scope.filter[key] = scope.selected[key];
-          }
-          return scope.onSelect();
-        };
-        scope.getClass = function(index) {
-          return {
-            'selected': index === scope.position
-          };
-        };
-        (startListening = function() {
-          return document.addEventListener('keydown', onKeyDown);
-        })();
-        stopListening = function() {
-          return document.removeEventListener('keydown', onKeyDown);
-        };
-        scope.$on('$destroy', stopListening);
-        return void 0;
+        });
       }
     };
   }
@@ -424,8 +511,8 @@ angular.module('shift.components.select', []).directive('shiftSelect', [
 
 'use strict';
 
-angular.module('shift.components.select').run(['$templateCache', function($templateCache) {
+angular.module('shift.components.typeahead').run(['$templateCache', function($templateCache) {
 
-  $templateCache.put('select/select.html', '<div ng-if="filtered_options.length" class="select-container"><div ng-repeat="option in filtered_options" ng-class="getClass($index)" ng-click="select($index)" class="select-option">{{ display(option) }}</div></div>');
+  $templateCache.put('typeahead/typeahead.html', '<input type="text" ng-blur="hide($event)" ng-focus="show_select_menu = true" ng-model="query">');
 
 }]);
