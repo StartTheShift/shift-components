@@ -119,10 +119,10 @@ gulp.task 'clean', (cb) ->
 Validate that "master" is the current branch
 ###
 gulp.task 'check_master', (cb) ->
-  git.status {args: '--branch', quiet: true}, (err, stdout) ->
+  git.status {args: '--porcelain -b', quiet: true}, (err, stdout) ->
     throw err if err
 
-    unless /On branch master/.test stdout
+    unless /## master/.test stdout
       console.log  'Error: you must be on "master" branch to bump the library.'
       process.exit 1 # Exit node with failure code
 
