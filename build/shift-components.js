@@ -207,7 +207,7 @@ angular.module('shift.components.select', []).directive('shiftSelect', ['$compil
       select_container = angular.element(document.createElement('div'));
       select_container.addClass('select-container');
       select_container.attr({
-        'ng-if': '!selected && options.length'
+        'ng-if': 'options.length'
       });
       option = angular.element(document.createElement('div'));
       option.addClass('select-option');
@@ -495,7 +495,7 @@ angular.module('shift.components.typeahead', ['shift.components.select']).direct
       var filterOptions, mouse_down, shift_select, shift_select_scope;
       shift_select = angular.element(document.createElement('shift-select'));
       shift_select.attr({
-        'ng-show': 'show_select_menu',
+        'ng-show': 'show_select_menu && !selected',
         'options': 'options',
         'selected': 'selected',
         'on-select': 'onSelect(selected)',
