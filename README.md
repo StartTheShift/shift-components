@@ -55,6 +55,12 @@ gulp-inject task.
 
 See [sortable](src/sortable/example/) for guidance.
 
+## Running Tests
+We're using [protractor](http://angular.github.io/protractor/) for e2e testing.
+
+Prior to running tests you'll need to `npm install -g protractor` followed by
+`webdriver-manager update` as outlined [here](http://angular.github.io/protractor/#/tutorial).
+
 ## Fix
 
 There is a potential bug in gulp-inject, removing line breaks from the gulp stream.

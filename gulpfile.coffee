@@ -17,6 +17,7 @@ inject = require 'gulp-inject'
 ngAnnotate = require 'gulp-ng-annotate'
 ngtemplate = require 'gulp-ngtemplate'
 htmlmin = require 'gulp-htmlmin'
+protractor = require('gulp-protractor').protractor
 bump = require 'gulp-bump'
 
 BUILD_DEST = 'build'
@@ -159,6 +160,15 @@ gulp.task 'connect', ->
     livereload: true
   }
 
+###
+Run e2e tests
+###
+gulp.task 'test', ['combine_minifiy'], ->
+  gulp.src 'src/*/test/*.spec.coffee'
+  .pipe protractor
+      configFile: 'protractor.conf.coffee',
+  .on 'error', (err) ->
+    console.log "protractor failed: #{err.message}"
 
 ###
 Generates the examples HTML files located in the examples folder.
