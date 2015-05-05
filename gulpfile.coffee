@@ -154,6 +154,7 @@ Runs on http://127.0.0.1:8080
 ###
 gulp.task 'connect', ->
   connect.server {
+    port: 2288,
     root: EXAMPLES_DEST,
     livereload: true
   }

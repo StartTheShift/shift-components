@@ -14,7 +14,7 @@ JavaScript files into the `src-js` folder.
 
 Every jade file located in src folder are compiled into html and stored
 into examples folder. The example folder is being served on
-[http://localhost:8080](http://localhost:8080)
+[http://localhost:2288](http://localhost:2288)
 
 
 ### Versioning
@@ -45,7 +45,7 @@ JQuery, lodash, angular, skeletor.css and shift-components are loaded automagica
 every examples. Examples are served and auto-reloaded on code update when running the
 dev server (simple `gulp` command).
 
-Examples are served at [http://localhost:8080](http://localhost:8080).
+Examples are served at [http://localhost:2288](http://localhost:2288).
 
 An example should be composed of a stylus file, a jade file and a coffee file.
 
