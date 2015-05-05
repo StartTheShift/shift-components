@@ -19,6 +19,7 @@ ngtemplate = require 'gulp-ngtemplate'
 htmlmin = require 'gulp-htmlmin'
 protractor = require('gulp-protractor').protractor
 bump = require 'gulp-bump'
+git = require 'gulp-git'
 
 BUILD_DEST = 'build'
 EXAMPLES_DEST = 'examples'
@@ -115,9 +116,21 @@ gulp.task 'clean', (cb) ->
 
 
 ###
+Validate that "master" is the current branch
+###
+gulp.task 'check_master', (cb) ->
+  git.status {args: '--branch', quiet: true}, (err, stdout) ->
+    throw err if err
+
+    unless /On branch master/.test stdout
+      console.log  'Error: you must be on "master" branch to bump the library.'
+      process.exit 1 # Exit node with failure code
+
+
+###
 Bump library minor revision
 ###
-gulp.task 'bump', ['build'], ->
+gulp.task 'bump', ['check_master', 'build'], ->
   gulp.src(['./bower.json', './package.json'])
     .pipe(bump({type:'minor'}))
     .pipe(gulp.dest('./'));
@@ -126,7 +139,7 @@ gulp.task 'bump', ['build'], ->
 ###
 Bump Patch library minor revision
 ###
-gulp.task 'patch', ['build'], ->
+gulp.task 'patch', ['check_master', 'build'], ->
   gulp.src(['./bower.json', './package.json'])
     .pipe(bump({type:'patch'}))
     .pipe(gulp.dest('./'));
