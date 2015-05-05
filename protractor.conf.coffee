@@ -1,14 +1,6 @@
 exports.config =
-  # allScriptsTimeout: 11000
-
   capabilities:
     'browserName': 'chrome'
-
-  # multiCapabilities: [{
-  #   'browserName': 'firefox'
-  # }, {
-  #   'browserName': 'chrome'
-  # }]
 
   baseUrl: 'http://localhost:10000'
 

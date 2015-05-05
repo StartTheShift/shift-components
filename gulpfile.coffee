@@ -167,7 +167,6 @@ gulp.task 'test', ['combine_minifiy'], ->
   gulp.src 'src/*/test/*.spec.coffee'
   .pipe protractor
       configFile: 'protractor.conf.coffee',
-      args: ['--baseUrl', 'http://127.0.0.1:8000']
   .on 'error', (err) ->
     console.log "protractor failed: #{err.message}"
 
