@@ -9,6 +9,8 @@ Sortable directive to allow drag n' drop sorting of an array.
 @param {array} shiftSortable Array of sortable object
 @param {function} shiftSortableChange Called when order is changed
 @param {string} shiftSortableHandle CSS selector to grab the element (optional)
+@param {string} shiftSortableNamespace Namespace for to define multiple possible
+source and destinations.
 
 @example
 ```jade
@@ -16,8 +18,17 @@ ul(
   shift-sortable = "list_of_object"
   shift-sortable-change = "onListOrderChange(list_of_object)"
   shift-sortable-handle = ".grab-icon"
+  shift-sortable-namespace = "bucket_list"
 )
   li(ng-repeat = "element in list_of_object") {{ element.name }}
+
+ul(
+  shift-sortable = "list_of_object_excluded"
+  shift-sortable-change = "onListOrderChange(list_of_object_excluded)"
+  shift-sortable-handle = ".grab-icon"
+  shift-sortable-namespace = "bucket_list"
+)
+  li(ng-repeat = "element in list_of_object_excluded") {{ element.name }}
 ```
 ###
 angular.module 'shift.components.sortable', []
