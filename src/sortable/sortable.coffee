@@ -231,7 +231,7 @@ angular.module 'shift.components.sortable', []
         # Prevent memory leakage
         container.removeEventListener 'mousedown', grab
 
-        if sortables:
+        if sortables
           # Deregister itself when destroyed
           _.remove sortables, (sortable) ->
             return sortable.scope is scope
