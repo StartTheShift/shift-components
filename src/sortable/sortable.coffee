@@ -48,7 +48,7 @@ angular.module 'shift.components.sortable', []
 
       return namespaces[namespace]
 
-  .directive 'shiftSortable', ($timeout, shiftSortableService) ->
+  .directive 'shiftSortable', (shiftSortableService) ->
     restrict: 'A'
     scope:
       shiftSortable: '='
