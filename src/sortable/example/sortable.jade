@@ -35,7 +35,8 @@ div(ng-controller="SortableCtrl")
     .sortable-container(
       shift-sortable = "items"
       shift-sortable-namespace = "item_bucket"
-      shift-sortable-change = "onItemOrderChange(items)"
+      shift-sortable-added = "onItemAdded(item)"
+      shift-sortable-removed = "onItemRemoved(item)"
     )
       .sortable-element(ng-repeat = "item in items track by $index") {{ item }}
 
@@ -44,7 +45,6 @@ div(ng-controller="SortableCtrl")
     .sortable-container(
       shift-sortable = "items_visited"
       shift-sortable-namespace = "item_bucket"
-      shift-sortable-change = "onItemOrderChange(items_visited)"
     )
       .sortable-element(ng-repeat = "item in items_visited track by $index") {{ item }}
 
@@ -53,6 +53,5 @@ div(ng-controller="SortableCtrl")
     .sortable-container(
       shift-sortable = "items_to_visit"
       shift-sortable-namespace = "item_bucket"
-      shift-sortable-change = "onItemOrderChange(items_to_visit)"
     )
       .sortable-element(ng-repeat = "item in items_to_visit track by $index") {{ item }}

@@ -7,6 +7,8 @@ Sortable directive to allow drag n' drop sorting of an array.
 | --- | --- | --- |
 | shiftSortable | <code>array</code> | Array of sortable object |
 | shiftSortableChange | <code>function</code> | Called when order is changed |
+| shiftSortableAdded | <code>function</code> | Called when an item gets added with the added item as argument |
+| shiftSortableRemoved | <code>function</code> | Called when an item gets removed with the removed item as argument |
 | shiftSortableHandle | <code>string</code> | CSS selector to grab the element (optional) |
 | shiftSortableNamespace | <code>string</code> | Namespace for to define multiple possible source and destinations. |
 
