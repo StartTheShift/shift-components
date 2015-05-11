@@ -27,3 +27,32 @@ div(ng-controller="SortableCtrl")
     span.sortable-element(ng-repeat = "item in items")
       i.fa.fa-align-justify
       |  {{ item }}
+
+  h2 Drag n Drop accross different list
+
+  .panel.column
+    h3 Cities
+    .sortable-container(
+      shift-sortable = "items"
+      shift-sortable-namespace = "item_bucket"
+      shift-sortable-change = "onItemOrderChange(items)"
+    )
+      .sortable-element(ng-repeat = "item in items track by $index") {{ item }}
+
+  .panel.column
+    h3 Visited
+    .sortable-container(
+      shift-sortable = "items_visited"
+      shift-sortable-namespace = "item_bucket"
+      shift-sortable-change = "onItemOrderChange(items_visited)"
+    )
+      .sortable-element(ng-repeat = "item in items_visited track by $index") {{ item }}
+
+  .panel.column
+    h3 Planned
+    .sortable-container(
+      shift-sortable = "items_to_visit"
+      shift-sortable-namespace = "item_bucket"
+      shift-sortable-change = "onItemOrderChange(items_to_visit)"
+    )
+      .sortable-element(ng-repeat = "item in items_to_visit track by $index") {{ item }}

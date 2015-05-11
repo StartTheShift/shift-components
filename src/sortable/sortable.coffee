@@ -21,12 +21,24 @@ ul(
 ```
 ###
 angular.module 'shift.components.sortable', []
-  .directive 'shiftSortable', ->
+  .factory 'shiftSortableService', ->
+    namespaces = {}
+
+    register: (namespace, container, scope) ->
+      if namespace not of namespaces
+        namespaces[namespace] = [{container, scope}]
+      else
+        namespaces[namespace].push {container, scope}
+
+      return namespaces[namespace]
+
+  .directive 'shiftSortable', ($timeout, shiftSortableService) ->
     restrict: 'A'
     scope:
       shiftSortable: '='
       shiftSortableChange: '&'
       shiftSortableHandle: '@'
+      shiftSortableNamespace: '@'
     link: (scope, element, attrs) ->
       container = element[0]
       dragging = null
@@ -37,7 +49,21 @@ angular.module 'shift.components.sortable', []
       placeholder = document.createElement('div')
       placeholder.className = 'placeholder'
 
-      getElementAt = (x, y) ->
+      # If this sortable list shares another namespace, this other
+      # list becomes also a pick and drop zone
+      if scope.shiftSortableNamespace
+        sortables = shiftSortableService.register(
+          scope.shiftSortableNamespace
+          container
+          scope
+        )
+
+        # Deregister itself when destroyed
+        scope.$on '$destroy', ->
+          _.remove sortables, (sortable) ->
+            return sortable.scope is scope
+
+      getElementAt = (container, x, y) ->
         last = container.children[container.children.length - 1]
 
         for element, index in container.children
@@ -75,9 +101,9 @@ angular.module 'shift.components.sortable', []
         target = event.target
 
         if scope.shiftSortableHandle?
-          return unless target.matches scope.shiftSortableHandle
-          while target.parentElement isnt container
-            target = target.parentElement
+          return unless target.matches(scope.shiftSortableHandle)
+          while target.parentNode isnt container
+            target = target.parentNode
 
         if target in container.children
           dragging = target
@@ -91,11 +117,11 @@ angular.module 'shift.components.sortable', []
           dragging.style.minWidth = "#{$(dragging).width()}px"
           dragging.style.minHeight = "#{$(dragging).height()}px"
 
-          window.addEventListener 'mousemove', move
-          window.addEventListener 'mouseup', release
+          window.addEventListener('mousemove', move)
+          window.addEventListener('mouseup', release)
 
-          container.insertBefore placeholder, dragging
-          document.body.appendChild dragging
+          container.insertBefore(placeholder, dragging)
+          document.body.appendChild(dragging)
           $(dragging).addClass('dragging')
 
           # grabing is also moving
@@ -109,25 +135,45 @@ angular.module 'shift.components.sortable', []
         dragging.style.left = "#{event.pageX - 10 }px"
         dragging.style.top = "#{event.pageY - 10 }px"
 
+        if scope.shiftSortableNamespace
+          for sortable in sortables
+            movePlaceholder(sortable.container, event)
+        else
+          movePlaceholder(container, event)
+
+      movePlaceholder = (container, event) ->
         return false unless isInside(event.pageX, event.pageY, container.getBoundingClientRect())
 
-        elt = getElementAt(event.pageX, event.pageY)
-        if elt?
-          if elt is last_element
-            container.appendChild placeholder
-          else if elt isnt hovered_element
-            hovered_element = elt
-            container.insertBefore placeholder, elt
+        if container.children.length is 0
+          container.appendChild placeholder
+
+        else
+          elt = getElementAt(container, event.pageX, event.pageY)
+          if elt?
+            if elt is last_element
+              container.appendChild placeholder
+            else if elt isnt hovered_element
+              hovered_element = elt
+              container.insertBefore placeholder, elt
 
         return false # prevent text selection while dragging
 
       release = (event) ->
         end_position = $(placeholder).index()
+        drop_container = placeholder.parentNode
+
+        container_changed = drop_container isnt container
+        position_changed = end_position isnt start_position
 
         # DOM: replace placeholder by element and remove its styles
-        $(dragging).removeClass 'dragging'
-        container.insertBefore dragging, placeholder
-        container.removeChild placeholder
+        $(dragging).removeClass('dragging')
+        # Put back the element only if the list hasn't been altered,
+        # otherwise the $apply will take care of re-inserting the element
+        # for us
+        unless container_changed or position_changed
+          drop_container.insertBefore(dragging, placeholder)
+
+        drop_container.removeChild(placeholder)
         dragging.style.left = placeholder.style.width = dragging.style.minWidth = ''
         dragging.style.top = placeholder.style.height = dragging.style.minHeight = ''
         dragging = null
@@ -135,8 +181,21 @@ angular.module 'shift.components.sortable', []
         window.removeEventListener 'mousemove', move
         window.removeEventListener 'mouseup', release
 
+        # if we moved the element to another sortable container
+        if container_changed
+          record = null
+          scope.$apply ->
+            record = scope.shiftSortable.splice(start_position, 1)[0]
+            scope.shiftSortableChange()
+
+          for sortable in sortables
+            if sortable.container is drop_container
+              sortable.scope.$apply ->
+                sortable.scope.shiftSortable.splice(end_position, 0, record)
+                sortable.scope.shiftSortableChange()
+
         # now that everything is back in place in the dom, trigger a digest
-        if end_position isnt start_position
+        else if position_changed
           # move the element in the provided list and trigger a digest cycle
           scope.$apply ->
             record = scope.shiftSortable.splice(start_position, 1)[0]

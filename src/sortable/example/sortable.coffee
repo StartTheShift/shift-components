@@ -13,5 +13,8 @@ angular.module('examples', ['shift.components'])
       'Mexico City'
     ]
 
+    $scope.items_visited = ['Paris', 'Los Angeles']
+    $scope.items_to_visit = []
+
     $scope.onItemOrderChange = (elements) ->
       console.log 'change', elements
