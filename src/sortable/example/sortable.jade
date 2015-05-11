@@ -38,7 +38,7 @@ div(ng-controller="SortableCtrl")
       shift-sortable-added = "onItemAdded(item)"
       shift-sortable-removed = "onItemRemoved(item)"
     )
-      .sortable-element(ng-repeat = "item in items track by $index") {{ item }}
+      .sortable-element(ng-repeat = "item in items") {{ item }}
 
   .panel.column
     h3 Visited
@@ -46,7 +46,7 @@ div(ng-controller="SortableCtrl")
       shift-sortable = "items_visited"
       shift-sortable-namespace = "item_bucket"
     )
-      .sortable-element(ng-repeat = "item in items_visited track by $index") {{ item }}
+      .sortable-element(ng-repeat = "item in items_visited") {{ item }}
 
   .panel.column
     h3 Planned
@@ -54,4 +54,4 @@ div(ng-controller="SortableCtrl")
       shift-sortable = "items_to_visit"
       shift-sortable-namespace = "item_bucket"
     )
-      .sortable-element(ng-repeat = "item in items_to_visit track by $index") {{ item }}
+      .sortable-element(ng-repeat = "item in items_to_visit") {{ item }}
