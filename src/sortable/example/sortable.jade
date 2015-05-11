@@ -7,8 +7,11 @@ div(ng-controller="SortableCtrl")
 
   h2 Scope
 
-  code.code
-    | $scope.items = {{items}}
+  pre
+    code.code
+      | $scope.items = {{items}}
+      | $scope.items_visited = {{items_visited}}
+      | $scope.items_to_visit = {{items_to_visit}}
 
   h2 Drag n Drop
 
@@ -27,3 +30,31 @@ div(ng-controller="SortableCtrl")
     span.sortable-element(ng-repeat = "item in items")
       i.fa.fa-align-justify
       |  {{ item }}
+
+  h2 Drag n Drop accross different list
+
+  .panel.column
+    h3 Cities
+    .sortable-container(
+      shift-sortable = "items"
+      shift-sortable-namespace = "item_bucket"
+      shift-sortable-add = "onItemAdded(item)"
+      shift-sortable-remove = "onItemRemoved(item)"
+    )
+      .sortable-element(ng-repeat = "item in items") {{ item }}
+
+  .panel.column
+    h3 Visited
+    .sortable-container(
+      shift-sortable = "items_visited"
+      shift-sortable-namespace = "item_bucket"
+    )
+      .sortable-element(ng-repeat = "item in items_visited") {{ item }}
+
+  .panel.column
+    h3 Planned
+    .sortable-container(
+      shift-sortable = "items_to_visit"
+      shift-sortable-namespace = "item_bucket"
+    )
+      .sortable-element(ng-repeat = "item in items_to_visit") {{ item }}

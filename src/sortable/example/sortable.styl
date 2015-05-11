@@ -1,7 +1,20 @@
 .sortable-container{
   position: relative;
   width: 400px;
+
 }
+
+.column{
+  width: 250px;
+  display: inline-block;
+  margin: 10px;
+  vertical-align: top;
+  .sortable-container{
+    width: auto;
+    min-height: 40px;
+  }
+}
+
 
 .sortable-element{
   background: #999;
@@ -26,3 +39,4 @@
   display: inline-block;
   vertical-align: middle;
 }
+
