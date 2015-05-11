@@ -68,18 +68,16 @@ angular.module 'shift.components.sortable', []
       placeholder.className = 'placeholder'
 
       # If this sortable list shares another namespace, this other
-      # list becomes also a pick and drop zone
+      # list becomes also a pick and drop container.
+      # We are using a service to store all the existing namespaces
+      # and their scope so a drag from one container to another
+      # can impact both scope content.
       if scope.shiftSortableNamespace
         sortables = shiftSortableService.register(
           scope.shiftSortableNamespace
           container
           scope
         )
-
-        # Deregister itself when destroyed
-        scope.$on '$destroy', ->
-          _.remove sortables, (sortable) ->
-            return sortable.scope is scope
 
       getElementAt = (container, x, y) ->
         last = container.children[container.children.length - 1]
@@ -199,7 +197,10 @@ angular.module 'shift.components.sortable', []
         window.removeEventListener 'mousemove', move
         window.removeEventListener 'mouseup', release
 
-        # if we moved the element to another sortable container
+        # if we moved the element to another sortable container we will then
+        # remove it from the origin scope, and trigger an $apply within that
+        # scope. Then we'll add it to the destination's scope and trigger
+        # a digest there.
         if container_changed
           record = null
           scope.$apply ->
@@ -214,7 +215,8 @@ angular.module 'shift.components.sortable', []
                 sortable.scope.shiftSortableChange()
                 sortable.scope.shiftSortableAdd({item:record})
 
-        # now that everything is back in place in the dom, trigger a digest
+        # Case where only a position change occur but not a change in
+        # container, a single local $apply is required.
         else if position_changed
           # move the element in the provided list and trigger a digest cycle
           scope.$apply ->
@@ -222,4 +224,14 @@ angular.module 'shift.components.sortable', []
             scope.shiftSortable.splice(end_position, 0, record)
             scope.shiftSortableChange()
 
+
       container.addEventListener 'mousedown', grab
+
+      scope.$on '$destroy', ->
+        # Prevent memory leakage
+        container.removeEventListener 'mousedown', grab
+
+        if sortables:
+          # Deregister itself when destroyed
+          _.remove sortables, (sortable) ->
+            return sortable.scope is scope
