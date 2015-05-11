@@ -7,8 +7,11 @@ div(ng-controller="SortableCtrl")
 
   h2 Scope
 
-  code.code
-    | $scope.items = {{items}}
+  pre
+    code.code
+      | $scope.items = {{items}}
+      | $scope.items_visited = {{items_visited}}
+      | $scope.items_to_visit = {{items_to_visit}}
 
   h2 Drag n Drop
 
@@ -35,8 +38,8 @@ div(ng-controller="SortableCtrl")
     .sortable-container(
       shift-sortable = "items"
       shift-sortable-namespace = "item_bucket"
-      shift-sortable-added = "onItemAdded(item)"
-      shift-sortable-removed = "onItemRemoved(item)"
+      shift-sortable-add = "onItemAdded(item)"
+      shift-sortable-remove = "onItemRemoved(item)"
     )
       .sortable-element(ng-repeat = "item in items") {{ item }}
 

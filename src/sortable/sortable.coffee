@@ -8,10 +8,10 @@ Sortable directive to allow drag n' drop sorting of an array.
 
 @param {array} shiftSortable Array of sortable object
 @param {function} shiftSortableChange Called when order is changed
-@param {function} shiftSortableAdded Called when an item gets added with
-the added item as argument
-@param {function} shiftSortableRemoved Called when an item gets removed with
-the removed item as argument
+@param {function} shiftSortableAdd Called when an item gets added with
+the added item as argument (`item` keyword is mandatory)
+@param {function} shiftSortableRemove Called when an item gets removed with
+the removed item as argument (`item` keyword is mandatory)
 @param {string} shiftSortableHandle CSS selector to grab the element (optional)
 @param {string} shiftSortableNamespace Namespace for to define multiple possible
 source and destinations.
@@ -28,7 +28,8 @@ ul(
 
 ul(
   shift-sortable = "list_of_object_excluded"
-  shift-sortable-change = "onListOrderChange(list_of_object_excluded)"
+  shift-sortable-add = "onListAdd(item)"
+  shift-sortable-remove = "onListRemove(item)"
   shift-sortable-handle = ".grab-icon"
   shift-sortable-namespace = "bucket_list"
 )
@@ -52,8 +53,8 @@ angular.module 'shift.components.sortable', []
     scope:
       shiftSortable: '='
       shiftSortableChange: '&'
-      shiftSortableAdded: '&'
-      shiftSortableRemoved: '&'
+      shiftSortableAdd: '&'
+      shiftSortableRemove: '&'
       shiftSortableHandle: '@'
       shiftSortableNamespace: '@'
     link: (scope, element, attrs) ->
@@ -204,14 +205,14 @@ angular.module 'shift.components.sortable', []
           scope.$apply ->
             record = scope.shiftSortable.splice(start_position, 1)[0]
             scope.shiftSortableChange()
-            scope.shiftSortableRemoved({item:record})
+            scope.shiftSortableRemove({item:record})
 
           for sortable in sortables
             if sortable.container is drop_container
               sortable.scope.$apply ->
                 sortable.scope.shiftSortable.splice(end_position, 0, record)
                 sortable.scope.shiftSortableChange()
-                sortable.scope.shiftSortableAdded({item:record})
+                sortable.scope.shiftSortableAdd({item:record})
 
         # now that everything is back in place in the dom, trigger a digest
         else if position_changed
