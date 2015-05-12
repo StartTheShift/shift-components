@@ -309,7 +309,13 @@ Sortable directive to allow drag n' drop sorting of an array.
 
 @param {array} shiftSortable Array of sortable object
 @param {function} shiftSortableChange Called when order is changed
+@param {function} shiftSortableAdd Called when an item gets added with
+the added item as argument (`item` keyword is mandatory)
+@param {function} shiftSortableRemove Called when an item gets removed with
+the removed item as argument (`item` keyword is mandatory)
 @param {string} shiftSortableHandle CSS selector to grab the element (optional)
+@param {string} shiftSortableNamespace Namespace for to define multiple possible
+source and destinations.
 
 @example
 ```jade
@@ -317,22 +323,50 @@ ul(
   shift-sortable = "list_of_object"
   shift-sortable-change = "onListOrderChange(list_of_object)"
   shift-sortable-handle = ".grab-icon"
+  shift-sortable-namespace = "bucket_list"
 )
   li(ng-repeat = "element in list_of_object") {{ element.name }}
+
+ul(
+  shift-sortable = "list_of_object_excluded"
+  shift-sortable-add = "onListAdd(item)"
+  shift-sortable-remove = "onListRemove(item)"
+  shift-sortable-handle = ".grab-icon"
+  shift-sortable-namespace = "bucket_list"
+)
+  li(ng-repeat = "element in list_of_object_excluded") {{ element.name }}
 ```
  */
 var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
 
-angular.module('shift.components.sortable', []).directive('shiftSortable', function() {
+angular.module('shift.components.sortable', []).service('shiftSortableService', function() {
+  var namespaces;
+  namespaces = {};
+  return {
+    register: function(namespace, container, scope) {
+      if (namespaces[namespace] == null) {
+        namespaces[namespace] = [];
+      }
+      namespaces[namespace].push({
+        container: container,
+        scope: scope
+      });
+      return namespaces[namespace];
+    }
+  };
+}).directive('shiftSortable', ['shiftSortableService', function(shiftSortableService) {
   return {
     restrict: 'A',
     scope: {
       shiftSortable: '=',
       shiftSortableChange: '&',
-      shiftSortableHandle: '@'
+      shiftSortableAdd: '&',
+      shiftSortableRemove: '&',
+      shiftSortableHandle: '@',
+      shiftSortableNamespace: '@'
     },
     link: function(scope, element, attrs) {
-      var container, dragging, getElementAt, grab, hovered_element, isBefore, isInside, last_element, move, placeholder, release, start_position;
+      var container, dragging, getElementAt, grab, hovered_element, isBefore, isInside, last_element, move, movePlaceholder, placeholder, release, sortables, start_position;
       container = element[0];
       dragging = null;
       start_position = null;
@@ -340,7 +374,10 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
       last_element = {};
       placeholder = document.createElement('div');
       placeholder.className = 'placeholder';
-      getElementAt = function(x, y) {
+      if (scope.shiftSortableNamespace) {
+        sortables = shiftSortableService.register(scope.shiftSortableNamespace, container, scope);
+      }
+      getElementAt = function(container, x, y) {
         var coord, i, index, last, len, ref;
         last = container.children[container.children.length - 1];
         ref = container.children;
@@ -373,16 +410,16 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
       };
       grab = function(event) {
         var target;
-        event.preventDefault();
         target = event.target;
         if (scope.shiftSortableHandle != null) {
           if (!target.matches(scope.shiftSortableHandle)) {
             return;
           }
-          while (target.parentElement !== container) {
-            target = target.parentElement;
+          while (target.parentNode !== container) {
+            target = target.parentNode;
           }
         }
+        event.preventDefault();
         if (indexOf.call(container.children, target) >= 0) {
           dragging = target;
           start_position = $(dragging).index();
@@ -400,48 +437,102 @@ angular.module('shift.components.sortable', []).directive('shiftSortable', funct
         return false;
       };
       move = function(event) {
-        var elt;
+        var i, len, results, sortable;
         event.preventDefault();
         dragging.style.left = (event.pageX - 10) + "px";
         dragging.style.top = (event.pageY - 10) + "px";
+        if (scope.shiftSortableNamespace) {
+          results = [];
+          for (i = 0, len = sortables.length; i < len; i++) {
+            sortable = sortables[i];
+            results.push(movePlaceholder(sortable.container, event));
+          }
+          return results;
+        } else {
+          return movePlaceholder(container, event);
+        }
+      };
+      movePlaceholder = function(container, event) {
+        var elt;
         if (!isInside(event.pageX, event.pageY, container.getBoundingClientRect())) {
           return false;
         }
-        elt = getElementAt(event.pageX, event.pageY);
-        if (elt != null) {
-          if (elt === last_element) {
-            container.appendChild(placeholder);
-          } else if (elt !== hovered_element) {
-            hovered_element = elt;
-            container.insertBefore(placeholder, elt);
+        if (container.children.length === 0) {
+          container.appendChild(placeholder);
+        } else {
+          elt = getElementAt(container, event.pageX, event.pageY);
+          if (elt != null) {
+            if (elt === last_element) {
+              container.appendChild(placeholder);
+            } else if (elt !== hovered_element) {
+              hovered_element = elt;
+              container.insertBefore(placeholder, elt);
+            }
           }
         }
         return false;
       };
       release = function(event) {
-        var end_position;
+        var container_changed, drop_container, end_position, i, len, position_changed, record, results, sortable;
         end_position = $(placeholder).index();
+        drop_container = placeholder.parentNode;
+        container_changed = drop_container !== container;
+        position_changed = end_position !== start_position;
         $(dragging).removeClass('dragging');
-        container.insertBefore(dragging, placeholder);
-        container.removeChild(placeholder);
+        if (!(container_changed || position_changed)) {
+          drop_container.insertBefore(dragging, placeholder);
+        }
+        drop_container.removeChild(placeholder);
         dragging.style.left = placeholder.style.width = dragging.style.minWidth = '';
         dragging.style.top = placeholder.style.height = dragging.style.minHeight = '';
         dragging = null;
         window.removeEventListener('mousemove', move);
         window.removeEventListener('mouseup', release);
-        if (end_position !== start_position) {
+        if (container_changed) {
+          record = null;
+          scope.$apply(function() {
+            record = scope.shiftSortable.splice(start_position, 1)[0];
+            scope.shiftSortableChange();
+            return scope.shiftSortableRemove({
+              item: record
+            });
+          });
+          results = [];
+          for (i = 0, len = sortables.length; i < len; i++) {
+            sortable = sortables[i];
+            if (sortable.container === drop_container) {
+              results.push(sortable.scope.$apply(function() {
+                sortable.scope.shiftSortable.splice(end_position, 0, record);
+                sortable.scope.shiftSortableChange();
+                return sortable.scope.shiftSortableAdd({
+                  item: record
+                });
+              }));
+            } else {
+              results.push(void 0);
+            }
+          }
+          return results;
+        } else if (position_changed) {
           return scope.$apply(function() {
-            var record;
             record = scope.shiftSortable.splice(start_position, 1)[0];
             scope.shiftSortable.splice(end_position, 0, record);
             return scope.shiftSortableChange();
           });
         }
       };
-      return container.addEventListener('mousedown', grab);
+      container.addEventListener('mousedown', grab);
+      return scope.$on('$destroy', function() {
+        container.removeEventListener('mousedown', grab);
+        if (sortables) {
+          return _.remove(sortables, function(sortable) {
+            return sortable.scope === scope;
+          });
+        }
+      });
     }
   };
-});
+}]);
 
 
 /**

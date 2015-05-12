@@ -125,6 +125,7 @@ gulp.task 'check_master', (cb) ->
     unless /## master/.test stdout
       console.log  'Error: you must be on "master" branch to bump the library.'
       process.exit 1 # Exit node with failure code
+    cb()
 
 
 ###
@@ -133,7 +134,7 @@ Bump library minor revision
 gulp.task 'bump', ['check_master', 'build'], ->
   gulp.src(['./bower.json', './package.json'])
     .pipe(bump({type:'minor'}))
-    .pipe(gulp.dest('./'));
+    .pipe(gulp.dest('./'))
 
 
 ###
@@ -142,7 +143,7 @@ Bump Patch library minor revision
 gulp.task 'patch', ['check_master', 'build'], ->
   gulp.src(['./bower.json', './package.json'])
     .pipe(bump({type:'patch'}))
-    .pipe(gulp.dest('./'));
+    .pipe(gulp.dest('./'))
 
 
 ###
