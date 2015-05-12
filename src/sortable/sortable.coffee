@@ -37,15 +37,12 @@ ul(
 ```
 ###
 angular.module 'shift.components.sortable', []
-  .factory 'shiftSortableService', ->
+  .service 'shiftSortableService', ->
     namespaces = {}
 
     register: (namespace, container, scope) ->
-      if namespace not of namespaces
-        namespaces[namespace] = [{container, scope}]
-      else
-        namespaces[namespace].push {container, scope}
-
+      namespaces[namespace] ?= []
+      namespaces[namespace].push {container, scope}
       return namespaces[namespace]
 
   .directive 'shiftSortable', (shiftSortableService) ->
@@ -113,7 +110,6 @@ angular.module 'shift.components.sortable', []
         return x > rectange.left and x < rectange.right and y > rectange.top and y < rectange.bottom
 
       grab = (event) ->
-        event.preventDefault() # prevent text selection while dragging
         target = event.target
 
         if scope.shiftSortableHandle?
@@ -121,6 +117,7 @@ angular.module 'shift.components.sortable', []
           while target.parentNode isnt container
             target = target.parentNode
 
+        event.preventDefault() # prevent text selection while dragging
         if target in container.children
           dragging = target
           start_position = $(dragging).index()
