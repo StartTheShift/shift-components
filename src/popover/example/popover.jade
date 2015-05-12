@@ -1,0 +1,50 @@
+div(ng-controller="PopoverCtrl")
+  h1 Shift Popover
+  p
+    | A directive to display a popover on custom event
+
+  h2 On text popover
+
+  p
+    | Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    span Maecenas venenatis
+    | sodales dolor. Pellentesque luctus id tortor malesuada mattis. Ut at
+    | efficitur magna. Fusce viverra porta erat, a volutpat
+
+    .highlight-word
+      |  nisi eleifend in
+
+      shift-popover(
+        on="mouseenter"
+        off="mouseleave"
+        off-delay="200"
+      )
+        div This is the definition of that word blah
+          | xxxx
+          button.button xxx
+
+    |  In velit lorem, semper vitae elit id, viverra elementum felis. Morbi
+    | ullamcorper quam vitae metus posuere elementum. Sed ac vehicula magna.
+    | Pellentesque laoreet nulla eu nibh dapibus, id ornare metus porta. Integer
+    | sed metus at risus accumsan posuere.
+
+    .highlight-word
+      |  Nullam dignissim consequat nisl
+
+      shift-popover(on="mouseenter")
+        div blah blah blah
+
+    | at pulvinar. Nullam rhoncus metus a turpis
+
+    .highlight-word
+      |  malesuada condimentum. Aliquam
+
+      shift-popover(on="click")
+        div It can work on click
+
+    | rutrum neque nisi, at eleifend metus consequat at. Nunc sit amet sagittis
+    | felis.
+
+    div.button Ok !
+      shift-popover(on="mouseenter")
+        div popover in a button
