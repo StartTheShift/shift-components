@@ -104,6 +104,7 @@ angular.module 'shift.components.typeahead', [
             filter = {}
             filter[scope.filterAttribute] = scope.query
             scope.options = $filter('filter')(scope.source, filter)[0..5]
+            scope.show_select_menu = true
 
           # No option displayed if not query entered
           else
