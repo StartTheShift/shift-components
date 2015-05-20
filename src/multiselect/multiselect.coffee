@@ -83,6 +83,4 @@ angular.module 'shift.components.multiselect', []
             option = _.find scope.options, {value: selected_option.value}
             scope.selection_state_hash[selected_option.value] = true
 
-        , true
-
         return
