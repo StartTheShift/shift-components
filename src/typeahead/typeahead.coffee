@@ -52,7 +52,6 @@ shift-typeahead(
 ```
 ###
 angular.module 'shift.components.typeahead', [
-  'shift.components.multiselect'
   'shift.components.selector'
 ]
   .directive 'shiftTypeahead',
