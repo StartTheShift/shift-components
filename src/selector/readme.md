@@ -20,7 +20,7 @@ options is emtpy.
     selected = "selected"
     on-select = "onSelect(selected)"
     on-discard = "onDiscard(discarded)"
-    multiple = "true"
+    multiselect = "true"
   )
     strong {{option.city}}
     span &nbsp; {{option.state}}
