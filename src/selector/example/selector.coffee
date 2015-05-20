@@ -6,6 +6,7 @@ angular.module('examples', ['shift.components'])
       $filter
     ) ->
       $scope.state = ''
+      $scope.options = []
 
       $scope.states = [
         ['All states', '']
@@ -31,6 +32,9 @@ angular.module('examples', ['shift.components'])
       $scope.toggleSelect = (state) ->
         $scope.show_select = state
 
+      $scope.toggleSelectMultiple = (state) ->
+        $scope.show_select_multiple = state
+
       do filterOptions = ->
         if $scope.state
           $scope.options = $filter('filter')($scope.sources, {state: $scope.state})
@@ -44,9 +48,11 @@ angular.module('examples', ['shift.components'])
       window.addEventListener 'mouseup', ->
         $scope.$apply ->
           $scope.show_select = false;
+          $scope.show_select_multiple = false;
 
       window.addEventListener 'keyup', (event) ->
         if event.which is 27 # ESC key
-          console.log event.which
+
           $scope.$apply ->
             $scope.show_select = false;
+            $scope.show_select_multiple = false;
