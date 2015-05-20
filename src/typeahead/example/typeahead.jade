@@ -7,7 +7,7 @@ div(ng-controller="ExampleCtrl")
   shift-typeahead.typeahead-container(
     source = "sources"
     filter-attribute = "city"
-    selected = "selected"
+    selected = "selected_state"
   )
     strong {{option.city}}
     span &nbsp; {{option.state}}
@@ -19,4 +19,23 @@ div(ng-controller="ExampleCtrl")
   pre
     code.code
       | $scope.sources.length = {{sources.length}}
-      | $scope.selected = {{selected}}
+      | $scope.selected = {{selected_state}}
+
+
+  h1 Shift Typeahead with Multiselect
+
+  shift-typeahead.typeahead-container(
+    source = "sources"
+    filter-attribute = "city"
+    show-options-on-focus = "true"
+    close-menu-on-esc = "true"
+    selected = "selected_states"
+    multiselect
+  )
+    label(for="shift_multiselect_option_{{$index}}") {{option.city}}
+
+  h2 Scope
+
+  pre
+    code.code
+      | $scope.selected = {{selected_states}}
