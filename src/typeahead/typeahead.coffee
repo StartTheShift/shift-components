@@ -123,7 +123,10 @@ angular.module 'shift.components.typeahead', [
 
           # List all options when input is focused
           if scope.show_options_on_focus
-            scope.options = scope.source
+            if scope.query
+              filterOptions()
+            else
+              scope.options = scope.source
 
         scope.onSelect = (selected) ->
           scope.selected = selected
