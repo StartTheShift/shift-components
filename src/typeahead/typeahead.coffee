@@ -35,7 +35,10 @@ shift-typeahead(
     i pop. {{option.population}}
 ```
 ###
-angular.module 'shift.components.typeahead', ['shift.components.select']
+angular.module 'shift.components.typeahead', [
+  'shift.components.multiselect'
+  'shift.components.select'
+]
   .directive 'shiftTypeahead',
     (
       $compile
