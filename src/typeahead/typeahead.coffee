@@ -135,3 +135,20 @@ angular.module 'shift.components.typeahead', [
             scope.selected = null if scope.query isnt scope.selected?[scope.filterAttribute]
 
           filterOptions()
+
+        onKeyUp = (event) ->
+          key = event.which or event.keyCode
+
+          return unless scope.close_menu_on_esc
+
+          if key is 27 # ESC key
+            scope.show_select_menu = false
+            scope.$digest()
+
+        do startListening = ->
+          document.addEventListener 'keyup', onKeyUp
+
+        stopListening = ->
+          document.removeEventListener 'keyup', onKeyUp
+
+        scope.$on '$destroy', stopListening
