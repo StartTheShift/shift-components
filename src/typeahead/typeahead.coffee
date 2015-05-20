@@ -25,6 +25,7 @@ through `{{ option.population }}`
 @param {function} onOptionDeselect Invoked when a multiselect option is deselected
 @param {string} placeholder Placeholder text for the input
 @param {bool} show_options_on_focus Open the select menu on focus
+@param {bool} show_selectmenu
 @param {bool} close_menu_on_esc Enable closing the menu with the escape key
 @param {string} multiselect An *attribute* to toggle shift-multiselect support
 
@@ -71,9 +72,12 @@ angular.module 'shift.components.typeahead', [
         onOptionDeselect: '&'
         placeholder: '@'
         show_options_on_focus: '=showOptionsOnFocus'
+        show_select_menu: '=?showSelectMenu'
         close_menu_on_esc: '=closeMenuOnEsc'
 
       link: (scope, element, attrs, ctrl, transclude) ->
+        scope.show_select_menu ?= false
+
         scope.onSelectMultiOption = (option) ->
           scope.onOptionSelect?({option})
 
@@ -160,8 +164,8 @@ angular.module 'shift.components.typeahead', [
           return unless scope.close_menu_on_esc
 
           if key is 27 # ESC key
-            scope.show_select_menu = false
-            scope.$digest()
+            scope.$apply ->
+              scope.show_select_menu = false
 
         do startListening = ->
           document.addEventListener 'keyup', onKeyUp
