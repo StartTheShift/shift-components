@@ -18,7 +18,7 @@ options is emtpy.
     selected = "selected"
     on-select = "onSelect(selected)"
     on-discard = "onDiscard(discarded)"
-    multiple = "true"
+    multiselect = "true"
   )
     strong {{option.city}}
     span &nbsp; {{option.state}}
@@ -44,7 +44,7 @@ angular.module 'shift.components.selector', []
         selected: '=?'
         onSelect: '&'
         onDiscard: '&'
-        multiple: '='
+        multiselect: '='
 
       link: (scope, element, attrs, ctrl, transclude) ->
         # Build the select container
@@ -74,8 +74,8 @@ angular.module 'shift.components.selector', []
 
         scope.position = -1
 
-        # default to an array as null value if selector allows multiple
-        if scope.multiple
+        # default to an array as null value if selector allows multiselect
+        if scope.multiselect
           scope.selected ?= []
 
         onKeyDown = (event) ->
@@ -121,7 +121,7 @@ angular.module 'shift.components.selector', []
             container_elt.scrollTop += option_pos.top - container_pos.top - margin
 
         isSelected = (option) ->
-          if scope.multiple
+          if scope.multiselect
             return option in scope.selected
 
           return option is scope.selected
@@ -142,7 +142,7 @@ angular.module 'shift.components.selector', []
           scope.position = index
           selected = scope.options[scope.position]
 
-          if scope.multiple
+          if scope.multiselect
             scope.selected.push selected
           else
             scope.selected = selected
@@ -153,7 +153,7 @@ angular.module 'shift.components.selector', []
           scope.position = index
           discarded = scope.options[scope.position]
 
-          if scope.multiple
+          if scope.multiselect
             _.pull scope.selected, discarded
           else
             scope.selected = null
