@@ -32,7 +32,9 @@ div(ng-controller="ExampleCtrl")
     selected = "selected_states"
     multiselect
   )
-    label(for="shift_multiselect_option_{{$index}}") {{option.city}}
+    div
+      span.checkbox x
+      span(for="shift_multiselect_option_{{$index}}") {{option.city}}
 
   h2 Scope
 

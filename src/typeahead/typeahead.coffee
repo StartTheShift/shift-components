@@ -85,15 +85,16 @@ angular.module 'shift.components.typeahead', [
           scope.onOptionDeselect?({option})
 
         if attrs.multiselect?
-          select_menu = angular.element document.createElement 'shift-multiselect'
+          select_menu = angular.element document.createElement 'shift-selector'
           select_menu.attr
             'ng-show': 'show_select_menu'
             'options': 'options'
             'selected': 'selected'
-            'on-select': "onSelectMultiOption(option)"
-            'on-deselect': 'onDeselectMultiOption(option)'
+            'on-select': 'onSelectMultiOption(selected)'
+            'on-discard': 'onDeselectMultiOption(discarded)'
             'ng-mousedown': 'mouseDown(true)'
             'ng-mouseup': 'mouseDown(false)'
+            'multiselect': 'true'
 
         else
           select_menu = angular.element document.createElement 'shift-selector'
