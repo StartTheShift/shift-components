@@ -52,16 +52,31 @@ angular.module 'shift.components.typeahead', [
         source: '='
         filterAttribute: '@'
         selected: '='
+        onOptionSelect: '&'
+        onOptionDeselect: '&'
+        placeholder: '@'
+        show_options_on_focus: '=showOptionsOnFocus'
+        close_menu_on_esc: '=closeMenuOnEsc'
 
       link: (scope, element, attrs, ctrl, transclude) ->
-        shift_select = angular.element document.createElement 'shift-select'
-        shift_select.attr
-          'ng-show': 'show_select_menu && !selected'
-          'options': 'options'
-          'selected': 'selected'
-          'on-select': 'onSelect(selected)'
-          'ng-mousedown': 'mouseDown(true)'
-          'ng-mouseup': 'mouseDown(false)'
+        if attrs.multiselect?
+          select_menu = angular.element document.createElement 'shift-multiselect'
+          select_menu.attr
+            'ng-show': 'show_select_menu'
+            'options': 'options'
+            'selected': 'selected'
+            'ng-mousedown': 'mouseDown(true)'
+            'ng-mouseup': 'mouseDown(false)'
+
+        else
+          select_menu = angular.element document.createElement 'shift-select'
+          select_menu.attr
+            'ng-show': 'show_select_menu && !selected'
+            'options': 'options'
+            'selected': 'selected'
+            'on-select': 'onSelect(selected)'
+            'ng-mousedown': 'mouseDown(true)'
+            'ng-mouseup': 'mouseDown(false)'
 
         # Create a new scope to transclude + compile the template with (we don't
         # want the child directives directly modifying the scope of shiftTypeahead)
@@ -69,12 +84,11 @@ angular.module 'shift.components.typeahead', [
 
         # Attach the transcluded template to shift-select
         transclude shift_select_scope, (clone) ->
-          shift_select.append clone
+          select_menu.append clone
 
         # Finally, add shift-select to the shiftTypeahead element
-        element.append shift_select
-
-        $compile(shift_select) shift_select_scope
+        element.append select_menu
+        $compile(select_menu) shift_select_scope
 
         filterOptions = ->
           if scope.query
