@@ -130,5 +130,8 @@ angular.module 'shift.components.typeahead', [
 
         scope.$watch 'query', (new_value, old_value) ->
           return if new_value is old_value
-          scope.selected = null if scope.query isnt scope.selected?[scope.filterAttribute]
+
+          unless attrs.multiselect?
+            scope.selected = null if scope.query isnt scope.selected?[scope.filterAttribute]
+
           filterOptions()
