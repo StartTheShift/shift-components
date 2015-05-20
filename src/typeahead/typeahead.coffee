@@ -21,6 +21,12 @@ through `{{ option.population }}`
 @param {array} sources Source of options to be filtered by the input
 @param {string} filterAttribute Name of the attribute for the filter
 @param {object} selected Object selected within the source
+@param {function} onOptionSelect Invoked when a multiselect option is selected
+@param {function} onOptionDeselect Invoked when a multiselect option is deselected
+@param {string} placeholder Placeholder text for the input
+@param {bool} show_options_on_focus Open the select menu on focus
+@param {bool} close_menu_on_esc Enable closing the menu with the escape key
+@param {string} multiselect An *attribute* to toggle shift-multiselect support
 
 @example
 ```jade
@@ -33,6 +39,15 @@ shift-typeahead(
   span &nbsp; {{option.state}}
   div
     i pop. {{option.population}}
+
+//- with multiselect enabled:
+shift-typeahead(
+  sources = "list_of_object"
+  filterAttribute = "city"
+  selected = "selected_cities"
+  multiselect
+)
+  label(for="shift_multiselect_option_{{$index}}") {{option.city}}
 ```
 ###
 angular.module 'shift.components.typeahead', [
@@ -64,7 +79,6 @@ angular.module 'shift.components.typeahead', [
 
         scope.onDeselectMultiOption = (option) ->
           scope.onOptionDeselect?({option})
-
 
         if attrs.multiselect?
           select_menu = angular.element document.createElement 'shift-multiselect'
@@ -121,7 +135,7 @@ angular.module 'shift.components.typeahead', [
         scope.onFocus = ($event) ->
           scope.show_select_menu = true
 
-          # List all options when input is focused
+          # List options when input has focused
           if scope.show_options_on_focus
             if scope.query
               filterOptions()
