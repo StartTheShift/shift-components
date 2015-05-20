@@ -1,7 +1,6 @@
 angular.module 'shift.components.multiselect', []
   .directive 'shiftMultiselect',
     (
-      $rootScope
       $compile
     ) ->
       restrict: 'E'
