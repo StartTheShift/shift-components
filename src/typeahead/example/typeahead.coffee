@@ -24,8 +24,3 @@ angular.module('examples', ['shift.components'])
         {state: 'ny', city: 'Syracuse', population: 145151, value: 'syracuse'}
         {state: 'ny', city: 'Albany', population: 97660, value: 'albany'}
       ]
-
-      $scope.getClass = (option) ->
-        return {
-          checked: option in $scope.selected_states
-        }
