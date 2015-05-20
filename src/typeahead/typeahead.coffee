@@ -16,7 +16,7 @@ through `{{ option.population }}`
 
 @module shift.components.typeahead
 
-@requires shift.components.select
+@requires shift.components.selector
 
 @param {array} sources Source of options to be filtered by the input
 @param {string} filterAttribute Name of the attribute for the filter
@@ -53,7 +53,7 @@ shift-typeahead(
 ###
 angular.module 'shift.components.typeahead', [
   'shift.components.multiselect'
-  'shift.components.select'
+  'shift.components.selector'
 ]
   .directive 'shiftTypeahead',
     (
@@ -96,7 +96,7 @@ angular.module 'shift.components.typeahead', [
             'ng-mouseup': 'mouseDown(false)'
 
         else
-          select_menu = angular.element document.createElement 'shift-select'
+          select_menu = angular.element document.createElement 'shift-selector'
           select_menu.attr
             'ng-show': 'show_select_menu && !selected'
             'options': 'options'

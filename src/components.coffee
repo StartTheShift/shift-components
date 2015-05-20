@@ -17,7 +17,7 @@ UI components for SHIFT applications
 angular.module 'shift.components', [
   'shift.components.sortable'
   'shift.components.calendar'
-  'shift.components.select'
-  'shift.components.multiselect'
+  'shift.components.selector'
+  #'shift.components.multiselect'
   'shift.components.typeahead'
 ]

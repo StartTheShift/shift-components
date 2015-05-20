@@ -1,5 +1,5 @@
-<a name="shift.components.module_select"></a>
-## select
+<a name="shift.components.module_selector"></a>
+## selector
 A directive that displays a list of option, navigation using arrow
 keys + enter or mouse click.
 
@@ -15,10 +15,12 @@ options is emtpy.
 
 **Example**  
 ```jade
-  shift-select(
+  shift-selector(
     options = "options"
     selected = "selected"
     on-select = "onSelect(selected)"
+    on-discard = "onDiscard(discarded)"
+    multiple = "true"
   )
     strong {{option.city}}
     span &nbsp; {{option.state}}
