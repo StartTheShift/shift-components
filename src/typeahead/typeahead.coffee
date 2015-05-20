@@ -117,6 +117,13 @@ angular.module 'shift.components.typeahead', [
           if not mouse_down
             scope.show_select_menu = false
 
+        scope.onFocus = ($event) ->
+          scope.show_select_menu = true
+
+          # List all options when input is focused
+          if scope.show_options_on_focus
+            scope.options = scope.source
+
         scope.onSelect = (selected) ->
           scope.selected = selected
           scope.query = selected?[scope.filterAttribute]
