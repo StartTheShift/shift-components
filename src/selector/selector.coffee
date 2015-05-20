@@ -10,6 +10,9 @@ options is emtpy.
 @param {array} options Options to be displayed and to choose from
 @param {object} selected Object selected from the options
 @param {function} onSelect Callback triggered when an option has been selected
+@param {function} onDiscard Callback triggered when an option has de-selected
+@param {boolean} multiple Indicates if the selection allows selection of more
+than one option
 
 @example
 ```jade
@@ -18,7 +21,7 @@ options is emtpy.
     selected = "selected"
     on-select = "onSelect(selected)"
     on-discard = "onDiscard(discarded)"
-    multiple = "true"
+    multiple
   )
     strong {{option.city}}
     span &nbsp; {{option.state}}
@@ -44,7 +47,6 @@ angular.module 'shift.components.selector', []
         selected: '=?'
         onSelect: '&'
         onDiscard: '&'
-        multiple: '='
 
       link: (scope, element, attrs, ctrl, transclude) ->
         # Build the select container
@@ -74,8 +76,8 @@ angular.module 'shift.components.selector', []
 
         scope.position = -1
 
-        # default to an array as null value if selector allows multiple
-        if scope.multiple
+        # default to an array as no value if selector allows multiple
+        if attrs.multiple?
           scope.selected ?= []
 
         onKeyDown = (event) ->
@@ -121,7 +123,7 @@ angular.module 'shift.components.selector', []
             container_elt.scrollTop += option_pos.top - container_pos.top - margin
 
         isSelected = (option) ->
-          if scope.multiple
+          if attrs.multiple?
             return option in scope.selected
 
           return option is scope.selected
@@ -142,7 +144,7 @@ angular.module 'shift.components.selector', []
           scope.position = index
           selected = scope.options[scope.position]
 
-          if scope.multiple
+          if attrs.multiple?
             scope.selected.push selected
           else
             scope.selected = selected
@@ -153,7 +155,7 @@ angular.module 'shift.components.selector', []
           scope.position = index
           discarded = scope.options[scope.position]
 
-          if scope.multiple
+          if attrs.multiple?
             _.pull scope.selected, discarded
           else
             scope.selected = null
@@ -171,7 +173,7 @@ angular.module 'shift.components.selector', []
 
         scope.getClass = (index) ->
           return {
-            'selected': isSelected(scope.options[index])
+            'selected': isSelected(scope.options?[index])
             'active': index is scope.position
           }
 

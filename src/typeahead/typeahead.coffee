@@ -79,31 +79,26 @@ angular.module 'shift.components.typeahead', [
         scope.show_select_menu ?= false
 
         scope.onSelectMultiOption = (option) ->
-          scope.onOptionSelect?({option})
+          scope.onOptionSelect({option})
 
         scope.onDeselectMultiOption = (option) ->
-          scope.onOptionDeselect?({option})
+          scope.onOptionDeselect({option})
+
+        select_menu = angular.element document.createElement 'shift-selector'
+        select_menu.attr
+          'ng-show': 'show_select_menu && !selected'
+          'options': 'options'
+          'selected': 'selected'
+          'on-select': 'onSelect(selected)'
+          'ng-mousedown': 'mouseDown(true)'
+          'ng-mouseup': 'mouseDown(false)'
 
         if attrs.multiselect?
-          select_menu = angular.element document.createElement 'shift-multiselect'
           select_menu.attr
+            'multiple': 'true'
+            'on-select': 'onSelectMultiOption(selected)'
+            'on-discard': 'onDeselectMultiOption(discarded)'
             'ng-show': 'show_select_menu'
-            'options': 'options'
-            'selected': 'selected'
-            'on-select': "onSelectMultiOption(option)"
-            'on-deselect': 'onDeselectMultiOption(option)'
-            'ng-mousedown': 'mouseDown(true)'
-            'ng-mouseup': 'mouseDown(false)'
-
-        else
-          select_menu = angular.element document.createElement 'shift-selector'
-          select_menu.attr
-            'ng-show': 'show_select_menu && !selected'
-            'options': 'options'
-            'selected': 'selected'
-            'on-select': 'onSelect(selected)'
-            'ng-mousedown': 'mouseDown(true)'
-            'ng-mouseup': 'mouseDown(false)'
 
         # Create a new scope to transclude + compile the template with (we don't
         # want the child directives directly modifying the scope of shiftTypeahead)

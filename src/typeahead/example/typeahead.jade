@@ -32,10 +32,15 @@ div(ng-controller="ExampleCtrl")
     selected = "selected_states"
     multiselect
   )
-    label(for="shift_multiselect_option_{{$index}}") {{option.city}}
+    input(
+      type = "checkbox"
+      ng-checked = "selected.indexOf(option) > -1"
+      value = "1"
+    )
+    | &nbsp; {{option.city}}
 
   h2 Scope
 
   pre
     code.code
-      | $scope.selected = {{selected_states}}
+      | $scope.selected_states = {{selected_states}}
