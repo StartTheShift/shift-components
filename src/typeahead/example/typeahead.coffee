@@ -7,6 +7,9 @@ angular.module('examples', ['shift.components'])
       $scope.state = ''
       $scope.states = ['', 'ca', 'ny']
 
+      $scope.selected_state = null
+      $scope.selected_states = []
+
       $scope.sources = [
         {state: 'ca', city: 'Los Angeles', population: 3884307}
         {state: 'ca', city: 'San Diego', population: 1355896}
