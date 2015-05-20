@@ -39,7 +39,7 @@ angular.module 'shift.components.select', []
 
       scope:
         options: '='
-        selected: '='
+        selected: '=?'
         onSelect: '&'
 
       link: (scope, element, attrs, ctrl, transclude) ->
@@ -115,7 +115,6 @@ angular.module 'shift.components.select', []
         scope.select = (index) ->
           scope.position = index
           scope.selected = scope.options[scope.position]
-
           scope.onSelect {selected: scope.selected}
 
         scope.setPosition = ($index) ->
