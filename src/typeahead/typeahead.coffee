@@ -59,12 +59,21 @@ angular.module 'shift.components.typeahead', [
         close_menu_on_esc: '=closeMenuOnEsc'
 
       link: (scope, element, attrs, ctrl, transclude) ->
+        scope.onSelectMultiOption = (option) ->
+          scope.onOptionSelect?({option})
+
+        scope.onDeselectMultiOption = (option) ->
+          scope.onOptionDeselect?({option})
+
+
         if attrs.multiselect?
           select_menu = angular.element document.createElement 'shift-multiselect'
           select_menu.attr
             'ng-show': 'show_select_menu'
             'options': 'options'
             'selected': 'selected'
+            'on-select': "onSelectMultiOption(option)"
+            'on-deselect': 'onDeselectMultiOption(option)'
             'ng-mousedown': 'mouseDown(true)'
             'ng-mouseup': 'mouseDown(false)'
 
