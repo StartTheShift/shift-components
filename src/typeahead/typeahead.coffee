@@ -75,6 +75,7 @@ angular.module 'shift.components.typeahead', [
         close_menu_on_esc: '=closeMenuOnEsc'
 
       link: (scope, element, attrs, ctrl, transclude) ->
+        scope.options = []
         scope.show_select_menu ?= false
 
         scope.onSelectMultiOption = (option) ->
