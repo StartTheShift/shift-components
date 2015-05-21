@@ -166,7 +166,7 @@ angular.module 'shift.components.typeahead', [
           return unless scope.show_select_menu
 
           # ignore if the click was inside the multiselect menu
-          return if element.has event.target
+          return if element.has(event.target).length
 
           scope.$apply ->
             scope.show_select_menu = false
