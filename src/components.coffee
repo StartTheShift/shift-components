@@ -18,6 +18,5 @@ angular.module 'shift.components', [
   'shift.components.sortable'
   'shift.components.calendar'
   'shift.components.selector'
-  #'shift.components.multiselect'
   'shift.components.typeahead'
 ]

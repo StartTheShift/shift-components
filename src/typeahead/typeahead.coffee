@@ -52,7 +52,6 @@ shift-typeahead(
 ```
 ###
 angular.module 'shift.components.typeahead', [
-  'shift.components.multiselect'
   'shift.components.selector'
 ]
   .directive 'shiftTypeahead',
@@ -162,10 +161,26 @@ angular.module 'shift.components.typeahead', [
             scope.$apply ->
               scope.show_select_menu = false
 
+        onMouseDown = (event) ->
+          # ignore when the menu is hidden
+          return unless scope.show_select_menu
+
+          # ignore if the click was inside the multiselect menu
+          return if element.has event.target
+
+          scope.$apply ->
+            scope.show_select_menu = false
+
+          return
+
         do startListening = ->
           document.addEventListener 'keyup', onKeyUp
 
+          if scope.multiselect
+            document.addEventListener 'mousedown', onMouseDown
+
         stopListening = ->
           document.removeEventListener 'keyup', onKeyUp
+          document.removeEventListener 'mousedown', onMouseDown
 
         scope.$on '$destroy', stopListening

@@ -22,7 +22,11 @@ options is emtpy.
     selected = "selected"
     on-select = "onSelect(selected)"
     on-discard = "onDiscard(discarded)"
+<<<<<<< HEAD
     multiple
+=======
+    multiselect = "true"
+>>>>>>> ea0a90317a6060318399b4184dd34466c6d65e5e
   )
     strong {{option.city}}
     span &nbsp; {{option.state}}
