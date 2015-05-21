@@ -75,35 +75,30 @@ angular.module 'shift.components.typeahead', [
         close_menu_on_esc: '=closeMenuOnEsc'
 
       link: (scope, element, attrs, ctrl, transclude) ->
+        scope.options = []
         scope.show_select_menu ?= false
 
         scope.onSelectMultiOption = (option) ->
-          scope.onOptionSelect?({option})
+          scope.onOptionSelect({option})
 
         scope.onDeselectMultiOption = (option) ->
-          scope.onOptionDeselect?({option})
+          scope.onOptionDeselect({option})
+
+        select_menu = angular.element document.createElement 'shift-selector'
+        select_menu.attr
+          'ng-show': 'show_select_menu && !selected'
+          'options': 'options'
+          'selected': 'selected'
+          'on-select': 'onSelect(selected)'
+          'ng-mousedown': 'mouseDown(true)'
+          'ng-mouseup': 'mouseDown(false)'
 
         if attrs.multiselect?
-          select_menu = angular.element document.createElement 'shift-selector'
           select_menu.attr
-            'ng-show': 'show_select_menu'
-            'options': 'options'
-            'selected': 'selected'
+            'multiple': 'true'
             'on-select': 'onSelectMultiOption(selected)'
             'on-discard': 'onDeselectMultiOption(discarded)'
-            'ng-mousedown': 'mouseDown(true)'
-            'ng-mouseup': 'mouseDown(false)'
-            'multiselect': 'true'
-
-        else
-          select_menu = angular.element document.createElement 'shift-selector'
-          select_menu.attr
-            'ng-show': 'show_select_menu && !selected'
-            'options': 'options'
-            'selected': 'selected'
-            'on-select': 'onSelect(selected)'
-            'ng-mousedown': 'mouseDown(true)'
-            'ng-mouseup': 'mouseDown(false)'
+            'ng-show': 'show_select_menu'
 
         # Create a new scope to transclude + compile the template with (we don't
         # want the child directives directly modifying the scope of shiftTypeahead)
@@ -163,14 +158,32 @@ angular.module 'shift.components.typeahead', [
 
           return unless scope.close_menu_on_esc
 
-          if key is 27 # ESC key
+          # Close menu on ESC
+          if key is 27 and scope.show_select_menu
+            event.stopPropagation()
             scope.$apply ->
               scope.show_select_menu = false
+
+        onMouseDown = (event) ->
+          # ignore when the menu is hidden
+          return unless scope.show_select_menu
+
+          # ignore if the click was inside the multiselect menu
+          return if element.has(event.target).length
+
+          scope.$apply ->
+            scope.show_select_menu = false
+
+          return
 
         do startListening = ->
           document.addEventListener 'keyup', onKeyUp
 
+          if attrs.multiselect?
+            document.addEventListener 'mousedown', onMouseDown
+
         stopListening = ->
           document.removeEventListener 'keyup', onKeyUp
+          document.removeEventListener 'mousedown', onMouseDown
 
         scope.$on '$destroy', stopListening
