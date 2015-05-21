@@ -12,15 +12,17 @@ options is emtpy.
 | options | <code>array</code> | Options to be displayed and to choose from |
 | selected | <code>object</code> | Object selected from the options |
 | onSelect | <code>function</code> | Callback triggered when an option has been selected |
+| onDiscard | <code>function</code> | Callback triggered when an option has de-selected |
+| multiple | <code>boolean</code> | Indicates if the selection allows selection of more than one option |
 
-**Example**  
+**Example**
 ```jade
   shift-selector(
     options = "options"
     selected = "selected"
     on-select = "onSelect(selected)"
     on-discard = "onDiscard(discarded)"
-    multiselect = "true"
+    multiple
   )
     strong {{option.city}}
     span &nbsp; {{option.state}}
