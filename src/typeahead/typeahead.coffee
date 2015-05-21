@@ -158,7 +158,9 @@ angular.module 'shift.components.typeahead', [
 
           return unless scope.close_menu_on_esc
 
-          if key is 27 # ESC key
+          # Close menu on ESC
+          if key is 27 and scope.show_select_menu
+            event.stopPropagation()
             scope.$apply ->
               scope.show_select_menu = false
 
