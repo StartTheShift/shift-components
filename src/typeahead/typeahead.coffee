@@ -176,7 +176,7 @@ angular.module 'shift.components.typeahead', [
         do startListening = ->
           document.addEventListener 'keyup', onKeyUp
 
-          if scope.multiselect
+          if attrs.multiselect?
             document.addEventListener 'mousedown', onMouseDown
 
         stopListening = ->
