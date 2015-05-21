@@ -5,18 +5,23 @@ keys + enter or mouse click.
 The options are not displayed anymore if selected has a value or if
 options is emtpy.
 
-@module shift.components.select
+@module shift.components.selector
 
 @param {array} options Options to be displayed and to choose from
 @param {object} selected Object selected from the options
 @param {function} onSelect Callback triggered when an option has been selected
+@param {function} onDiscard Callback triggered when an option has de-selected
+@param {boolean} multiple Indicates if the selection allows selection of more
+than one option
 
 @example
 ```jade
-  shift-select(
+  shift-selector(
     options = "options"
     selected = "selected"
     on-select = "onSelect(selected)"
+    on-discard = "onDiscard(discarded)"
+    multiple
   )
     strong {{option.city}}
     span &nbsp; {{option.state}}
@@ -25,8 +30,8 @@ options is emtpy.
 ```
 ###
 
-angular.module 'shift.components.select', []
-  .directive 'shiftSelect',
+angular.module 'shift.components.selector', []
+  .directive 'shiftSelector',
     (
       $compile
     ) ->
@@ -39,8 +44,9 @@ angular.module 'shift.components.select', []
 
       scope:
         options: '='
-        selected: '='
+        selected: '=?'
         onSelect: '&'
+        onDiscard: '&'
 
       link: (scope, element, attrs, ctrl, transclude) ->
         # Build the select container
@@ -55,8 +61,8 @@ angular.module 'shift.components.select', []
         option.attr
           'ng-repeat': 'option in options'
           'ng-class': 'getClass($index)'
-          'ng-click': 'select($index)'
-          'ng-mouseenter': 'setPosition($index)'
+          'ng-click': 'toggle($index, $event)'
+          'ng-mouseenter': 'setPosition($index, $event)'
 
         # Transclude the template to the base option element
         transclude scope, (clone, scope) ->
@@ -69,6 +75,10 @@ angular.module 'shift.components.select', []
         $compile(option) scope
 
         scope.position = -1
+
+        # default to an array as no value if selector allows multiple
+        if attrs.multiple?
+          scope.selected ?= []
 
         onKeyDown = (event) ->
           return unless scope.options?.length
@@ -85,7 +95,7 @@ angular.module 'shift.components.select', []
                 scope.position += 1
               else # ENTER KEY
                 if scope.position > -1
-                  scope.select scope.position
+                  scope.toggle scope.position, event
 
             # limit the movement to the possible range of the options
             scope.position = Math.max 0, scope.position
@@ -112,18 +122,59 @@ angular.module 'shift.components.select', []
             margin = parseInt option_style.marginTop, 10
             container_elt.scrollTop += option_pos.top - container_pos.top - margin
 
+        isSelected = (option) ->
+          if attrs.multiple?
+            return option in scope.selected
+
+          return option is scope.selected
+
+        scope.toggle = (index, event) ->
+          event.stopPropagation()
+
+          option = scope.options[index]
+
+          if isSelected(option)
+              scope.discard(index)
+          else
+            scope.select(index)
+
+          return false
+
         scope.select = (index) ->
           scope.position = index
-          scope.selected = scope.options[scope.position]
+          selected = scope.options[scope.position]
 
-          scope.onSelect {selected: scope.selected}
+          if attrs.multiple?
+            scope.selected.push selected
+          else
+            scope.selected = selected
 
-        scope.setPosition = ($index) ->
-          scope.position = $index
+          scope.onSelect {selected}
+
+        scope.discard = (index) ->
+          scope.position = index
+          discarded = scope.options[scope.position]
+
+          if attrs.multiple?
+            _.pull scope.selected, discarded
+          else
+            scope.selected = null
+
+          scope.onDiscard {discarded}
+
+        previous_client_y = 0
+        scope.setPosition = ($index, event) ->
+          # only set the position if the mouse actually
+          # moved. Prevent mouse enter from being triggered
+          # when the content is moving under the cursor.
+          if event.clientY isnt previous_client_y
+            previous_client_y = event.clientY
+            scope.position = $index
 
         scope.getClass = (index) ->
           return {
-            'selected': index is scope.position
+            'selected': isSelected(scope.options?[index])
+            'active': index is scope.position
           }
 
         do startListening = ->
@@ -133,5 +184,3 @@ angular.module 'shift.components.select', []
           document.removeEventListener 'keydown', onKeyDown
 
         scope.$on '$destroy', stopListening
-
-        undefined

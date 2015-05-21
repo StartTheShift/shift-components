@@ -1,0 +1,82 @@
+div(ng-controller="ExampleCtrl")
+  h1 Shift Selector
+
+  p
+    | A widget to display a list of options for the user to choose from
+
+  h2 Select single
+
+  select(
+    ng-options = 'state[1] as state[0] for state in states'
+    ng-model = 'state'
+  )
+
+  div.selected-container(
+    ng-click = "toggleSelect(true)"
+  )
+    .select-option(
+      ng-if = "selected"
+    )
+      strong {{selected.city}}
+      span
+        |  {{selected.state}}
+        i  (pop. {{selected.population.toLocaleString() }})
+
+    .select-option(
+      ng-if = "!selected"
+    )
+      div Select a State...
+
+    shift-selector(
+      ng-show = "show_select"
+      options = "options"
+      selected = "selected"
+      on-select = "toggleSelect(false)"
+    )
+      strong {{option.city}}
+      span &nbsp; {{option.state}}
+      div
+        i pop. {{option.population.toLocaleString()}}
+
+  h2 Scope
+
+  pre
+    code.code
+      | $scope.options.length = {{options.length}}
+      | $scope.selected = {{selected}}
+      | $scope.state = "{{state}}"
+      | $scope.show_select = {{ show_select }}
+
+  h2 Select multiple
+
+  div.selected-container(
+    ng-click = "toggleSelectMultiple(true)"
+  )
+    .select-option(
+      ng-if = "selected_list.length"
+    )
+      strong(ng-repeat = "selected in selected_list")
+        |  {{selected.city}} {{ !$last && "," || "" }}
+
+    .select-option(
+      ng-if = "!selected_list.length"
+    )
+      div Select multiple state...
+
+    shift-selector(
+      ng-show = "show_select_multiple"
+      options = "sources"
+      selected = "selected_list"
+      multiple
+    )
+      strong {{option.city}}
+      span &nbsp; {{option.state}}
+      div
+        i pop. {{option.population.toLocaleString()}}
+
+  h2 Scope
+
+  pre
+    code.code
+      | $scope.sources.length = {{sources.length}}
+      | $scope.selected_list = {{selected_list}}
