@@ -15,18 +15,14 @@ options is emtpy.
 | onDiscard | <code>function</code> | Callback triggered when an option has de-selected |
 | multiple | <code>boolean</code> | Indicates if the selection allows selection of more than one option |
 
-**Example**  
+**Example**
 ```jade
   shift-selector(
     options = "options"
     selected = "selected"
     on-select = "onSelect(selected)"
     on-discard = "onDiscard(discarded)"
-<<<<<<< HEAD
     multiple
-=======
-    multiselect = "true"
->>>>>>> ea0a90317a6060318399b4184dd34466c6d65e5e
   )
     strong {{option.city}}
     span &nbsp; {{option.state}}
