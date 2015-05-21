@@ -175,6 +175,9 @@ options is emtpy.
 @param {array} options Options to be displayed and to choose from
 @param {object} selected Object selected from the options
 @param {function} onSelect Callback triggered when an option has been selected
+@param {function} onDiscard Callback triggered when an option has de-selected
+@param {boolean} multiple Indicates if the selection allows selection of more
+than one option
 
 @example
 ```jade
@@ -183,7 +186,7 @@ options is emtpy.
     selected = "selected"
     on-select = "onSelect(selected)"
     on-discard = "onDiscard(discarded)"
-    multiselect = "true"
+    multiple
   )
     strong {{option.city}}
     span &nbsp; {{option.state}}
@@ -205,8 +208,7 @@ angular.module('shift.components.selector', []).directive('shiftSelector', ['$co
       options: '=',
       selected: '=?',
       onSelect: '&',
-      onDiscard: '&',
-      multiselect: '='
+      onDiscard: '&'
     },
     link: function(scope, element, attrs, ctrl, transclude) {
       var autoScroll, isSelected, onKeyDown, option, previous_client_y, select_container, startListening, stopListening;
@@ -231,7 +233,7 @@ angular.module('shift.components.selector', []).directive('shiftSelector', ['$co
       $compile(select_container)(scope);
       $compile(option)(scope);
       scope.position = -1;
-      if (scope.multiselect) {
+      if (attrs.multiple != null) {
         if (scope.selected == null) {
           scope.selected = [];
         }
@@ -283,7 +285,7 @@ angular.module('shift.components.selector', []).directive('shiftSelector', ['$co
         }
       };
       isSelected = function(option) {
-        if (scope.multiselect) {
+        if (attrs.multiple != null) {
           return indexOf.call(scope.selected, option) >= 0;
         }
         return option === scope.selected;
@@ -302,7 +304,7 @@ angular.module('shift.components.selector', []).directive('shiftSelector', ['$co
         var selected;
         scope.position = index;
         selected = scope.options[scope.position];
-        if (scope.multiselect) {
+        if (attrs.multiple != null) {
           scope.selected.push(selected);
         } else {
           scope.selected = selected;
@@ -315,7 +317,7 @@ angular.module('shift.components.selector', []).directive('shiftSelector', ['$co
         var discarded;
         scope.position = index;
         discarded = scope.options[scope.position];
-        if (scope.multiselect) {
+        if (attrs.multiple != null) {
           _.pull(scope.selected, discarded);
         } else {
           scope.selected = null;
@@ -332,8 +334,9 @@ angular.module('shift.components.selector', []).directive('shiftSelector', ['$co
         }
       };
       scope.getClass = function(index) {
+        var ref;
         return {
-          'selected': isSelected(scope.options[index]),
+          'selected': isSelected((ref = scope.options) != null ? ref[index] : void 0),
           'active': index === scope.position
         };
       };
@@ -655,41 +658,36 @@ angular.module('shift.components.typeahead', ['shift.components.selector']).dire
       close_menu_on_esc: '=closeMenuOnEsc'
     },
     link: function(scope, element, attrs, ctrl, transclude) {
-      var filterOptions, mouse_down, onKeyUp, select_menu, shift_select_scope, startListening, stopListening;
+      var filterOptions, mouse_down, onKeyUp, onMouseDown, select_menu, shift_select_scope, startListening, stopListening;
+      scope.options = [];
       if (scope.show_select_menu == null) {
         scope.show_select_menu = false;
       }
       scope.onSelectMultiOption = function(option) {
-        return typeof scope.onOptionSelect === "function" ? scope.onOptionSelect({
+        return scope.onOptionSelect({
           option: option
-        }) : void 0;
+        });
       };
       scope.onDeselectMultiOption = function(option) {
-        return typeof scope.onOptionDeselect === "function" ? scope.onOptionDeselect({
+        return scope.onOptionDeselect({
           option: option
-        }) : void 0;
+        });
       };
+      select_menu = angular.element(document.createElement('shift-selector'));
+      select_menu.attr({
+        'ng-show': 'show_select_menu && !selected',
+        'options': 'options',
+        'selected': 'selected',
+        'on-select': 'onSelect(selected)',
+        'ng-mousedown': 'mouseDown(true)',
+        'ng-mouseup': 'mouseDown(false)'
+      });
       if (attrs.multiselect != null) {
-        select_menu = angular.element(document.createElement('shift-selector'));
         select_menu.attr({
-          'ng-show': 'show_select_menu',
-          'options': 'options',
-          'selected': 'selected',
+          'multiple': 'true',
           'on-select': 'onSelectMultiOption(selected)',
           'on-discard': 'onDeselectMultiOption(discarded)',
-          'ng-mousedown': 'mouseDown(true)',
-          'ng-mouseup': 'mouseDown(false)',
-          'multiselect': 'true'
-        });
-      } else {
-        select_menu = angular.element(document.createElement('shift-selector'));
-        select_menu.attr({
-          'ng-show': 'show_select_menu && !selected',
-          'options': 'options',
-          'selected': 'selected',
-          'on-select': 'onSelect(selected)',
-          'ng-mousedown': 'mouseDown(true)',
-          'ng-mouseup': 'mouseDown(false)'
+          'ng-show': 'show_select_menu'
         });
       }
       shift_select_scope = scope.$new();
@@ -750,17 +748,33 @@ angular.module('shift.components.typeahead', ['shift.components.selector']).dire
         if (!scope.close_menu_on_esc) {
           return;
         }
-        if (key === 27) {
+        if (key === 27 && scope.show_select_menu) {
+          event.stopPropagation();
           return scope.$apply(function() {
             return scope.show_select_menu = false;
           });
         }
       };
+      onMouseDown = function(event) {
+        if (!scope.show_select_menu) {
+          return;
+        }
+        if (element.has(event.target).length) {
+          return;
+        }
+        scope.$apply(function() {
+          return scope.show_select_menu = false;
+        });
+      };
       (startListening = function() {
-        return document.addEventListener('keyup', onKeyUp);
+        document.addEventListener('keyup', onKeyUp);
+        if (attrs.multiselect != null) {
+          return document.addEventListener('mousedown', onMouseDown);
+        }
       })();
       stopListening = function() {
-        return document.removeEventListener('keyup', onKeyUp);
+        document.removeEventListener('keyup', onKeyUp);
+        return document.removeEventListener('mousedown', onMouseDown);
       };
       return scope.$on('$destroy', stopListening);
     }
@@ -771,6 +785,6 @@ angular.module('shift.components.typeahead', ['shift.components.selector']).dire
 
 angular.module('shift.components.typeahead').run(['$templateCache', function($templateCache) {
 
-  $templateCache.put('typeahead/typeahead.html', '<input type="text" ng-blur="hide($event)" ng-focus="onFocus($event)" ng-model="query" placeholder="{{placeholder}}">');
+  $templateCache.put('typeahead/typeahead.html', '<input type="text" ng-blur="hide($event)" ng-class="{\'select-menu-visible\': show_select_menu &amp;&amp; options.length}" ng-focus="onFocus($event)" ng-model="query" placeholder="{{placeholder}}">');
 
 }]);
