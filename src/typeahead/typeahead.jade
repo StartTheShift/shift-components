@@ -1,6 +1,7 @@
 input(
   type = "text"
   ng-blur = "hide($event)"
+  ng-class = "{'select-menu-visible': show_select_menu}"
   ng-focus = "onFocus($event)"
   ng-model="query"
   placeholder = "{{placeholder}}"
