@@ -15,7 +15,7 @@ options is emtpy.
 | onDiscard | <code>function</code> | Callback triggered when an option has de-selected |
 | multiple | <code>boolean</code> | Indicates if the selection allows selection of more than one option |
 
-**Example**
+**Example**  
 ```jade
   shift-selector(
     options = "options"
