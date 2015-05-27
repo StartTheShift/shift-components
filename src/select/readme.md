@@ -9,6 +9,7 @@ A directive to mimic HTML select but awesome.
 | option | <code>object</code> | Option selected |
 | onSelect | <code>function</code> | Callback triggered when an option has been selected |
 | onDiscard | <code>function</code> | Callback triggered when an option has been de-selected |
+| placeholder | <code>string</code> | Text to display when no option are selected |
 
 **Example**  
 ```jade
@@ -17,6 +18,7 @@ A directive to mimic HTML select but awesome.
     option = "selected_option"
     on-select = "onSelect(selected)"
     on-discard = "onDiscard(discarded)"
+    placeholder = "Click to make a selection..."
   )
     strong {{option.city}}, {{ option.state }}
     div
