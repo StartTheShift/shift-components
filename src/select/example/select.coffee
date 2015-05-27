@@ -31,3 +31,6 @@ angular.module('examples', ['shift.components'])
 
       $scope.onDiscard = (discarded) ->
         console.debug 'Discarded', discarded
+
+      $scope.reset = ->
+        $scope.selected = null

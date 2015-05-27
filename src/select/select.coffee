@@ -1,13 +1,12 @@
 ###*
-A directive to mimic HTML select and its augment customization.
-
+A directive to mimic HTML select but awesome.
 
 @module shift.components.select
 
 @param {array} options Options to be displayed and to choose from
-@param {object} option Option selected from the options
+@param {object} option Option selected
 @param {function} onSelect Callback triggered when an option has been selected
-@param {function} onDiscard Callback triggered when an option has de-selected
+@param {function} onDiscard Callback triggered when an option has been de-selected
 
 @example
 ```jade
@@ -51,16 +50,8 @@ angular.module 'shift.components.select', ['shift.components.selector']
         shift_selector.attr
           'ng-show': 'show_select'
           'options': 'options'
-          'selected': 'option'
           'on-select': '_onSelect(selected)'
           'on-discard': '_onDiscard(discarded)'
-          'ng-mousedown': 'mouseDown(true)'
-          'ng-mouseup': 'mouseDown(false)'
-
-
-        scope.$watch 'selected', (new_value, old_value) ->
-          return if new_value is old_value
-          scope.option = new_value
 
         # Create a new scope to transclude + compile the template with (we don't
         # want the child directives directly modifying the scope)
@@ -98,6 +89,7 @@ angular.module 'shift.components.select', ['shift.components.selector']
         scope.show = ->
           scope.show_select = true
 
+        # Event: close selector on ESC press and click outside the element
         onKeyup = (event) ->
           if event.which is 27 # ESC key
 
@@ -110,6 +102,7 @@ angular.module 'shift.components.select', ['shift.components.selector']
           while target?.parentNode
             if target is element[0]
               return
+
             target = target.parentNode
 
           scope.$apply ->

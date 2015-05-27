@@ -22,6 +22,10 @@ div(ng-controller="ExampleCtrl")
     div
       i  (pop. {{option.population.toLocaleString() }})
 
+  button.button(
+    ng-click = "reset()"
+  ) reset
+
   h2 Scope
 
   pre
