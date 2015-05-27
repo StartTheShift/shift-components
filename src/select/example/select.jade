@@ -1,0 +1,30 @@
+div(ng-controller="ExampleCtrl")
+
+  h1 Shift Select
+
+  p
+    | A widget to mimic HTML select
+
+  h2 Select single
+
+  shift-select(
+    ng-options = 'state[1] as state[0] for state in states'
+    ng-model = 'state'
+    placeholder = 'Select a State...'
+    options = "options"
+    option = "selected"
+    on-discard = "onDiscard(discarded)"
+    on-select = "onSelect(selected)"
+  )
+    strong {{option.city}},
+    span(style="text-transform: uppercase")
+      |  {{option.state}}
+    div
+      i  (pop. {{option.population.toLocaleString() }})
+
+  h2 Scope
+
+  pre
+    code.code
+      | $scope.options.length = {{options.length}}
+      | $scope.selected = {{selected}}
