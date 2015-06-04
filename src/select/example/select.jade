@@ -8,7 +8,6 @@ div(ng-controller="ExampleCtrl")
   h2 Select single
 
   shift-select(
-    ng-options = 'state[1] as state[0] for state in states'
     ng-model = 'state'
     placeholder = 'Select a State...'
     options = "options"
@@ -22,9 +21,7 @@ div(ng-controller="ExampleCtrl")
     div
       i  (pop. {{option.population.toLocaleString() }})
 
-  button.button(
-    ng-click = "reset()"
-  ) reset
+  button.button(ng-click="reset()") reset
 
   h2 Scope
 

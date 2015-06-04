@@ -96,7 +96,7 @@ angular.module 'shift.components.select', ['shift.components.selector']
           if event.which is 27 # ESC key
 
             scope.$apply ->
-              scope.show_select = false;
+              scope.show_select = false
 
         onDocumentClick = (event) ->
           target = event.target
