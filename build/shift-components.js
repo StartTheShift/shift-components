@@ -9,12 +9,13 @@ UI components for SHIFT applications
 @requires shift.components.calendar
 @requires shift.components.select
 @requires shift.components.typeahead
+@requires shift.components.select
 
 @module shift.components
 
 @link sortable/
  */
-angular.module('shift.components', ['shift.components.sortable', 'shift.components.calendar', 'shift.components.selector', 'shift.components.typeahead']);
+angular.module('shift.components', ['shift.components.sortable', 'shift.components.calendar', 'shift.components.selector', 'shift.components.typeahead', 'shift.components.select']);
 
 
 /**
@@ -160,6 +161,125 @@ angular.module('shift.components.calendar', []).directive('shiftCalendar', funct
 angular.module('shift.components.calendar').run(['$templateCache', function($templateCache) {
 
   $templateCache.put('calendar/calendar.html', '<div class="calendar"><table class="table-condensed"><thead><tr><th title="previous month" ng-click="goToPreviousMonth()"><i class="fa fa-chevron-left"></i></th><th><i ng-if="date" title="go to {{ date.format(\'MMMM Do, YYYY\') }}" ng-hide="showing_date.isSame(date, \'month\')" ng-click="goToSelectedDate()" class="fa fa-dot-circle-o"></i></th><th colspan="3" class="month">{{ showing_date.format(\'MMM YYYY\') }}</th><th><i title="Unset date" ng-click="setNull()" ng-if="date &amp;&amp; dateAllowNull" class="fa fa-times"></i></th><th title="next month" ng-click="goToNextMonth()"><i class="fa fa-chevron-right"></i></th></tr><tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr></thead><tbody ng-click="selectDate($event)"><tr ng-repeat="week in weeks track by $index"><td ng-repeat="day in week track by $index" ng-class="getClass(day.date)" data-iso="{{ day.iso_8061 }}">{{ day.day_of_the_month }}</td></tr></tbody></table></div>');
+
+}]);
+
+/**
+A directive to mimic HTML select but awesome.
+
+@module shift.components.select
+
+@param {array} options Options to be displayed and to choose from
+@param {object} option Option selected
+@param {function} onSelect Callback triggered when an option has been selected
+@param {function} onDiscard Callback triggered when an option has been de-selected
+@param {string} placeholder Text to display when no option are selected
+
+@example
+```jade
+  shift-select(
+    options = "options"
+    option = "selected_option"
+    on-select = "onSelect(selected)"
+    on-discard = "onDiscard(discarded)"
+    placeholder = "Click to make a selection..."
+  )
+    strong {{option.city}}, {{ option.state }}
+    div
+      i pop. {{option.population}}
+```
+ */
+angular.module('shift.components.select', ['shift.components.selector']).directive('shiftSelect', ['$compile', function($compile) {
+  return {
+    restrict: 'E',
+    transclude: true,
+    templateUrl: 'select/select.html',
+    scope: {
+      options: '=',
+      option: '=',
+      onSelect: '&',
+      onDiscard: '&',
+      placeholder: '@'
+    },
+    link: function(scope, element, attrs, ctrl, transclude) {
+      var onDocumentClick, onKeyup, shift_selected, shift_selected_scope, shift_selector, shift_selector_scope;
+      scope.show_select = false;
+      shift_selected = angular.element(document.createElement('div'));
+      shift_selected.attr({
+        'ng-show': 'option',
+        'class': 'select-option'
+      });
+      shift_selector = angular.element(document.createElement('shift-selector'));
+      shift_selector.attr({
+        'ng-show': 'show_select',
+        'options': 'options',
+        'on-select': '_onSelect(selected)',
+        'on-discard': '_onDiscard(discarded)'
+      });
+      shift_selector_scope = scope.$new();
+      shift_selected_scope = scope.$new();
+      transclude(shift_selector_scope, function(clone) {
+        return shift_selector.append(clone);
+      });
+      transclude(shift_selected_scope, function(clone) {
+        return shift_selected.append(clone);
+      });
+      element.children().append(shift_selected);
+      element.append(shift_selector);
+      $compile(shift_selector)(shift_selector_scope);
+      $compile(shift_selected)(shift_selected_scope);
+      scope._onDiscard = function(discarded) {
+        scope.show_select = false;
+        scope.option = null;
+        return scope.onDiscard({
+          discarded: discarded
+        });
+      };
+      scope._onSelect = function(selected) {
+        scope.onSelect({
+          selected: selected
+        });
+        scope.option = selected;
+        return scope.show_select = false;
+      };
+      scope.show = function() {
+        return scope.show_select = true;
+      };
+      onKeyup = function(event) {
+        if (event.which === 27) {
+          return scope.$apply(function() {
+            return scope.show_select = false;
+          });
+        }
+      };
+      onDocumentClick = function(event) {
+        var target;
+        target = event.target;
+        while (target != null ? target.parentNode : void 0) {
+          if (target === element[0]) {
+            return;
+          }
+          target = target.parentNode;
+        }
+        return scope.$apply(function() {
+          return scope.show_select = false;
+        });
+      };
+      document.addEventListener('click', onDocumentClick);
+      document.addEventListener('keyup', onKeyup);
+      return scope.$on('$destroy', function() {
+        document.removeEventListener('click', onDocumentClick);
+        return document.removeEventListener('keyup', onKeyup);
+      });
+    }
+  };
+}]);
+
+'use strict';
+
+angular.module('shift.components.select').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('select/select.html', '<div ng-click="show()" class="select-container"><div ng-if="!option" class="select-option">{{ placeholder }}</div></div>');
 
 }]);
 
