@@ -15,6 +15,7 @@ UI components for SHIFT applications
 @link sortable/
 ###
 
+
 angular.module 'shift.components', [
   'shift.components.sortable'
   'shift.components.calendar'
