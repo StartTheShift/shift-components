@@ -1,4 +1,8 @@
 angular.module('examples', ['shift.components'])
+  .directive 'testTransclude', ->
+    restrict: 'E'
+    template: '<div>blah <div> <ng-transclude></ng-transclude/><hr></div><ng-transclude></ng-transclude></div>'
+    transclude: true
 
   .controller 'ExampleCtrl',
     (
@@ -7,13 +11,7 @@ angular.module('examples', ['shift.components'])
     ) ->
       $scope.state = ''
 
-      $scope.states = [
-        ['All states', '']
-        ['California', 'ca']
-        ['New York', 'ny']
-      ]
-
-      $scope.sources = [
+      $scope.options = [
         {state: 'ca', city: 'Los Angeles', population: 3884307}
         {state: 'ca', city: 'San Diego', population: 1355896}
         {state: 'ca', city: 'San Jose', population: 998537}
@@ -28,25 +26,11 @@ angular.module('examples', ['shift.components'])
         {state: 'ny', city: 'Albany', population: 97660}
       ]
 
-      $scope.toggleSelect = (state) ->
-        $scope.show_select = state
+      $scope.onSelect = (selected) ->
+        console.debug 'Selected', selected
 
-      do filterOptions = ->
-        if $scope.state
-          $scope.options = $filter('filter')($scope.sources, {state: $scope.state})
-        else
-          $scope.options = $scope.sources
+      $scope.onDiscard = (discarded) ->
+        console.debug 'Discarded', discarded
 
-      $scope.$watch 'state', (new_value, old_value) ->
-        return if new_value is old_value
-        filterOptions()
-
-      window.addEventListener 'mouseup', ->
-        $scope.$apply ->
-          $scope.show_select = false;
-
-      window.addEventListener 'keyup', (event) ->
-        if event.which is 27 # ESC key
-          console.log event.which
-          $scope.$apply ->
-            $scope.show_select = false;
+      $scope.reset = ->
+        $scope.selected = null

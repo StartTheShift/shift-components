@@ -1,137 +1,118 @@
 ###*
-A directive that displays a list of option, navigation using arrow
-keys + enter or mouse click.
-
-The options are not displayed anymore if selected has a value or if
-options is emtpy.
+A directive to mimic HTML select but awesome.
 
 @module shift.components.select
 
 @param {array} options Options to be displayed and to choose from
-@param {object} selected Object selected from the options
+@param {object} option Option selected
 @param {function} onSelect Callback triggered when an option has been selected
+@param {function} onDiscard Callback triggered when an option has been de-selected
+@param {string} placeholder Text to display when no option are selected
 
 @example
 ```jade
   shift-select(
     options = "options"
-    selected = "selected"
+    option = "selected_option"
     on-select = "onSelect(selected)"
+    on-discard = "onDiscard(discarded)"
+    placeholder = "Click to make a selection..."
   )
-    strong {{option.city}}
-    span &nbsp; {{option.state}}
+    strong {{option.city}}, {{ option.state }}
     div
       i pop. {{option.population}}
 ```
 ###
 
-angular.module 'shift.components.select', []
+angular.module 'shift.components.select', ['shift.components.selector']
   .directive 'shiftSelect',
     (
       $compile
     ) ->
-      UP_KEY = 38
-      DOWN_KEY = 40
-      ENTER_KEY = 13
-
       restrict: 'E'
       transclude: true
+      templateUrl: 'select/select.html'
 
       scope:
         options: '='
-        selected: '='
+        option: '='
         onSelect: '&'
+        onDiscard: '&'
+        placeholder: '@'
 
       link: (scope, element, attrs, ctrl, transclude) ->
-        # Build the select container
-        select_container = angular.element document.createElement 'div'
-        select_container.addClass 'select-container'
-        select_container.attr
-          'ng-if': 'options.length'
+        scope.show_select = false
 
-        # Build the base option element
-        option = angular.element document.createElement 'div'
-        option.addClass 'select-option'
-        option.attr
-          'ng-repeat': 'option in options'
-          'ng-class': 'getClass($index)'
-          'ng-click': 'select($index)'
-          'ng-mouseenter': 'setPosition($index)'
+        shift_selected = angular.element document.createElement 'div'
+        shift_selected.attr
+          'ng-show': 'option'
+          'class': 'select-option'
 
-        # Transclude the template to the base option element
-        transclude scope, (clone, scope) ->
-          option.append clone
+        shift_selector = angular.element document.createElement 'shift-selector'
+        shift_selector.attr
+          'ng-show': 'show_select'
+          'options': 'options'
+          'on-select': '_onSelect(selected)'
+          'on-discard': '_onDiscard(discarded)'
 
-        select_container.append option
-        element.append select_container
+        # Create a new scope to transclude + compile the template with (we don't
+        # want the child directives directly modifying the scope)
+        shift_selector_scope = scope.$new()
+        shift_selected_scope = scope.$new()
 
-        $compile(select_container) scope
-        $compile(option) scope
+        # Attach the transcluded template to selector
+        transclude shift_selector_scope, (clone) ->
+          shift_selector.append clone
 
-        scope.position = -1
+        # Attach the transcluded template to the selected option
+        transclude shift_selected_scope, (clone) ->
+          shift_selected.append clone
 
-        onKeyDown = (event) ->
-          return unless scope.options?.length
+        # Finally, add shift-selector and the selected option
+        # to the template.
+        # Selected is added to the container
+        element.children().append shift_selected
+        element.append shift_selector
 
-          key_code = event.which or event.keyCode
+        # ... while the selector is appended to the element itself
+        $compile(shift_selector) shift_selector_scope
+        $compile(shift_selected) shift_selected_scope
 
-          return unless key_code in [UP_KEY, DOWN_KEY, ENTER_KEY]
+        scope._onDiscard = (discarded) ->
+          scope.show_select = false
+          scope.option = null
+          scope.onDiscard {discarded}
+
+        scope._onSelect = (selected) ->
+          scope.onSelect {selected}
+          scope.option = selected
+          scope.show_select = false
+
+        scope.show = ->
+          scope.show_select = true
+
+        # Event: close selector on ESC press and click outside the element
+        onKeyup = (event) ->
+          if event.which is 27 # ESC key
+
+            scope.$apply ->
+              scope.show_select = false
+
+        onDocumentClick = (event) ->
+          target = event.target
+
+          while target?.parentNode
+            if target is element[0]
+              return
+
+            target = target.parentNode
 
           scope.$apply ->
-            switch key_code
-              when UP_KEY
-                scope.position -= 1
-              when DOWN_KEY
-                scope.position += 1
-              else # ENTER KEY
-                if scope.position > -1
-                  scope.select scope.position
+            scope.show_select = false
 
-            # limit the movement to the possible range of the options
-            scope.position = Math.max 0, scope.position
-            scope.position = Math.min scope.options.length - 1, scope.position
+        document.addEventListener 'click', onDocumentClick
+        document.addEventListener 'keyup', onKeyup
 
-            autoScroll()
-
-          event.preventDefault()
-          event.stopPropagation()
-
-          return false
-
-        autoScroll = ->
-          container_elt = element[0].children[0]
-          option_elt = container_elt.children[scope.position]
-          option_pos = option_elt.getBoundingClientRect()
-          container_pos = container_elt.getBoundingClientRect()
-          option_style = getComputedStyle(option_elt)
-
-          if option_pos.bottom > container_pos.bottom
-            margin = parseInt option_style.marginBottom, 10
-            container_elt.scrollTop += option_pos.bottom - container_pos.bottom + margin
-          if option_pos.top < container_pos.top
-            margin = parseInt option_style.marginTop, 10
-            container_elt.scrollTop += option_pos.top - container_pos.top - margin
-
-        scope.select = (index) ->
-          scope.position = index
-          scope.selected = scope.options[scope.position]
-
-          scope.onSelect {selected: scope.selected}
-
-        scope.setPosition = ($index) ->
-          scope.position = $index
-
-        scope.getClass = (index) ->
-          return {
-            'selected': index is scope.position
-          }
-
-        do startListening = ->
-          document.addEventListener 'keydown', onKeyDown
-
-        stopListening = ->
-          document.removeEventListener 'keydown', onKeyDown
-
-        scope.$on '$destroy', stopListening
-
-        undefined
+        scope.$on '$destroy', ->
+          document.removeEventListener 'click', onDocumentClick
+          document.removeEventListener 'keyup', onKeyup
