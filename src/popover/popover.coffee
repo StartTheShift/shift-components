@@ -43,6 +43,7 @@ angular.module 'shift.components.popover', []
   .directive 'shiftPopover',
     (
       $timeout
+      $window
       shiftPopoverService
     ) ->
       restrict: 'E'
@@ -53,11 +54,22 @@ angular.module 'shift.components.popover', []
         off: '@'
         offDelay: '@'
 
-      link: (scope, element, _, xx, transclude) ->
+      compile: (element, attrs, scope)->
+        root_element = element[0].parentNode
+
+        getStyle = (element, key, default_value='') ->
+          return $window.getComputedStyle(element)[key] or default_value
+
+        # find a parent a non static element
+        while getStyle(root_element, 'position', 'static') is 'static'
+          root_element = root_element.parentNode
+
+        $(root_element).append(element)
+
+      link: (scope, element, attrs, controllers, transclude) ->
 
         transclude scope, (copy) ->
           console.log copy
-
 
         parent = element[0].parentNode
         unregister = null
