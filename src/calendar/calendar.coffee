@@ -94,6 +94,11 @@ angular.module 'shift.components.calendar', []
           date = moment(scope.showing_date).startOf('month').startOf('week')
           end_date = moment(scope.showing_date).endOf('month').endOf('week')
 
+          if scope.date?.isValid?()
+            date.set('hour', scope.date.get('hour'))
+            date.set('minute', scope.date.get('minute'))
+            date.set('second', scope.date.get('second'))
+
           scope.weeks = []
           while true
             day_of_the_week = date.day() # from 0 to 6, 0 being sunday
