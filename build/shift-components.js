@@ -120,9 +120,14 @@ angular.module('shift.components.calendar', []).directive('shiftCalendar', funct
         };
       };
       (buildCalendarScope = function() {
-        var date, day_of_the_month, day_of_the_week, end_date, results, week;
+        var date, day_of_the_month, day_of_the_week, end_date, ref, results, week;
         date = moment(scope.showing_date).startOf('month').startOf('week');
         end_date = moment(scope.showing_date).endOf('month').endOf('week');
+        if ((ref = scope.date) != null ? typeof ref.isValid === "function" ? ref.isValid() : void 0 : void 0) {
+          date.set('hour', scope.date.get('hour'));
+          date.set('minute', scope.date.get('minute'));
+          date.set('second', scope.date.get('second'));
+        }
         scope.weeks = [];
         results = [];
         while (true) {
@@ -710,6 +715,107 @@ angular.module('shift.components.sortable', []).service('shiftSortableService', 
 
 
 /**
+Time directive displays a text input guessing the time entered. Accepts
+a moment_object object as model and only inpacts its time.
+
+@module shift.components.time
+
+@requires momentJS
+@requires lodash
+
+@param {moment} time A moment object, default to now
+@param {function} timeChange Called when date is changed
+@param {function} timeValidator Method returning a Boolean indicating if
+the selected date is valid or not
+@param {Boolean} timeAllowNull Indicate if the date can be set to null
+
+@example
+```jade
+shift-time(
+  time = "date"
+  time-change = "onDateChange(date)"
+  time-validator = "isValidDate"
+)
+```
+ */
+angular.module('shift.components.time', []).directive('shiftTime', function() {
+  return {
+    restrict: 'E',
+    templateUrl: 'time/time.html',
+    scope: {
+      time: '=',
+      timeChange: '&',
+      timeValidator: '='
+    },
+    link: function(scope) {
+      var guessTime, isValidDate, original_time_str, updateDate;
+      original_time_str = null;
+      isValidDate = function(date) {
+        if (!(moment.isMoment(date) && date.isValid())) {
+          return false;
+        }
+        if (scope.timeValidator != null) {
+          return scope.timeValidator(date);
+        }
+        return true;
+      };
+      updateDate = function(date) {
+        if (isValidDate(date)) {
+          scope.time = date;
+          scope.timeChange();
+        }
+        if (scope.time === null) {
+          scope.time_str = '';
+        } else {
+          scope.time_str = scope.time.format('h:mm a');
+        }
+        return original_time_str = scope.time_str;
+      };
+      scope.$watch('time', function(new_time, old_time) {
+        if (new_time === old_time) {
+          return;
+        }
+        return updateDate(new_time);
+      });
+      scope.readTime = function() {
+        var hour, minute, new_date, ref;
+        if (original_time_str === scope.time_str) {
+          return;
+        }
+        ref = guessTime(scope.time_str), hour = ref[0], minute = ref[1];
+        new_date = moment(scope.time).set('hour', hour).set('minute', minute);
+        return updateDate(new_date);
+      };
+      guessTime = function(time_str) {
+        var hour, minute, ref, time_re, time_tuple;
+        time_re = /(1[0-2]|0?[1-9])[^\d]?([0-5][0-9]|[0-9])?\s?(am|pm|a|p)?/;
+        time_tuple = time_re.exec(time_str.toLowerCase());
+        if (time_tuple) {
+          hour = time_tuple[1] && parseInt(time_tuple[1], 10) || 0;
+          minute = time_tuple[2] && parseInt(time_tuple[2], 10) || 0;
+          if ((ref = time_tuple[3]) === 'p' || ref === 'pm') {
+            hour += 12;
+          }
+          return [hour, minute];
+        }
+        return [0, 0];
+      };
+      if (moment.isMoment(scope.time)) {
+        return updateDate(scope.time);
+      }
+    }
+  };
+});
+
+'use strict';
+
+angular.module('shift.components.time').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('time/time.html', '<input type="text" ng-model="time_str" placeholder="--:-- pm" ng-blur="readTime()" ng-disabled="!(time &amp;&amp; time.isValid())">');
+
+}]);
+
+/**
 Typeahead directive displaying a set of option to choose from as input changes.
 
 The transcluded object attributes are prepend with `option.`. In the case of the
@@ -907,106 +1013,5 @@ angular.module('shift.components.typeahead', ['shift.components.selector']).dire
 angular.module('shift.components.typeahead').run(['$templateCache', function($templateCache) {
 
   $templateCache.put('typeahead/typeahead.html', '<input type="text" ng-blur="hide($event)" ng-class="{\'select-menu-visible\': show_select_menu &amp;&amp; options.length}" ng-focus="onFocus($event)" ng-model="query" placeholder="{{placeholder}}">');
-
-}]);
-
-/**
-Time directive displays a text input guessing the time entered. Accepts
-a moment_object object as model and only inpacts its time.
-
-@module shift.components.time
-
-@requires momentJS
-@requires lodash
-
-@param {moment} time A moment object, default to now
-@param {function} timeChange Called when date is changed
-@param {function} timeValidator Method returning a Boolean indicating if
-the selected date is valid or not
-@param {Boolean} timeAllowNull Indicate if the date can be set to null
-
-@example
-```jade
-shift-time(
-  time = "date"
-  time-change = "onDateChange(date)"
-  time-validator = "isValidDate"
-)
-```
- */
-angular.module('shift.components.time', []).directive('shiftTime', function() {
-  return {
-    restrict: 'E',
-    templateUrl: 'time/time.html',
-    scope: {
-      time: '=',
-      timeChange: '&',
-      timeValidator: '='
-    },
-    link: function(scope) {
-      var guessTime, isValidDate, original_time_str, updateDate;
-      original_time_str = null;
-      isValidDate = function(date) {
-        if (!(moment.isMoment(date) && date.isValid())) {
-          return false;
-        }
-        if (scope.timeValidator != null) {
-          return scope.timeValidator(date);
-        }
-        return true;
-      };
-      updateDate = function(date) {
-        if (isValidDate(date)) {
-          scope.time = date;
-          scope.timeChange();
-        }
-        if (scope.time === null) {
-          scope.time_str = '';
-        } else {
-          scope.time_str = scope.time.format('h:mm a');
-        }
-        return original_time_str = scope.time_str;
-      };
-      scope.$watch('time', function(new_time, old_time) {
-        if (new_time === old_time) {
-          return;
-        }
-        return updateDate(new_time);
-      });
-      scope.readTime = function() {
-        var hour, minute, new_date, ref;
-        if (original_time_str === scope.time_str) {
-          return;
-        }
-        ref = guessTime(scope.time_str), hour = ref[0], minute = ref[1];
-        new_date = moment(scope.time).set('hour', hour).set('minute', minute);
-        return updateDate(new_date);
-      };
-      guessTime = function(time_str) {
-        var hour, minute, ref, time_re, time_tuple;
-        time_re = /(1[0-2]|0?[1-9])[^\d]?([0-5][0-9]|[0-9])?\s?(am|pm|a|p)?/;
-        time_tuple = time_re.exec(time_str.toLowerCase());
-        if (time_tuple) {
-          hour = time_tuple[1] && parseInt(time_tuple[1], 10) || 0;
-          minute = time_tuple[2] && parseInt(time_tuple[2], 10) || 0;
-          if ((ref = time_tuple[3]) === 'p' || ref === 'pm') {
-            hour += 12;
-          }
-          return [hour, minute];
-        }
-        return [0, 0];
-      };
-      if (moment.isMoment(scope.time)) {
-        return updateDate(scope.time);
-      }
-    }
-  };
-});
-
-'use strict';
-
-angular.module('shift.components.time').run(['$templateCache', function($templateCache) {
-
-  $templateCache.put('time/time.html', '<input type="text" ng-model="time_str" placeholder="--:-- pm" ng-blur="readTime()" ng-disabled="!(time &amp;&amp; time.isValid())">');
 
 }]);
