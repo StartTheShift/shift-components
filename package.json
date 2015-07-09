@@ -1,6 +1,6 @@
 {
   "name": "shift-components",
-  "version": "0.6.2",
+  "version": "0.6.3",
   "description": "UI components for SHIFT applications",
   "main": "build/shift-components.js",
   "scripts": {
