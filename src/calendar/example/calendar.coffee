@@ -44,3 +44,7 @@ angular.module('examples', ['shift.components'])
     $scope.lastWeek = ->
       $scope.stop_date = moment().startOf 'week'
       $scope.start_date = moment($scope.stop_date).subtract(1, 'week')
+
+    $scope.outOfRangeDate = ->
+      $scope.stop_date = moment(min_date).subtract(1, 'week')
+      $scope.start_date = moment(min_date).subtract(3, 'week')

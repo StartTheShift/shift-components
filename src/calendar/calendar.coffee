@@ -56,7 +56,10 @@ angular.module 'shift.components.calendar', []
           buildCalendarScope()
 
         scope.selectDate = ($event) ->
-          updateDate moment $event.target.getAttribute('data-iso')
+          date = moment $event.target.getAttribute('data-iso')
+          return unless isValidDate(date)
+
+          updateDate(date)
 
         scope.setNull = ->
           return unless scope.allowNull
@@ -72,11 +75,10 @@ angular.module 'shift.components.calendar', []
           return true
 
         updateDate = (date) ->
-          if isValidDate(date)
-            scope.date = date
-            scope.showing_date = moment(date)
-            buildCalendarScope()
-            scope.change()
+          scope.date = date
+          scope.showing_date = moment(date)
+          buildCalendarScope()
+          scope.change()
 
         scope.$watch 'date', (new_value, old_value) ->
             return if new_value is old_value
@@ -123,7 +125,7 @@ angular.module 'shift.components.calendar', []
           scope.date = moment()
 
         if moment.isMoment(scope.date)
-          updateDate scope.date
+          updateDate(scope.date)
           scope.showing_date = moment(scope.date)
         else
           scope.showing_date = moment().startOf('day')
