@@ -77,7 +77,12 @@ angular.module('shift.components.calendar', []).directive('shiftCalendar', funct
         return buildCalendarScope();
       };
       scope.selectDate = function($event) {
-        return updateDate(moment($event.target.getAttribute('data-iso')));
+        var date;
+        date = moment($event.target.getAttribute('data-iso'));
+        if (!isValidDate(date)) {
+          return;
+        }
+        return updateDate(date);
       };
       scope.setNull = function() {
         if (!scope.allowNull) {
@@ -97,12 +102,10 @@ angular.module('shift.components.calendar', []).directive('shiftCalendar', funct
         return true;
       };
       updateDate = function(date) {
-        if (isValidDate(date)) {
-          scope.date = date;
-          scope.showing_date = moment(date);
-          buildCalendarScope();
-          return scope.change();
-        }
+        scope.date = date;
+        scope.showing_date = moment(date);
+        buildCalendarScope();
+        return scope.change();
       };
       scope.$watch('date', function(new_value, old_value) {
         if (new_value === old_value) {
@@ -168,125 +171,6 @@ angular.module('shift.components.calendar', []).directive('shiftCalendar', funct
 angular.module('shift.components.calendar').run(['$templateCache', function($templateCache) {
 
   $templateCache.put('calendar/calendar.html', '<div class="calendar"><table class="table-condensed"><thead><tr><th title="previous month" ng-click="goToPreviousMonth()"><i class="fa fa-chevron-left"></i></th><th><i ng-if="date" title="go to {{ date.format(\'MMMM Do, YYYY\') }}" ng-hide="showing_date.isSame(date, \'month\')" ng-click="goToSelectedDate()" class="fa fa-dot-circle-o"></i></th><th colspan="3" class="month">{{ showing_date.format(\'MMM YYYY\') }}</th><th><i title="Unset date" ng-click="setNull()" ng-if="date &amp;&amp; dateAllowNull" class="fa fa-times"></i></th><th title="next month" ng-click="goToNextMonth()"><i class="fa fa-chevron-right"></i></th></tr><tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr></thead><tbody ng-click="selectDate($event)"><tr ng-repeat="week in weeks track by $index"><td ng-repeat="day in week track by $index" ng-class="getClass(day.date)" data-iso="{{ day.iso_8061 }}">{{ day.day_of_the_month }}</td></tr></tbody></table></div>');
-
-}]);
-
-/**
-A directive to mimic HTML select but awesome.
-
-@module shift.components.select
-
-@param {array} options Options to be displayed and to choose from
-@param {object} option Option selected
-@param {function} onSelect Callback triggered when an option has been selected
-@param {function} onDiscard Callback triggered when an option has been de-selected
-@param {string} placeholder Text to display when no option are selected
-
-@example
-```jade
-  shift-select(
-    options = "options"
-    option = "selected_option"
-    on-select = "onSelect(selected)"
-    on-discard = "onDiscard(discarded)"
-    placeholder = "Click to make a selection..."
-  )
-    strong {{option.city}}, {{ option.state }}
-    div
-      i pop. {{option.population}}
-```
- */
-angular.module('shift.components.select', ['shift.components.selector']).directive('shiftSelect', ['$compile', function($compile) {
-  return {
-    restrict: 'E',
-    transclude: true,
-    templateUrl: 'select/select.html',
-    scope: {
-      options: '=',
-      option: '=',
-      onSelect: '&',
-      onDiscard: '&',
-      placeholder: '@'
-    },
-    link: function(scope, element, attrs, ctrl, transclude) {
-      var onDocumentClick, onKeyup, shift_selected, shift_selected_scope, shift_selector, shift_selector_scope;
-      scope.show_select = false;
-      shift_selected = angular.element(document.createElement('div'));
-      shift_selected.attr({
-        'ng-show': 'option',
-        'class': 'select-option'
-      });
-      shift_selector = angular.element(document.createElement('shift-selector'));
-      shift_selector.attr({
-        'ng-show': 'show_select',
-        'options': 'options',
-        'on-select': '_onSelect(selected)',
-        'on-discard': '_onDiscard(discarded)'
-      });
-      shift_selector_scope = scope.$new();
-      shift_selected_scope = scope.$new();
-      transclude(shift_selector_scope, function(clone) {
-        return shift_selector.append(clone);
-      });
-      transclude(shift_selected_scope, function(clone) {
-        return shift_selected.append(clone);
-      });
-      element.children().append(shift_selected);
-      element.append(shift_selector);
-      $compile(shift_selector)(shift_selector_scope);
-      $compile(shift_selected)(shift_selected_scope);
-      scope._onDiscard = function(discarded) {
-        scope.show_select = false;
-        scope.option = null;
-        return scope.onDiscard({
-          discarded: discarded
-        });
-      };
-      scope._onSelect = function(selected) {
-        scope.onSelect({
-          selected: selected
-        });
-        scope.option = selected;
-        return scope.show_select = false;
-      };
-      scope.show = function() {
-        return scope.show_select = true;
-      };
-      onKeyup = function(event) {
-        if (event.which === 27) {
-          return scope.$apply(function() {
-            return scope.show_select = false;
-          });
-        }
-      };
-      onDocumentClick = function(event) {
-        var target;
-        target = event.target;
-        while (target != null ? target.parentNode : void 0) {
-          if (target === element[0]) {
-            return;
-          }
-          target = target.parentNode;
-        }
-        return scope.$apply(function() {
-          return scope.show_select = false;
-        });
-      };
-      document.addEventListener('click', onDocumentClick);
-      document.addEventListener('keyup', onKeyup);
-      return scope.$on('$destroy', function() {
-        document.removeEventListener('click', onDocumentClick);
-        return document.removeEventListener('keyup', onKeyup);
-      });
-    }
-  };
-}]);
-
-'use strict';
-
-angular.module('shift.components.select').run(['$templateCache', function($templateCache) {
-
-  $templateCache.put('select/select.html', '<div ng-click="show()" class="select-container"><div ng-if="!option" class="select-option">{{ placeholder }}</div></div>');
 
 }]);
 
@@ -480,86 +364,123 @@ angular.module('shift.components.selector', []).directive('shiftSelector', ['$co
 
 
 /**
-Time directive displays a text input guessing the time entered.
+A directive to mimic HTML select but awesome.
 
-@module shift.components.time
+@module shift.components.select
 
-@requires momentJS
-@requires lodash
-
-@param {moment} time A moment object, default to now
-the selected date is valid or not
+@param {array} options Options to be displayed and to choose from
+@param {object} option Option selected
+@param {function} onSelect Callback triggered when an option has been selected
+@param {function} onDiscard Callback triggered when an option has been de-selected
+@param {string} placeholder Text to display when no option are selected
 
 @example
 ```jade
-input(
-  ng-model = "date"
-  type = "text"
-  shift-time
-)
+  shift-select(
+    options = "options"
+    option = "selected_option"
+    on-select = "onSelect(selected)"
+    on-discard = "onDiscard(discarded)"
+    placeholder = "Click to make a selection..."
+  )
+    strong {{option.city}}, {{ option.state }}
+    div
+      i pop. {{option.population}}
 ```
  */
-var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-angular.module('shift.components.time', []).directive('shiftTime', ['$timeout', function($timeout) {
+angular.module('shift.components.select', ['shift.components.selector']).directive('shiftSelect', ['$compile', function($compile) {
   return {
-    require: 'ngModel',
-    restrict: 'A',
+    restrict: 'E',
+    transclude: true,
+    templateUrl: 'select/select.html',
     scope: {
-      time: '=ngModel'
+      options: '=',
+      option: '=',
+      onSelect: '&',
+      onDiscard: '&',
+      placeholder: '@'
     },
-    link: function(scope, element, attr, ngModel) {
-      var guessTime;
-      guessTime = function(time_str) {
-        var hour, minute, ref, time_re, time_tuple;
-        time_re = /(1[0-2]|0?[1-9])[^ap\d]?([0-5][0-9]|[0-9])?\s?(am|pm|a|p)?/;
-        time_tuple = time_re.exec(time_str.toLowerCase());
-        if (time_tuple) {
-          hour = time_tuple[1] && parseInt(time_tuple[1], 10) || 0;
-          minute = time_tuple[2] && parseInt(time_tuple[2], 10) || 0;
-          if ((ref = time_tuple[3]) === 'p' || ref === 'pm') {
-            if (hour < 12) {
-              hour += 12;
-            }
-          } else {
-            if (hour === 12) {
-              hour = 0;
-            }
-          }
-          return [hour, minute];
-        }
-        return [0, 0];
+    link: function(scope, element, attrs, ctrl, transclude) {
+      var onDocumentClick, onKeyup, shift_selected, shift_selected_scope, shift_selector, shift_selector_scope;
+      scope.show_select = false;
+      shift_selected = angular.element(document.createElement('div'));
+      shift_selected.attr({
+        'ng-show': 'option',
+        'class': 'select-option'
+      });
+      shift_selector = angular.element(document.createElement('shift-selector'));
+      shift_selector.attr({
+        'ng-show': 'show_select',
+        'options': 'options',
+        'on-select': '_onSelect(selected)',
+        'on-discard': '_onDiscard(discarded)'
+      });
+      shift_selector_scope = scope.$new();
+      shift_selected_scope = scope.$new();
+      transclude(shift_selector_scope, function(clone) {
+        return shift_selector.append(clone);
+      });
+      transclude(shift_selected_scope, function(clone) {
+        return shift_selected.append(clone);
+      });
+      element.children().append(shift_selected);
+      element.append(shift_selector);
+      $compile(shift_selector)(shift_selector_scope);
+      $compile(shift_selected)(shift_selected_scope);
+      scope._onDiscard = function(discarded) {
+        scope.show_select = false;
+        scope.option = null;
+        return scope.onDiscard({
+          discarded: discarded
+        });
       };
-      ngModel.$formatters.push(function(value) {
-        if (value) {
-          return moment(value).format('h:mm a');
-        }
-        return '';
-      });
-      ngModel.$parsers.push(function(value) {
-        var hour, minute, new_date, ref;
-        if (value) {
-          ref = guessTime(value), hour = ref[0], minute = ref[1];
-          new_date = moment(scope.time).set('hour', hour).set('minute', minute);
-          return new_date;
-        }
-        return scope.time;
-      });
-      return element.on('blur', function(event) {
-        var ref;
-        if (!(scope.time && scope.time.isValid())) {
-          return;
-        }
-        if (ref = event.target.value, indexOf.call(moment(scope.time).format('h:mm a'), ref) < 0) {
-          return $timeout(function() {
-            return scope.time = moment(scope.time);
+      scope._onSelect = function(selected) {
+        scope.onSelect({
+          selected: selected
+        });
+        scope.option = selected;
+        return scope.show_select = false;
+      };
+      scope.show = function() {
+        return scope.show_select = true;
+      };
+      onKeyup = function(event) {
+        if (event.which === 27) {
+          return scope.$apply(function() {
+            return scope.show_select = false;
           });
         }
+      };
+      onDocumentClick = function(event) {
+        var target;
+        target = event.target;
+        while (target != null ? target.parentNode : void 0) {
+          if (target === element[0]) {
+            return;
+          }
+          target = target.parentNode;
+        }
+        return scope.$apply(function() {
+          return scope.show_select = false;
+        });
+      };
+      document.addEventListener('click', onDocumentClick);
+      document.addEventListener('keyup', onKeyup);
+      return scope.$on('$destroy', function() {
+        document.removeEventListener('click', onDocumentClick);
+        return document.removeEventListener('keyup', onKeyup);
       });
     }
   };
 }]);
 
+'use strict';
+
+angular.module('shift.components.select').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('select/select.html', '<div ng-click="show()" class="select-container"><div ng-if="!option" class="select-option">{{ placeholder }}</div></div>');
+
+}]);
 
 /**
 Sortable directive to allow drag n' drop sorting of an array.
@@ -789,6 +710,88 @@ angular.module('shift.components.sortable', []).service('shiftSortableService', 
         if (sortables) {
           return _.remove(sortables, function(sortable) {
             return sortable.scope === scope;
+          });
+        }
+      });
+    }
+  };
+}]);
+
+
+/**
+Time directive displays a text input guessing the time entered.
+
+@module shift.components.time
+
+@requires momentJS
+@requires lodash
+
+@param {moment} time A moment object, default to now
+the selected date is valid or not
+
+@example
+```jade
+input(
+  ng-model = "date"
+  type = "text"
+  shift-time
+)
+```
+ */
+var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+angular.module('shift.components.time', []).directive('shiftTime', ['$timeout', function($timeout) {
+  return {
+    require: 'ngModel',
+    restrict: 'A',
+    scope: {
+      time: '=ngModel'
+    },
+    link: function(scope, element, attr, ngModel) {
+      var guessTime;
+      guessTime = function(time_str) {
+        var hour, minute, ref, time_re, time_tuple;
+        time_re = /(1[0-2]|0?[1-9])[^ap\d]?([0-5][0-9]|[0-9])?\s?(am|pm|a|p)?/;
+        time_tuple = time_re.exec(time_str.toLowerCase());
+        if (time_tuple) {
+          hour = time_tuple[1] && parseInt(time_tuple[1], 10) || 0;
+          minute = time_tuple[2] && parseInt(time_tuple[2], 10) || 0;
+          if ((ref = time_tuple[3]) === 'p' || ref === 'pm') {
+            if (hour < 12) {
+              hour += 12;
+            }
+          } else {
+            if (hour === 12) {
+              hour = 0;
+            }
+          }
+          return [hour, minute];
+        }
+        return [0, 0];
+      };
+      ngModel.$formatters.push(function(value) {
+        if (value) {
+          return moment(value).format('h:mm a');
+        }
+        return '';
+      });
+      ngModel.$parsers.push(function(value) {
+        var hour, minute, new_date, ref;
+        if (value) {
+          ref = guessTime(value), hour = ref[0], minute = ref[1];
+          new_date = moment(scope.time).set('hour', hour).set('minute', minute);
+          return new_date;
+        }
+        return scope.time;
+      });
+      return element.on('blur', function(event) {
+        var ref;
+        if (!(scope.time && scope.time.isValid())) {
+          return;
+        }
+        if (ref = event.target.value, indexOf.call(moment(scope.time).format('h:mm a'), ref) < 0) {
+          return $timeout(function() {
+            return scope.time = moment(scope.time);
           });
         }
       });
