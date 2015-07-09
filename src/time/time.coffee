@@ -1,6 +1,5 @@
 ###*
-Time directive displays a text input guessing the time entered. Accepts
-a moment_object object as model and only inpacts its time.
+Time directive displays a text input guessing the time entered.
 
 @module shift.components.time
 
@@ -8,67 +7,30 @@ a moment_object object as model and only inpacts its time.
 @requires lodash
 
 @param {moment} time A moment object, default to now
-@param {function} timeChange Called when date is changed
-@param {function} timeValidator Method returning a Boolean indicating if
 the selected date is valid or not
-@param {Boolean} timeAllowNull Indicate if the date can be set to null
 
 @example
 ```jade
-shift-time(
-  time = "date"
-  time-change = "onDateChange(date)"
-  time-validator = "isValidDate"
+input(
+  ng-model = "date"
+  type = "text"
+  shift-time
 )
 ```
 ###
 angular.module 'shift.components.time', []
   .directive 'shiftTime',
-    ->
-      restrict: 'E'
-      templateUrl: 'time/time.html'
+    (
+      $timeout
+    ) ->
+      require: 'ngModel'
+      restrict: 'A'
       scope:
-        time: '='
-        timeChange: '&'
-        timeValidator: '='
+        time: '=ngModel'
 
-      link: (scope) ->
-        original_time_str = null
-
-        isValidDate = (date) ->
-          return false unless moment.isMoment(date) and date.isValid()
-
-          if scope.timeValidator?
-            return scope.timeValidator date
-          return true
-
-        updateDate = (date) ->
-          if isValidDate(date)
-            scope.time = date
-            scope.timeChange()
-
-          # if the date set is reset to null,
-          # display an empty field
-          if scope.time is null
-            scope.time_str = ''
-          else
-            scope.time_str = scope.time.format('h:mm a')
-
-          original_time_str = scope.time_str
-
-        scope.$watch 'time', (new_time, old_time) ->
-            return if new_time is old_time
-            updateDate(new_time)
-
-        scope.readTime = ->
-          return if original_time_str is scope.time_str
-
-          [hour, minute] = guessTime(scope.time_str)
-          new_date = moment(scope.time).set('hour', hour).set('minute', minute)
-          updateDate(new_date)
-
+      link: (scope, element, attr, ngModel) ->
+        # Guess and return a time tuple from a string
         guessTime = (time_str) ->
-          # Guess and return a time tuple from a string
           time_re = /(1[0-2]|0?[1-9])[^ap\d]?([0-5][0-9]|[0-9])?\s?(am|pm|a|p)?/
 
           time_tuple = time_re.exec(time_str.toLowerCase())
@@ -89,5 +51,26 @@ angular.module 'shift.components.time', []
 
           return [0,0]
 
-        if moment.isMoment(scope.time)
-          updateDate scope.time
+        # format text going to user (model to view)
+        ngModel.$formatters.push (value) ->
+          if value
+            return moment(value).format('h:mm a')
+          return ''
+
+        # format text from the user (view to model)
+        ngModel.$parsers.push (value) ->
+          if value
+            [hour, minute] = guessTime(value)
+            new_date = moment(scope.time).set('hour', hour).set('minute', minute)
+            return new_date
+
+          return scope.time
+
+        element.on 'blur', (event) ->
+          return unless scope.time and scope.time.isValid()
+
+          # Update the time value to trigger the $formatter when leaving
+          # the field
+          if event.target.value not in moment(scope.time).format('h:mm a')
+            $timeout ->
+              scope.time = moment(scope.time)
