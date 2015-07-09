@@ -290,195 +290,6 @@ angular.module('shift.components.select').run(['$templateCache', function($templ
 }]);
 
 /**
-A directive that displays a list of option, navigation using arrow
-keys + enter or mouse click.
-
-The options are not displayed anymore if selected has a value or if
-options is emtpy.
-
-@module shift.components.selector
-
-@param {array} options Options to be displayed and to choose from
-@param {object} selected Object selected from the options
-@param {function} onSelect Callback triggered when an option has been selected
-@param {function} onDiscard Callback triggered when an option has de-selected
-@param {boolean} multiple Indicates if the selection allows selection of more
-than one option
-
-@example
-```jade
-  shift-selector(
-    options = "options"
-    selected = "selected"
-    on-select = "onSelect(selected)"
-    on-discard = "onDiscard(discarded)"
-    multiple
-  )
-    strong {{option.city}}
-    span &nbsp; {{option.state}}
-    div
-      i pop. {{option.population}}
-```
- */
-var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
-
-angular.module('shift.components.selector', []).directive('shiftSelector', ['$compile', function($compile) {
-  var DOWN_KEY, ENTER_KEY, UP_KEY;
-  UP_KEY = 38;
-  DOWN_KEY = 40;
-  ENTER_KEY = 13;
-  return {
-    restrict: 'E',
-    transclude: true,
-    scope: {
-      options: '=',
-      selected: '=?',
-      onSelect: '&',
-      onDiscard: '&'
-    },
-    link: function(scope, element, attrs, ctrl, transclude) {
-      var autoScroll, isSelected, onKeyDown, option, previous_client_y, select_container, startListening, stopListening;
-      select_container = angular.element(document.createElement('div'));
-      select_container.addClass('select-container');
-      select_container.attr({
-        'ng-if': 'options.length'
-      });
-      option = angular.element(document.createElement('div'));
-      option.addClass('select-option');
-      option.attr({
-        'ng-repeat': 'option in options',
-        'ng-class': 'getClass($index)',
-        'ng-click': 'toggle($index, $event)',
-        'ng-mouseenter': 'setPosition($index, $event)'
-      });
-      transclude(scope, function(clone, scope) {
-        return option.append(clone);
-      });
-      select_container.append(option);
-      element.append(select_container);
-      $compile(select_container)(scope);
-      $compile(option)(scope);
-      scope.position = -1;
-      if (attrs.multiple != null) {
-        if (scope.selected == null) {
-          scope.selected = [];
-        }
-      }
-      onKeyDown = function(event) {
-        var key_code, ref;
-        if (!((ref = scope.options) != null ? ref.length : void 0)) {
-          return;
-        }
-        key_code = event.which || event.keyCode;
-        if (key_code !== UP_KEY && key_code !== DOWN_KEY && key_code !== ENTER_KEY) {
-          return;
-        }
-        scope.$apply(function() {
-          switch (key_code) {
-            case UP_KEY:
-              scope.position -= 1;
-              break;
-            case DOWN_KEY:
-              scope.position += 1;
-              break;
-            default:
-              if (scope.position > -1) {
-                scope.toggle(scope.position, event);
-              }
-          }
-          scope.position = Math.max(0, scope.position);
-          scope.position = Math.min(scope.options.length - 1, scope.position);
-          return autoScroll();
-        });
-        event.preventDefault();
-        event.stopPropagation();
-        return false;
-      };
-      autoScroll = function() {
-        var container_elt, container_pos, margin, option_elt, option_pos, option_style;
-        container_elt = element[0].children[0];
-        option_elt = container_elt.children[scope.position];
-        option_pos = option_elt.getBoundingClientRect();
-        container_pos = container_elt.getBoundingClientRect();
-        option_style = getComputedStyle(option_elt);
-        if (option_pos.bottom > container_pos.bottom) {
-          margin = parseInt(option_style.marginBottom, 10);
-          container_elt.scrollTop += option_pos.bottom - container_pos.bottom + margin;
-        }
-        if (option_pos.top < container_pos.top) {
-          margin = parseInt(option_style.marginTop, 10);
-          return container_elt.scrollTop += option_pos.top - container_pos.top - margin;
-        }
-      };
-      isSelected = function(option) {
-        if (attrs.multiple != null) {
-          return indexOf.call(scope.selected, option) >= 0;
-        }
-        return option === scope.selected;
-      };
-      scope.toggle = function(index, event) {
-        event.stopPropagation();
-        option = scope.options[index];
-        if (isSelected(option)) {
-          scope.discard(index);
-        } else {
-          scope.select(index);
-        }
-        return false;
-      };
-      scope.select = function(index) {
-        var selected;
-        scope.position = index;
-        selected = scope.options[scope.position];
-        if (attrs.multiple != null) {
-          scope.selected.push(selected);
-        } else {
-          scope.selected = selected;
-        }
-        return scope.onSelect({
-          selected: selected
-        });
-      };
-      scope.discard = function(index) {
-        var discarded;
-        scope.position = index;
-        discarded = scope.options[scope.position];
-        if (attrs.multiple != null) {
-          _.pull(scope.selected, discarded);
-        } else {
-          scope.selected = null;
-        }
-        return scope.onDiscard({
-          discarded: discarded
-        });
-      };
-      previous_client_y = 0;
-      scope.setPosition = function($index, event) {
-        if (event.clientY !== previous_client_y) {
-          previous_client_y = event.clientY;
-          return scope.position = $index;
-        }
-      };
-      scope.getClass = function(index) {
-        var ref;
-        return {
-          'selected': isSelected((ref = scope.options) != null ? ref[index] : void 0),
-          'active': index === scope.position
-        };
-      };
-      (startListening = function() {
-        return document.addEventListener('keydown', onKeyDown);
-      })();
-      stopListening = function() {
-        return document.removeEventListener('keydown', onKeyDown);
-      };
-      return scope.$on('$destroy', stopListening);
-    }
-  };
-}]);
-
-
-/**
 Sortable directive to allow drag n' drop sorting of an array.
 
 @module shift.components.sortable
@@ -715,6 +526,195 @@ angular.module('shift.components.sortable', []).service('shiftSortableService', 
 
 
 /**
+A directive that displays a list of option, navigation using arrow
+keys + enter or mouse click.
+
+The options are not displayed anymore if selected has a value or if
+options is emtpy.
+
+@module shift.components.selector
+
+@param {array} options Options to be displayed and to choose from
+@param {object} selected Object selected from the options
+@param {function} onSelect Callback triggered when an option has been selected
+@param {function} onDiscard Callback triggered when an option has de-selected
+@param {boolean} multiple Indicates if the selection allows selection of more
+than one option
+
+@example
+```jade
+  shift-selector(
+    options = "options"
+    selected = "selected"
+    on-select = "onSelect(selected)"
+    on-discard = "onDiscard(discarded)"
+    multiple
+  )
+    strong {{option.city}}
+    span &nbsp; {{option.state}}
+    div
+      i pop. {{option.population}}
+```
+ */
+var indexOf = [].indexOf || function(item) { for (var i = 0, l = this.length; i < l; i++) { if (i in this && this[i] === item) return i; } return -1; };
+
+angular.module('shift.components.selector', []).directive('shiftSelector', ['$compile', function($compile) {
+  var DOWN_KEY, ENTER_KEY, UP_KEY;
+  UP_KEY = 38;
+  DOWN_KEY = 40;
+  ENTER_KEY = 13;
+  return {
+    restrict: 'E',
+    transclude: true,
+    scope: {
+      options: '=',
+      selected: '=?',
+      onSelect: '&',
+      onDiscard: '&'
+    },
+    link: function(scope, element, attrs, ctrl, transclude) {
+      var autoScroll, isSelected, onKeyDown, option, previous_client_y, select_container, startListening, stopListening;
+      select_container = angular.element(document.createElement('div'));
+      select_container.addClass('select-container');
+      select_container.attr({
+        'ng-if': 'options.length'
+      });
+      option = angular.element(document.createElement('div'));
+      option.addClass('select-option');
+      option.attr({
+        'ng-repeat': 'option in options',
+        'ng-class': 'getClass($index)',
+        'ng-click': 'toggle($index, $event)',
+        'ng-mouseenter': 'setPosition($index, $event)'
+      });
+      transclude(scope, function(clone, scope) {
+        return option.append(clone);
+      });
+      select_container.append(option);
+      element.append(select_container);
+      $compile(select_container)(scope);
+      $compile(option)(scope);
+      scope.position = -1;
+      if (attrs.multiple != null) {
+        if (scope.selected == null) {
+          scope.selected = [];
+        }
+      }
+      onKeyDown = function(event) {
+        var key_code, ref;
+        if (!((ref = scope.options) != null ? ref.length : void 0)) {
+          return;
+        }
+        key_code = event.which || event.keyCode;
+        if (key_code !== UP_KEY && key_code !== DOWN_KEY && key_code !== ENTER_KEY) {
+          return;
+        }
+        scope.$apply(function() {
+          switch (key_code) {
+            case UP_KEY:
+              scope.position -= 1;
+              break;
+            case DOWN_KEY:
+              scope.position += 1;
+              break;
+            default:
+              if (scope.position > -1) {
+                scope.toggle(scope.position, event);
+              }
+          }
+          scope.position = Math.max(0, scope.position);
+          scope.position = Math.min(scope.options.length - 1, scope.position);
+          return autoScroll();
+        });
+        event.preventDefault();
+        event.stopPropagation();
+        return false;
+      };
+      autoScroll = function() {
+        var container_elt, container_pos, margin, option_elt, option_pos, option_style;
+        container_elt = element[0].children[0];
+        option_elt = container_elt.children[scope.position];
+        option_pos = option_elt.getBoundingClientRect();
+        container_pos = container_elt.getBoundingClientRect();
+        option_style = getComputedStyle(option_elt);
+        if (option_pos.bottom > container_pos.bottom) {
+          margin = parseInt(option_style.marginBottom, 10);
+          container_elt.scrollTop += option_pos.bottom - container_pos.bottom + margin;
+        }
+        if (option_pos.top < container_pos.top) {
+          margin = parseInt(option_style.marginTop, 10);
+          return container_elt.scrollTop += option_pos.top - container_pos.top - margin;
+        }
+      };
+      isSelected = function(option) {
+        if (attrs.multiple != null) {
+          return indexOf.call(scope.selected, option) >= 0;
+        }
+        return option === scope.selected;
+      };
+      scope.toggle = function(index, event) {
+        event.stopPropagation();
+        option = scope.options[index];
+        if (isSelected(option)) {
+          scope.discard(index);
+        } else {
+          scope.select(index);
+        }
+        return false;
+      };
+      scope.select = function(index) {
+        var selected;
+        scope.position = index;
+        selected = scope.options[scope.position];
+        if (attrs.multiple != null) {
+          scope.selected.push(selected);
+        } else {
+          scope.selected = selected;
+        }
+        return scope.onSelect({
+          selected: selected
+        });
+      };
+      scope.discard = function(index) {
+        var discarded;
+        scope.position = index;
+        discarded = scope.options[scope.position];
+        if (attrs.multiple != null) {
+          _.pull(scope.selected, discarded);
+        } else {
+          scope.selected = null;
+        }
+        return scope.onDiscard({
+          discarded: discarded
+        });
+      };
+      previous_client_y = 0;
+      scope.setPosition = function($index, event) {
+        if (event.clientY !== previous_client_y) {
+          previous_client_y = event.clientY;
+          return scope.position = $index;
+        }
+      };
+      scope.getClass = function(index) {
+        var ref;
+        return {
+          'selected': isSelected((ref = scope.options) != null ? ref[index] : void 0),
+          'active': index === scope.position
+        };
+      };
+      (startListening = function() {
+        return document.addEventListener('keydown', onKeyDown);
+      })();
+      stopListening = function() {
+        return document.removeEventListener('keydown', onKeyDown);
+      };
+      return scope.$on('$destroy', stopListening);
+    }
+  };
+}]);
+
+
+/**
 Time directive displays a text input guessing the time entered. Accepts
 a moment_object object as model and only inpacts its time.
 
@@ -788,13 +788,19 @@ angular.module('shift.components.time', []).directive('shiftTime', function() {
       };
       guessTime = function(time_str) {
         var hour, minute, ref, time_re, time_tuple;
-        time_re = /(1[0-2]|0?[1-9])[^\d]?([0-5][0-9]|[0-9])?\s?(am|pm|a|p)?/;
+        time_re = /(1[0-2]|0?[1-9])[^ap\d]?([0-5][0-9]|[0-9])?\s?(am|pm|a|p)?/;
         time_tuple = time_re.exec(time_str.toLowerCase());
         if (time_tuple) {
           hour = time_tuple[1] && parseInt(time_tuple[1], 10) || 0;
           minute = time_tuple[2] && parseInt(time_tuple[2], 10) || 0;
           if ((ref = time_tuple[3]) === 'p' || ref === 'pm') {
-            hour += 12;
+            if (hour < 12) {
+              hour += 12;
+            }
+          } else {
+            if (hour === 12) {
+              hour = 0;
+            }
           }
           return [hour, minute];
         }
