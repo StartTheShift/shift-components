@@ -13,6 +13,9 @@ angular.module('examples', ['shift.components'])
     $scope.today = ->
       $scope.date = moment()
 
+    $scope.nullDate = ->
+      $scope.date = null
+
     $scope.beginingOfYear = ->
       $scope.date = moment().startOf('year')
 

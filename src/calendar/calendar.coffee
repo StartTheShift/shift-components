@@ -76,7 +76,8 @@ angular.module 'shift.components.calendar', []
 
         updateDate = (date) ->
           scope.date = date
-          scope.showing_date = moment(date)
+          # undefined param creates a valid moment object, while null doesn't
+          scope.showing_date = moment(date or undefined)
           buildCalendarScope()
           scope.change()
 
