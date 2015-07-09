@@ -69,7 +69,7 @@ angular.module 'shift.components.time', []
 
         guessTime = (time_str) ->
           # Guess and return a time tuple from a string
-          time_re = /(1[0-2]|0?[1-9])[^\d]?([0-5][0-9]|[0-9])?\s?(am|pm|a|p)?/
+          time_re = /(1[0-2]|0?[1-9])[^ap\d]?([0-5][0-9]|[0-9])?\s?(am|pm|a|p)?/
 
           time_tuple = time_re.exec(time_str.toLowerCase())
 
@@ -78,7 +78,12 @@ angular.module 'shift.components.time', []
             minute = time_tuple[2] and parseInt(time_tuple[2], 10) or 0
 
             if time_tuple[3] in ['p', 'pm']
+              if hour < 12
                 hour += 12
+
+            else
+              if hour is 12
+                hour = 0
 
             return [hour, minute]
 

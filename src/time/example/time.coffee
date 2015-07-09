@@ -18,5 +18,6 @@ angular.module('examples', ['shift.components'])
       $scope.date = moment()
 
     $scope.dateValidator = (date) ->
+      return true
       return date.isBetween min_date, max_date
 
