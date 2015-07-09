@@ -10,18 +10,18 @@ date handeling without the the risk of impacting associated dates.
 | Param | Type | Description |
 | --- | --- | --- |
 | date | <code>moment</code> | A moment object, default to now |
-| dateChange | <code>function</code> | Called when date is changed |
-| dateValidator | <code>function</code> | Method returning a Boolean indicating if the selected date is valid or not |
-| dateHightlight | <code>function</code> | Method returning a Boolean to highlight a days on the calendar. |
-| dateAllowNull | <code>Boolean</code> | Indicate if the date can be set to null |
+| change | <code>function</code> | Called when date is changed |
+| validator | <code>function</code> | Method returning a Boolean indicating if the selected date is valid or not |
+| highlight | <code>function</code> | Method returning a Boolean to highlight a days on the calendar. |
+| allowNull | <code>Boolean</code> | Indicate if the date can be set to null |
 
 **Example**  
 ```jade
 shift-calendar(
-  date = "date"
-  date-change = "onDateChange(date)"
-  date-validator = "isValidDate"
-  date-highlight = "isSpecialDay"
-  date-allow-null = "true"
+  ng-model = "date"
+  change = "onDateChange(date)"
+  validator = "isValidDate"
+  highlight = "isSpecialDay"
+  allow-null = "true"
 )
 ```
