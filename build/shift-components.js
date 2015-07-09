@@ -103,7 +103,7 @@ angular.module('shift.components.calendar', []).directive('shiftCalendar', funct
       };
       updateDate = function(date) {
         scope.date = date;
-        scope.showing_date = moment(date);
+        scope.showing_date = moment(date || void 0);
         buildCalendarScope();
         return scope.change();
       };
