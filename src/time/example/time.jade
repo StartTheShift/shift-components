@@ -5,11 +5,12 @@ div(ng-controller="TimeCtrl")
 
   h2 Time
 
-  shift-time(
-    time = "date"
-    time-change = "onDateChange(date)"
-    time-validator = "dateValidator"
-    time-allow-null = "true"
+  input(
+    type = "text"
+    ng-model = "date"
+    ng-change = "onDateChange(date)"
+    ng-disabled = "!date"
+    shift-time
   )
 
   button.button.inline(ng-click="setDateToNull()") Set to Null
