@@ -6,10 +6,10 @@ div(ng-controller="CalendarCtrl")
   h2 Date
 
   shift-calendar.naked.single-calendar(
-    date = "date"
-    date-change = "onDateChange(date)"
-    date-validator = "dateValidator"
-    date-allow-null = "true"
+    ng-model = "date"
+    change = "onDateChange(date)"
+    validator = "dateValidator"
+    allow-null = "true"
   )
 
   div
@@ -25,6 +25,10 @@ div(ng-controller="CalendarCtrl")
       ng-click = "endOfQuarter()"
     ) end of quarter
 
+    button.button.inline(
+      ng-click = "nullDate()"
+    ) Null Date
+
   h3 Scope
   pre
     code.code
@@ -34,17 +38,17 @@ div(ng-controller="CalendarCtrl")
   h2 Date Range
 
   shift-calendar.naked.range-calendar(
-    date = "start_date"
-    date-validator = "dateValidator"
-    date-hightlight = "isDateInRange"
-    date-change = "startDateChange(start_date)"
+    ng-model = "start_date"
+    validator = "dateValidator"
+    highlight = "isDateInRange"
+    change = "startDateChange(start_date)"
   )
 
   shift-calendar.naked.range-calendar(
-    date = "stop_date"
-    date-validator = "dateValidator"
-    date-hightlight = "isDateInRange"
-    date-change = "stopDateChange(stop_date)"
+    ng-model = "stop_date"
+    validator = "dateValidator"
+    highlight = "isDateInRange"
+    change = "stopDateChange(stop_date)"
   )
 
   div
@@ -55,6 +59,11 @@ div(ng-controller="CalendarCtrl")
     button.button.inline(
       ng-click = "lastWeek()"
     ) Last week
+
+    button.button.inline(
+      ng-click = "outOfRangeDate()"
+    ) Out of range
+
 
   h3 Scope
   pre

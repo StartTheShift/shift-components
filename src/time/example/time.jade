@@ -1,0 +1,23 @@
+div(ng-controller="TimeCtrl")
+  h1 Shift Time
+  p
+    | A directive to guess time entered by the user.
+
+  h2 Time
+
+  input(
+    type = "text"
+    ng-model = "date"
+    ng-change = "onDateChange(date)"
+    ng-disabled = "!date"
+    shift-time
+  )
+
+  button.button.inline(ng-click="setDateToNull()") Set to Null
+  button.button.inline(ng-click="setDateToNow()") Set to Now
+
+  h3 Scope
+  pre
+    code.code
+      | // moment object
+      | $scope.date = {{date}}

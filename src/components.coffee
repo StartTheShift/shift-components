@@ -10,6 +10,7 @@ UI components for SHIFT applications
 @requires shift.components.typeahead
 @requires shift.components.popover
 @requires shift.components.select
+@requires shift.components.time
 
 @module shift.components
 
@@ -23,4 +24,5 @@ angular.module 'shift.components', [
   'shift.components.typeahead'
   'shift.components.popover'
   'shift.components.select'
+  'shift.components.time'
 ]

@@ -11,21 +11,21 @@ date handeling without the the risk of impacting associated dates.
 @requires lodash
 
 @param {moment} date A moment object, default to now
-@param {function} dateChange Called when date is changed
-@param {function} dateValidator Method returning a Boolean indicating if
+@param {function} change Called when date is changed
+@param {function} validator Method returning a Boolean indicating if
 the selected date is valid or not
-@param {function} dateHightlight Method returning a Boolean to highlight
+@param {function} highlight Method returning a Boolean to highlight
 a days on the calendar.
-@param {Boolean} dateAllowNull Indicate if the date can be set to null
+@param {Boolean} allowNull Indicate if the date can be set to null
 
 @example
 ```jade
 shift-calendar(
-  date = "date"
-  date-change = "onDateChange(date)"
-  date-validator = "isValidDate"
-  date-highlight = "isSpecialDay"
-  date-allow-null = "true"
+  ng-model = "date"
+  change = "onDateChange(date)"
+  validator = "isValidDate"
+  highlight = "isSpecialDay"
+  allow-null = "true"
 )
 ```
 ###
@@ -34,12 +34,13 @@ angular.module 'shift.components.calendar', []
     ->
       restrict: 'E'
       templateUrl: 'calendar/calendar.html'
+      require: 'ngModel'
       scope:
-        date: '='
-        dateChange: '&'
-        dateValidator: '='
-        dateHightlight: '='
-        dateAllowNull: '='
+        date: '=ngModel'
+        change: '&'
+        validator: '='
+        highlight: '='
+        allowNull: '='
 
       link: (scope) ->
         scope.goToNextMonth = ->
@@ -55,27 +56,30 @@ angular.module 'shift.components.calendar', []
           buildCalendarScope()
 
         scope.selectDate = ($event) ->
-          updateDate moment $event.target.getAttribute('data-iso')
+          date = moment $event.target.getAttribute('data-iso')
+          return unless isValidDate(date)
+
+          updateDate(date)
 
         scope.setNull = ->
-          return unless scope.dateAllowNull
+          return unless scope.allowNull
           scope.date = null
           buildCalendarScope()
-          scope.dateChange()
+          scope.change()
 
         isValidDate = (date) ->
           return false unless moment.isMoment(date) and date.isValid()
 
-          if scope.dateValidator?
-            return scope.dateValidator date
+          if scope.validator?
+            return scope.validator date
           return true
 
         updateDate = (date) ->
-          if isValidDate(date)
-            scope.date = date
-            scope.showing_date = moment(date)
-            buildCalendarScope()
-            scope.dateChange()
+          scope.date = date
+          # undefined param creates a valid moment object, while null doesn't
+          scope.showing_date = moment(date or undefined)
+          buildCalendarScope()
+          scope.change()
 
         scope.$watch 'date', (new_value, old_value) ->
             return if new_value is old_value
@@ -87,12 +91,17 @@ angular.module 'shift.components.calendar', []
            off: not scope.showing_date.isSame(date, 'month')
            available: isValidDate(date)
            invalid: not isValidDate(date)
-           highlight: scope.dateHightlight?(date)
+           highlight: scope.highlight?(date)
           }
 
         do buildCalendarScope = ->
           date = moment(scope.showing_date).startOf('month').startOf('week')
           end_date = moment(scope.showing_date).endOf('month').endOf('week')
+
+          if scope.date?.isValid?()
+            date.set('hour', scope.date.get('hour'))
+            date.set('minute', scope.date.get('minute'))
+            date.set('second', scope.date.get('second'))
 
           scope.weeks = []
           while true
@@ -113,11 +122,11 @@ angular.module 'shift.components.calendar', []
 
             date.add(1, 'day')
 
-        if not scope.dateAllowNull and not moment.isMoment(scope.date)
+        if not scope.allowNull and not moment.isMoment(scope.date)
           scope.date = moment()
 
         if moment.isMoment(scope.date)
-          updateDate scope.date
+          updateDate(scope.date)
           scope.showing_date = moment(scope.date)
         else
           scope.showing_date = moment().startOf('day')
