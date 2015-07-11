@@ -4,7 +4,7 @@ executed on the parent element.
 
 @module shift.components.popover
 
-@param {moment} date A moment object, default to now
+@param {} date A moment object, default to now
 @param {function} dateChange Called when date is changed
 @param {function} dateValidator Method returning a Boolean indicating if
 the selected date is valid or not
@@ -14,105 +14,172 @@ a days on the calendar.
 
 @example
 ```jade
-shift-calendar(
-  date = "date"
-  date-change = "onDateChange(date)"
-  date-validator = "isValidDate"
-  date-highlight = "isSpecialDay"
-  date-allow-null = "true"
+shift-popover(
+  title = "date"
+  text = "lorem ipsum"
+  trigger = "click|hover|focus"
+  position = "top|bottom|left|right"
+  template-url = ""
+  fixed
 )
 ```
 ###
 angular.module 'shift.components.popover', []
-  .service 'shiftPopoverService', ->
-    popover_scope = null
-
-    register: (scope) ->
-      # Hide current popover if any and return
-      # a de-registering method
-      popover_scope.hide() if popover_scope?
-      popover_scope = scope
-
-      # deregistering method removes the popover
-      # scope to prevent memory leakage
-      return ->
-        # make sure we only remove our directive scope
-        if popover_scope is scope
-          popover_scope = null
-
   .directive 'shiftPopover',
     (
       $timeout
       $window
-      shiftPopoverService
+      $http
+      $compile
     ) ->
       restrict: 'E'
       transclude: true
-      templateUrl: 'popover/popover.html'
+
+      #templateUrl: 'popover/popover.html'
       scope:
-        on: '@'
-        off: '@'
-        offDelay: '@'
-
-      compile: (element, attrs, scope)->
-        root_element = element[0].parentNode
-
-        getStyle = (element, key, default_value='') ->
-          return $window.getComputedStyle(element)[key] or default_value
-
-        # find a parent a non static element
-        while getStyle(root_element, 'position', 'static') is 'static'
-          root_element = root_element.parentNode
-
-        $(root_element).append(element)
+        title: '@'
+        text: '@'
+        templateUrl: '@'
+        position: '@'
+        trigger: '@'
 
       link: (scope, element, attrs, controllers, transclude) ->
+        is_visible = false
+        renderPopover = null
+        onDestroy = null
+        is_compiled = false
+        offset = 5
 
-        transclude scope, (copy) ->
-          console.log copy
+        default_template =
+          '<div' +
+          '  class = "popover-title"' +
+          '  ng-if = "title ">{{title}}</div>' +
+          '<p>{{ text }}</p>'
 
-        parent = element[0].parentNode
-        unregister = null
+        popover = angular.element(
+          "<div class=\"popover-container\ popover-#{scope.direction}\" />"
+        )
 
-        show = (event) ->
-          scope.$apply scope.show
+        if 'fixed' of attrs
+          $scope.fixed = true
 
-        hide = (event) ->
-          scope.$apply scope.hide
+        container = element[0].parentNode
 
-        scope.show = ->
-          unregister = shiftPopoverService.register(scope)
-          scope.visible = true
-          window.addEventListener 'keyup', hideOnEscape
-          document.body.addEventListener 'mousedown', hideOnClickOut
+
+        renderTemplate = (template) ->
+          return if is_visible
+          is_visible = true
+
+          unless is_compiled
+            popover.append $compile(template)(scope)
+            is_compiled = true
+
+          scope.$apply ->
+            $(document.body).append(popover)
+
+          $timeout ->
+            $(popover).offset( $(container).offset() )
+
+            popover_height = $(popover[0]).outerHeight()
+            popover_width = $(popover[0]).outerWidth()
+            container_height = $(container).outerHeight()
+            container_width = $(container).outerWidth()
+
+            switch scope.position
+              when 'top'
+                popover.css
+                  marginLeft: "#{container_width/2 - popover_width/2}px"
+                  marginTop: "-#{popover_height + offset}px"
+                  visibility: ''
+
+              when 'bottom'
+                popover.css
+                  marginLeft: "#{container_width/2 - popover_width/2}px"
+                  marginTop: "#{container_height + offset}px"
+                  visibility: ''
+
+              when 'right'
+                popover.css
+                  marginLeft: "#{container_width + offset}px"
+                  marginTop: "#{container_height/2 - popover_height/2}px"
+                  visibility: ''
+
+              else # default left position
+                popover.css
+                  marginLeft: "-#{popover_width + offset}px"
+                  marginTop: "#{container_height/2 - popover_height/2}px"
+                  visibility: ''
 
         scope.hide = ->
-          scope.visible = false
-          unregister()
-          window.removeEventListener 'keyup', hideOnEscape
-          document.body.removeEventListener 'mousedown', hideOnClickOut
+          console.log 'hide called', is_visible
 
+          return unless is_visible
+          is_visible = false
+
+          popover.remove()
+          popover.css(
+            marginLeft: ''
+            marginTop: ''
+            visibility: 'hidden'
+          )
+
+
+        ###
+        Event triggering a hide after the click event
+        ###
         hideOnClickOut = (event) ->
           target = event.target
-          while target
-            return if target is parent
-            target = target.parent
 
-          scope.$apply scope.hide
+          while target
+            if target in [popover[0], container]
+              return
+            target = target.parentNode
+
+          scope.hide()
 
         hideOnEscape = (event) ->
           if event.which is 27 # ESC key
             scope.$apply scope.hide
 
-        if scope.off
-          parent.addEventListener scope.off, ->
-            $timeout scope.hide, scope.offDelay
+        if scope.templateUrl
+          $http.get scope.templateUrl
+            .then (response) ->
+              renderPopover = ->
+                renderTemplate(response.data)
+        else
+          renderPopover = ->
+            renderTemplate(default_template)
 
-        parent.addEventListener scope.on, show
+        ###
+        Triggers
+        ###
+        switch scope.trigger
+          when 'hover'
+            container.addEventListener 'mouseenter', renderPopover
+            container.addEventListener 'mouseout', scope.hide
 
-        # unregister the popover on destroy
-        scope.$on '$destroy', ->
-          unregister()
-          parent.removeEventListener scope.on, trigger
-          window.removeEventListener 'keyup', hideOnEscape
-          document.body.removeEventListener 'mousedown', hideOnClickOut
+            onDestroy = ->
+              container.removeEventListener 'mouseenter', renderPopover
+              container.removeEventListener 'mouseout', scope.hide
+
+          when 'focus'
+            container.addEventListener 'focus', renderPopover
+            container.addEventListener 'blur', scope.hide
+
+            onDestroy = ->
+              container.removeEventListener 'focus', renderPopover
+              container.removeEventListener 'blur', scope.hide
+
+          else # 'click' by default
+            container.addEventListener 'click', renderPopover
+            document.addEventListener 'click', hideOnClickOut
+            document.addEventListener 'keyup', hideOnEscape
+
+            onDestroy = ->
+              container.removeEventListener 'click', renderPopover
+              document.removeEventListener 'click', hideOnClickOut
+              document.addEventListener 'keyup', hideOnEscape
+
+
+        scope.$on '$destroy', onDestroy
+

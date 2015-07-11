@@ -6,7 +6,7 @@ executed on the parent element.
 
 | Param | Type | Description |
 | --- | --- | --- |
-| date | <code>moment</code> | A moment object, default to now |
+| date |  | A moment object, default to now |
 | dateChange | <code>function</code> | Called when date is changed |
 | dateValidator | <code>function</code> | Method returning a Boolean indicating if the selected date is valid or not |
 | dateHightlight | <code>function</code> | Method returning a Boolean to highlight a days on the calendar. |
@@ -14,11 +14,12 @@ executed on the parent element.
 
 **Example**  
 ```jade
-shift-calendar(
-  date = "date"
-  date-change = "onDateChange(date)"
-  date-validator = "isValidDate"
-  date-highlight = "isSpecialDay"
-  date-allow-null = "true"
+shift-popover(
+  title = "date"
+  text = "lorem ipsum"
+  trigger = "click|hover|focus"
+  position = "top|bottom|left|right"
+  template-url = ""
+  fixed
 )
 ```

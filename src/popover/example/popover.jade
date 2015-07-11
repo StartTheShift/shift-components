@@ -5,7 +5,7 @@ div(ng-controller="PopoverCtrl")
 
   h2 On text popover
 
-  p
+  p(style="font-size:3em")
     | Lorem ipsum dolor sit amet, consectetur adipiscing elit.
     span Maecenas venenatis
     | sodales dolor. Pellentesque luctus id tortor malesuada mattis. Ut at
@@ -15,13 +15,11 @@ div(ng-controller="PopoverCtrl")
       |  nisi eleifend in
 
       shift-popover(
-        on="mouseenter"
-        off="mouseleave"
-        off-delay="200"
+        title = "I am a title"
+        text = "I'm a content Lorem ipsum dolor sit amet (1st top)"
+        position = "top"
+        trigger = 'click'
       )
-        div This is the definition of that word blah
-          | xxxx
-          button.button xxx
 
     |  In velit lorem, semper vitae elit id, viverra elementum felis. Morbi
     | ullamcorper quam vitae metus posuere elementum. Sed ac vehicula magna.
@@ -31,20 +29,28 @@ div(ng-controller="PopoverCtrl")
     span.highlight-word
       |  Nullam dignissim consequat nisl
 
-      shift-popover(on="mouseenter")
-        div blah blah blah
+      shift-popover(
+        title = "I am a title"
+        text = "I'm a content Lorem ipsum dolor sit amet (2rd bottom)"
+        position = "bottom"
+        trigger = 'hover'
+      )
 
     | at pulvinar. Nullam rhoncus metus a turpis
 
     span.highlight-word
       |  malesuada condimentum. Aliquam
 
-      shift-popover(on="click")
-        div It can work on click
+      shift-popover(
+        text="It can work on click (3rd auto)"
+      )
 
     | rutrum neque nisi, at eleifend metus consequat at. Nunc sit amet sagittis
     | felis.
 
     button.button Ok !
-      shift-popover(on="mouseenter")
-        div popover in a button
+      shift-popover(
+        text = "It can work on click (button right)"
+        position = "right"
+        trigger = "focus"
+      )

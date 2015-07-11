@@ -1,2 +1,3 @@
-.popover-content(ng-if="visible")
-	ng-transclude
+.popover-content
+  h1(ng-if="title") {{ title }}
+  p {{ text }}
