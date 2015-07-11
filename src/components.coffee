@@ -11,6 +11,7 @@ UI components for SHIFT applications
 @requires shift.components.popover
 @requires shift.components.select
 @requires shift.components.time
+@requires shift.components.floating
 
 @module shift.components
 
@@ -25,4 +26,5 @@ angular.module 'shift.components', [
   'shift.components.popover'
   'shift.components.select'
   'shift.components.time'
+  'shift.components.floating'
 ]

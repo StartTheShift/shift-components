@@ -1,0 +1,71 @@
+div(ng-controller="FloatingCtrl")
+  h1 Shift Floating
+  p
+    | A directive to display a floating element on custom event
+
+  h2 On text floating
+
+  p(style="font-size:3em")
+    | Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    span Maecenas venenatis
+    | sodales dolor. Pellentesque luctus id tortor malesuada mattis. Ut at
+    | efficitur magna. Fusce viverra porta erat, a volutpat
+
+    span.highlight-word
+      |  nisi eleifend in
+
+      shift-floating(
+        position = "top"
+        trigger = 'click'
+      ) I'm a content Lorem ipsum dolor sit amet (1st top)
+
+    |  In velit lorem, semper vitae elit id, viverra elementum felis. Morbi
+    | ullamcorper quam vitae metus posuere elementum. Sed ac vehicula magna.
+    | Pellentesque laoreet nulla eu nibh dapibus, id ornare metus porta. Integer
+    | sed metus at risus accumsan posuere.
+
+    span.highlight-word
+      |  Nullam dignissim consequat nisl
+
+      shift-floating(
+        position = "bottom"
+        trigger = 'hover'
+      ) I'm a content Lorem ipsum dolor sit amet (2rd bottom)
+
+    | at pulvinar. Nullam rhoncus metus a turpis
+
+    span.highlight-word
+      |  malesuada condimentum. Aliquam
+
+      shift-floating It can work on click (3rd auto)
+
+    | rutrum neque nisi, at eleifend metus consequat at. Nunc sit amet sagittis
+    | felis.
+
+    button.button Ok !
+      shift-floating(
+        position = "right"
+        trigger = "focus"
+      ) It can work on click (button right)
+
+    div
+      | rutrum neque nisi, at eleifend metus consequat at. Nunc sit
+      strong {{ foo.bar }}
+
+      shift-floating(
+        position = "bottom"
+        trigger = "click"
+      )
+        form
+          input(
+            type = "text"
+            placeholder = "Something..."
+            ng-model = "foo.bar"
+            value = "{{ foo.bar }}"
+          )
+
+          button.button.primary(
+            ng-click = "hide()"
+          ) Validate {{ foo.bar }}
+
+        span {{ foo.bar }}
