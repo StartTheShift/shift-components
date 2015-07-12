@@ -27,159 +27,65 @@ shift-popover(
 angular.module 'shift.components.popover', []
   .directive 'shiftPopover',
     (
-      $timeout
-      $window
       $http
       $compile
+      $templateCache
     ) ->
-      restrict: 'E'
-      transclude: true
+      default_template = '''
+        <div class="popover-container">
+          <h3
+            ng-show = "title"
+            class = "popover-title"
+          > {{ title }} </h3>
+          <p>{{ text }}</p>
+        </div>
+      '''
 
-      #templateUrl: 'popover/popover.html'
-      scope:
-        title: '@'
-        text: '@'
-        templateUrl: '@'
-        position: '@'
-        trigger: '@'
+      ###
+      # Directive definition object
+      ###
+
+      restrict: 'E'
+      scope: true
 
       link: (scope, element, attrs, controllers, transclude) ->
-        is_visible = false
-        renderPopover = null
-        onDestroy = null
-        is_compiled = false
-        offset = 5
+        scope.title = ''
+        scope.text = ''
+        scope.parent_node = element.parent()?[0]
 
-        default_template =
-          '<div' +
-          '  class = "popover-title"' +
-          '  ng-if = "title ">{{title}}</div>' +
-          '<p>{{ text }}</p>'
+        compile = (template) ->
+          element.empty()
 
-        popover = angular.element(
-          "<div class=\"popover-container\ popover-#{scope.direction}\" />"
-        )
+          shift_floating = angular.element '<shift-floating />'
 
-        if 'fixed' of attrs
-          $scope.fixed = true
+          shift_floating.attr
+            parent: 'parent_node'
+            position: attrs.position or 'bottom'
+            trigger: attrs.trigger or 'click'
 
-        container = element[0].parentNode
+          if attrs.fixed
+            shift_floating.attr
+              fixed: true
 
+          shift_floating.append $compile(template)(scope)
+          element.append $compile(shift_floating)(scope)
 
-        renderTemplate = (template) ->
-          return if is_visible
-          is_visible = true
+          undefined
 
-          unless is_compiled
-            popover.append $compile(template)(scope)
-            is_compiled = true
+        # Recompile popover on template change
+        # attrs.$observe 'templateUrl', ->
+        #   return unless attrs.templateUrl
+        #   $http.get attrs.templateUrl, cache: $templateCache
+        #     .success compile
 
-          scope.$apply ->
-            $(document.body).append(popover)
+        # Recompile popover on title/text change
+        scope.$watch ->
+          "#{attrs.title}, #{attrs.text}"
+        , (new_value, old_value) ->
+          return unless new_value
+          return if new_value isnt old_value
 
-          $timeout ->
-            $(popover).offset( $(container).offset() )
-
-            popover_height = $(popover[0]).outerHeight()
-            popover_width = $(popover[0]).outerWidth()
-            container_height = $(container).outerHeight()
-            container_width = $(container).outerWidth()
-
-            switch scope.position
-              when 'top'
-                popover.css
-                  marginLeft: "#{container_width/2 - popover_width/2}px"
-                  marginTop: "-#{popover_height + offset}px"
-                  visibility: ''
-
-              when 'bottom'
-                popover.css
-                  marginLeft: "#{container_width/2 - popover_width/2}px"
-                  marginTop: "#{container_height + offset}px"
-                  visibility: ''
-
-              when 'right'
-                popover.css
-                  marginLeft: "#{container_width + offset}px"
-                  marginTop: "#{container_height/2 - popover_height/2}px"
-                  visibility: ''
-
-              else # default left position
-                popover.css
-                  marginLeft: "-#{popover_width + offset}px"
-                  marginTop: "#{container_height/2 - popover_height/2}px"
-                  visibility: ''
-
-        scope.hide = ->
-          console.log 'hide called', is_visible
-
-          return unless is_visible
-          is_visible = false
-
-          popover.remove()
-          popover.css(
-            marginLeft: ''
-            marginTop: ''
-            visibility: 'hidden'
-          )
-
-
-        ###
-        Event triggering a hide after the click event
-        ###
-        hideOnClickOut = (event) ->
-          target = event.target
-
-          while target
-            if target in [popover[0], container]
-              return
-            target = target.parentNode
-
-          scope.hide()
-
-        hideOnEscape = (event) ->
-          if event.which is 27 # ESC key
-            scope.$apply scope.hide
-
-        if scope.templateUrl
-          $http.get scope.templateUrl
-            .then (response) ->
-              renderPopover = ->
-                renderTemplate(response.data)
-        else
-          renderPopover = ->
-            renderTemplate(default_template)
-
-        ###
-        Triggers
-        ###
-        switch scope.trigger
-          when 'hover'
-            container.addEventListener 'mouseenter', renderPopover
-            container.addEventListener 'mouseout', scope.hide
-
-            onDestroy = ->
-              container.removeEventListener 'mouseenter', renderPopover
-              container.removeEventListener 'mouseout', scope.hide
-
-          when 'focus'
-            container.addEventListener 'focus', renderPopover
-            container.addEventListener 'blur', scope.hide
-
-            onDestroy = ->
-              container.removeEventListener 'focus', renderPopover
-              container.removeEventListener 'blur', scope.hide
-
-          else # 'click' by default
-            container.addEventListener 'click', renderPopover
-            document.addEventListener 'click', hideOnClickOut
-            document.addEventListener 'keyup', hideOnEscape
-
-            onDestroy = ->
-              container.removeEventListener 'click', renderPopover
-              document.removeEventListener 'click', hideOnClickOut
-              document.addEventListener 'keyup', hideOnEscape
-
-
-        scope.$on '$destroy', onDestroy
+          scope.title = attrs.title
+          scope.text = attrs.text
+          compile default_template
 
