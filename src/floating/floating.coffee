@@ -7,7 +7,6 @@ executed on the parent element.
 @param {string} trigger The event trigger type click, hover or focus
 @param {string} position The positioning of the element relative to its parent
 @param {string} fixed if provided, the floating element will be fixed positioned
-@param {string} template Template string for the content
 @param {number} offset margin from the parent element
 @param {DOM element} parent Parent object relative to
 
@@ -17,7 +16,6 @@ shift-floating(
   trigger = "click|hover|focus"
   position = "top|bottom|left|right"
   parent = ""
-  template = ""
   offset = "5"
   fixed
 )
@@ -33,7 +31,6 @@ angular.module 'shift.components.floating', []
       transclude: 'true'
 
       scope:
-        templateUrl: '@'
         position: '@'
         trigger: '@'
         offset: '@'
@@ -46,6 +43,9 @@ angular.module 'shift.components.floating', []
 
         floating_container = angular.element document.createElement 'div'
         floating_container.addClass "floating-container floating-#{scope.position}"
+
+        if 'fixed' of attrs
+          floating_container.attr {fixed: 'fixed'}
 
         floating_container.append transclude()
 

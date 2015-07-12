@@ -5,8 +5,29 @@
   box-shadow: 3px 3px 5px rgba(0,0,0,.3);
   background: white;
   padding: 12px;
+  max-width: 80%;
+  z-index: 10;
+}
+
+.floating-container[fixed]{
+  position: fixed;
 }
 
 .highlight-word{
   color: pink;
+}
+
+.fixed-bar{
+  position: fixed;
+  left: 0;
+  top: 0;
+  right: 0;
+  height: 50px;
+  padding: 10px;
+  background-color: #ddd;
+  z-index: 1;
+}
+
+.page{
+  margin-top: 70px;
 }
