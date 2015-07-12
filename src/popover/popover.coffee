@@ -62,6 +62,7 @@ angular.module 'shift.components.popover', []
             parent: 'parent_node'
             position: attrs.position or 'bottom'
             trigger: attrs.trigger or 'click'
+            offset: "5"
 
           if attrs.fixed
             shift_floating.attr
@@ -79,13 +80,13 @@ angular.module 'shift.components.popover', []
         #     .success compile
 
         # Recompile popover on title/text change
-        scope.$watch ->
-          "#{attrs.title}, #{attrs.text}"
-        , (new_value, old_value) ->
-          return unless new_value
-          return if new_value isnt old_value
+        # scope.$watch ->
+        #   "#{attrs.title}, #{attrs.text}"
+        # , (new_value, old_value) ->
+        #   return unless new_value
+        #   return if new_value isnt old_value
 
-          scope.title = attrs.title
-          scope.text = attrs.text
-          compile default_template
+        scope.title = attrs.title
+        scope.text = attrs.text
+        compile default_template
 

@@ -5,7 +5,7 @@ div(ng-controller="PopoverCtrl")
 
   h2 On text popover
 
-  p(style="font-size:3em")
+  p
     | Lorem ipsum dolor sit amet, consectetur adipiscing elit.
     span Maecenas venenatis
     | sodales dolor. Pellentesque luctus id tortor malesuada mattis. Ut at
@@ -21,6 +21,7 @@ div(ng-controller="PopoverCtrl")
         trigger = 'click'
       )
 
+  p
     |  In velit lorem, semper vitae elit id, viverra elementum felis. Morbi
     | ullamcorper quam vitae metus posuere elementum. Sed ac vehicula magna.
     | Pellentesque laoreet nulla eu nibh dapibus, id ornare metus porta. Integer
@@ -36,7 +37,7 @@ div(ng-controller="PopoverCtrl")
         trigger = 'hover'
       )
 
-    | at pulvinar. Nullam rhoncus metus a turpis
+    |  at pulvinar. Nullam rhoncus metus a turpis
 
     span.highlight-word
       |  malesuada condimentum. Aliquam
@@ -45,12 +46,5 @@ div(ng-controller="PopoverCtrl")
         text="It can work on click (3rd auto)"
       )
 
-    | rutrum neque nisi, at eleifend metus consequat at. Nunc sit amet sagittis
+    |  rutrum neque nisi, at eleifend metus consequat at. Nunc sit amet sagittis
     | felis.
-
-    button.button Ok !
-      shift-popover(
-        text = "It can work on click (button right)"
-        position = "right"
-        trigger = "focus"
-      )

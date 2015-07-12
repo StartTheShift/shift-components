@@ -41,24 +41,27 @@ div(ng-controller="FloatingCtrl")
 
   h2 Within a scrolling element
   div.panel(style="height: 200px; overflow: auto")
-    div(style="height: 100px")
     button.button.large floating on right
       shift-floating(
         position = "right"
         trigger = "focus"
-        scroll-in = ".panel"
+        attach-to = ".panel"
       ) I'm floating on the right
+
     div(style="height: 100px")
+
     button.button.large floating on right
       shift-floating(
         position = "right"
         trigger = "focus"
-        scroll-in = ".panel"
+        attach-to = ".panel"
       ) I'm floating on the right
+
     div(style="height: 100px")
+
     button.button.large floating on right
       shift-floating(
         position = "right"
         trigger = "focus"
-        scroll-in = ".panel"
+        attach-to = ".panel"
       ) I'm floating on the right
