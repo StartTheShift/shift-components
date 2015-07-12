@@ -9,6 +9,9 @@ executed on the parent element.
 @param {string} fixed if provided, the floating element will be fixed positioned
 @param {number} offset margin from the parent element
 @param {DOM element} parent Parent object relative to
+@param {string} scrollIn Optional css selector of the scrollable element
+containing the element. Selector will be matched against the parent of
+the container.
 
 @example
 ```jade
@@ -17,6 +20,7 @@ shift-floating(
   position = "top|bottom|left|right"
   parent = ""
   offset = "5"
+  scroll-in = ".css-seletor"
   fixed
 )
 ```
@@ -26,6 +30,7 @@ angular.module 'shift.components.floating', []
   .directive 'shiftFloating',
     (
       $compile
+      $timeout
     ) ->
       restrict: 'E'
       transclude: 'true'
@@ -35,34 +40,45 @@ angular.module 'shift.components.floating', []
         trigger: '@'
         offset: '@'
         parent: '='
+        scrollIn: '@'
 
       link: (scope, element, attrs, controllers, transclude) ->
         is_visible = false
         onDestroy = null
+
         offset = scope.offset or 0
+        container = scope.parent or element[0].parentNode
 
         floating_container = angular.element document.createElement 'div'
         floating_container.addClass "floating-container floating-#{scope.position}"
+        floating_container.css {
+          visibility: 'hidden'
+          # To retrieve offset, a top and left value should be defined
+          top: 0
+          left: 0
+        }
 
         if 'fixed' of attrs
           floating_container.attr {fixed: 'fixed'}
 
         floating_container.append transclude()
 
-        container = scope.parent or element[0].parentNode
-
         scope.show = (template) ->
           return if is_visible
           is_visible = true
 
+          container_element = $(document.body)
+          if scope.scrollIn
+            container_element = $(container.closest(scope.scrollIn))
+
           scope.$apply ->
-            $(document.body).append(floating_container)
+            container_element.append(floating_container)
             $compile(floating_container) scope
 
           # no need for $timeout service, we are doing
           # straight CSS adjustment here
           setTimeout ->
-            $(floating_container).offset( $(container).offset() )
+            $(floating_container).offset $(container).offset()
 
             popover_height = $(floating_container[0]).outerHeight()
             popover_width = $(floating_container[0]).outerWidth()
@@ -96,6 +112,9 @@ angular.module 'shift.components.floating', []
 
         scope.hide = ->
           return unless is_visible
+
+          if scope.scrollSelector
+            container.closest(scope.scrollSelector).removeEventListener 'scroll', monitorScroll
 
           floating_container.remove()
           floating_container.css(
@@ -153,6 +172,4 @@ angular.module 'shift.components.floating', []
               document.removeEventListener 'click', hideOnClickOut
               document.addEventListener 'keyup', hideOnEscape
 
-
         scope.$on '$destroy', onDestroy
-
