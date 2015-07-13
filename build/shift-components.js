@@ -9,14 +9,17 @@ UI components for SHIFT applications
 @requires shift.components.calendar
 @requires shift.components.select
 @requires shift.components.typeahead
+@requires shift.components.popover
 @requires shift.components.select
 @requires shift.components.time
+@requires shift.components.floating
+@requires shift.components.tooltip
 
 @module shift.components
 
 @link sortable/
  */
-angular.module('shift.components', ['shift.components.sortable', 'shift.components.calendar', 'shift.components.selector', 'shift.components.typeahead', 'shift.components.select', 'shift.components.time']);
+angular.module('shift.components', ['shift.components.sortable', 'shift.components.calendar', 'shift.components.selector', 'shift.components.typeahead', 'shift.components.popover', 'shift.components.select', 'shift.components.time', 'shift.components.floating', 'shift.components.tooltip']);
 
 
 /**
@@ -175,6 +178,403 @@ angular.module('shift.components.calendar').run(['$templateCache', function($tem
 }]);
 
 /**
+Floating element directive displays template content on custom action
+executed on the parent element.
+
+@module shift.components.floating
+
+@param {string} trigger The event trigger type click, hover or focus
+@param {string} position The positioning of the element relative to its parent
+@param {string} fixed if provided, the floating element will be fixed positioned
+@param {number} offset margin from the parent element
+@param {element} parent Parent object relative to
+@param {string} attachTo Optional css selector of the scrollable element
+containing the element. default to "body", the selector will be matched
+against the parent of the container.
+
+@example
+```jade
+shift-floating(
+  trigger = "click|hover|focus"
+  position = "top|bottom|left|right"
+  parent = ""
+  offset = "5"
+  attach-to = ".css-seletor"
+  fixed
+)
+```
+ */
+angular.module('shift.components.floating', []).directive('shiftFloating', ['$compile', function($compile) {
+  return {
+    restrict: 'E',
+    transclude: true,
+    scope: {
+      position: '@',
+      trigger: '@',
+      offset: '@',
+      parent: '=',
+      attachTo: '@'
+    },
+    link: function(scope, element, attrs, controllers, transclude) {
+      var container, floating_container, hideOnClickOut, hideOnEscape, is_visible, offset, onDestroy;
+      is_visible = false;
+      onDestroy = null;
+      offset = parseInt(scope.offset, 10) || 0;
+      container = scope.parent || element[0].parentNode;
+      floating_container = angular.element(document.createElement('div'));
+      floating_container.addClass("floating-container floating-" + scope.position);
+      floating_container.css({
+        visibility: 'hidden',
+        top: 0,
+        left: 0
+      });
+      if ('fixed' in attrs) {
+        floating_container.attr({
+          fixed: true
+        });
+      }
+      scope.show = function(event) {
+        var container_element;
+        if (is_visible) {
+          return;
+        }
+        is_visible = true;
+        container_element = $(scope.attachTo || "body");
+        floating_container.empty();
+        transclude(scope.$parent.$new(), function(clone) {
+          return floating_container.append(clone);
+        });
+        scope.$apply(function() {
+          container_element.append(floating_container);
+          return $compile(floating_container)(scope);
+        });
+        return setTimeout(function() {
+          var container_height, container_width, popover_height, popover_width;
+          $(floating_container).offset($(container).offset());
+          popover_height = $(floating_container[0]).outerHeight();
+          popover_width = $(floating_container[0]).outerWidth();
+          container_height = $(container).outerHeight();
+          container_width = $(container).outerWidth();
+          switch (scope.position) {
+            case 'top':
+              return floating_container.css({
+                marginLeft: (container_width / 2 - popover_width / 2) + "px",
+                marginTop: "-" + (popover_height + offset) + "px",
+                visibility: ''
+              });
+            case 'bottom':
+              return floating_container.css({
+                marginLeft: (container_width / 2 - popover_width / 2) + "px",
+                marginTop: (container_height + offset) + "px",
+                visibility: ''
+              });
+            case 'right':
+              return floating_container.css({
+                marginLeft: (container_width + offset) + "px",
+                marginTop: (container_height / 2 - popover_height / 2) + "px",
+                visibility: ''
+              });
+            default:
+              return floating_container.css({
+                marginLeft: "-" + (popover_width + offset) + "px",
+                marginTop: (container_height / 2 - popover_height / 2) + "px",
+                visibility: ''
+              });
+          }
+        });
+      };
+      scope.hide = function() {
+        if (!is_visible) {
+          return;
+        }
+        if (scope.scrollSelector) {
+          container.closest(scope.scrollSelector).removeEventListener('scroll', monitorScroll);
+        }
+        floating_container.remove();
+        floating_container.css({
+          marginLeft: '',
+          marginTop: '',
+          visibility: 'hidden'
+        });
+        return is_visible = false;
+      };
+
+      /*
+      Event triggering a hide after the click event
+       */
+      hideOnClickOut = function(event) {
+        var target;
+        target = event.target;
+        while (target) {
+          if (target === floating_container[0] || target === container) {
+            return;
+          }
+          target = target.parentNode;
+        }
+        return scope.hide();
+      };
+      hideOnEscape = function(event) {
+        if (event.which === 27) {
+          return scope.$apply(scope.hide);
+        }
+      };
+
+      /*
+      Triggers
+       */
+      switch (scope.trigger) {
+        case 'hover':
+          container.addEventListener('mouseenter', scope.show);
+          container.addEventListener('mouseout', scope.hide);
+          onDestroy = function() {
+            container.removeEventListener('mouseenter', scope.show);
+            return container.removeEventListener('mouseout', scope.hide);
+          };
+          break;
+        case 'focus':
+          container.addEventListener('focus', scope.show);
+          container.addEventListener('blur', scope.hide);
+          onDestroy = function() {
+            container.removeEventListener('focus', scope.show);
+            return container.removeEventListener('blur', scope.hide);
+          };
+          break;
+        default:
+          container.addEventListener('click', scope.show);
+          document.addEventListener('click', hideOnClickOut);
+          document.addEventListener('keyup', hideOnEscape);
+          onDestroy = function() {
+            container.removeEventListener('click', scope.show);
+            document.removeEventListener('click', hideOnClickOut);
+            return document.addEventListener('keyup', hideOnEscape);
+          };
+      }
+      return scope.$on('$destroy', onDestroy);
+    }
+  };
+}]);
+
+
+/**
+Popover directive displays transcluded content on custom action
+executed on the parent element.
+
+@module shift.components.popover
+
+@param {string} shiftPopover the text of the popover
+@param {string} shiftPopoverTitle (optional) The title of the popover
+@param {string} shiftPopoverTrigger What triggers the popover ? click, hover
+or focus.
+@param {string} shiftPopoverPosition Default to 'bottom', can also be set to
+left, right and top.
+@param {string} shiftPopoverTemplateUrl the template URL for rendering. When
+provided, the text and title attribute are ignored.
+@param {attribute} fixed Use fixed positioning for the the tooltip. To be set
+when the trigger object is also fixed positioned.
+@param {string} shiftPopoverAttachTo a CSS selector where to put the popover
+element. Useful when the popover is appearing in a scrollable area.
+
+@example
+```jade
+input(
+  type = "text"
+  ng-model = "foo"
+  shift-popover = "lorem ipsum"
+  shift-popover-title = "date"
+  shift-popover-trigger = "click|hover|focus"
+  shift-popover-position = "top|bottom|left|right"
+  shift-popover-template-url = "xyz.html"
+  shift-popover-attach-to = ".scrollable.classname"
+  fixed
+)
+```
+ */
+angular.module('shift.components.popover', []).directive('shiftPopover', ['$http', '$compile', '$templateCache', function($http, $compile, $templateCache) {
+  var default_template;
+  default_template = '<div class="popover-container">\n  <h3\n    ng-if = "title"\n    class = "popover-title">{{ title }}</h3>\n  <p>{{ text }}</p>\n</div>';
+  return {
+
+    /*
+     * Directive definition object
+     */
+    restrict: 'A',
+    scope: true,
+    link: function(scope, element, attrs, controllers, transclude) {
+      var compile, template;
+      scope.parent_node = element[0];
+      template = default_template;
+      compile = function() {
+        var shift_floating;
+        shift_floating = angular.element('<shift-floating />');
+        scope.title = attrs.shiftPopoverTitle;
+        scope.text = attrs.shiftPopover;
+        shift_floating.attr({
+          parent: 'parent_node',
+          attachTo: attrs.shiftPopoverattachTo,
+          position: attrs.shiftPopoverPosition || 'bottom',
+          trigger: attrs.shiftPopoverTrigger || 'click',
+          offset: "5"
+        });
+        if (attrs.fixed) {
+          shift_floating.attr({
+            fixed: true
+          });
+        }
+        shift_floating.html(template);
+        $('body').append($compile(shift_floating)(scope));
+        return void 0;
+      };
+      if (attrs.shiftPopoverTemplateUrl) {
+        return $http.get(attrs.shiftPopoverTemplateUrl, {
+          cache: $templateCache
+        }).then(function(response) {
+          template = "<div class=\"popover-container\">" + response.data + "</div>";
+          return compile();
+        });
+      } else {
+        compile();
+        scope.$watch(attrs.title, function(new_value, old_value) {
+          if (new_value === old_value) {
+            return;
+          }
+          return compile();
+        });
+        return scope.$watch(attrs.text, function(new_value, old_value) {
+          if (new_value === old_value) {
+            return;
+          }
+          return compile();
+        });
+      }
+    }
+  };
+}]);
+
+
+/**
+A directive to mimic HTML select but awesome.
+
+@module shift.components.select
+
+@param {array} options Options to be displayed and to choose from
+@param {object} option Option selected
+@param {function} onSelect Callback triggered when an option has been selected
+@param {function} onDiscard Callback triggered when an option has been de-selected
+@param {string} placeholder Text to display when no option are selected
+
+@example
+```jade
+  shift-select(
+    options = "options"
+    option = "selected_option"
+    on-select = "onSelect(selected)"
+    on-discard = "onDiscard(discarded)"
+    placeholder = "Click to make a selection..."
+  )
+    strong {{option.city}}, {{ option.state }}
+    div
+      i pop. {{option.population}}
+```
+ */
+angular.module('shift.components.select', ['shift.components.selector']).directive('shiftSelect', ['$compile', function($compile) {
+  return {
+    restrict: 'E',
+    transclude: true,
+    templateUrl: 'select/select.html',
+    scope: {
+      options: '=',
+      option: '=',
+      onSelect: '&',
+      onDiscard: '&',
+      placeholder: '@'
+    },
+    link: function(scope, element, attrs, ctrl, transclude) {
+      var onDocumentClick, onKeyup, shift_selected, shift_selected_scope, shift_selector, shift_selector_scope;
+      scope.show_select = false;
+      shift_selected = angular.element(document.createElement('div'));
+      shift_selected.attr({
+        'ng-show': 'option',
+        'class': 'select-option'
+      });
+      shift_selector = angular.element(document.createElement('shift-selector'));
+      shift_selector.css({
+        width: $(element[0].parentNode).outerWidth() + 'px'
+      });
+      shift_selector.attr({
+        'class': 'shift-selector',
+        'visible': 'show_select',
+        'options': 'options',
+        'on-select': '_onSelect(selected)',
+        'on-discard': '_onDiscard(discarded)'
+      });
+      shift_selector_scope = scope.$new();
+      shift_selected_scope = scope.$new();
+      transclude(shift_selector_scope, function(clone) {
+        return shift_selector.append(clone);
+      });
+      transclude(shift_selected_scope, function(clone) {
+        return shift_selected.append(clone);
+      });
+      element.children().append(shift_selected);
+      element.append(shift_selector);
+      $compile(shift_selector)(shift_selector_scope);
+      $compile(shift_selected)(shift_selected_scope);
+      scope._onDiscard = function(discarded) {
+        scope.show_select = false;
+        scope.option = null;
+        return scope.onDiscard({
+          discarded: discarded
+        });
+      };
+      scope._onSelect = function(selected) {
+        scope.onSelect({
+          selected: selected
+        });
+        scope.option = selected;
+        return scope.show_select = false;
+      };
+      scope.show = function() {
+        return scope.show_select = true;
+      };
+      onKeyup = function(event) {
+        if (event.which === 27) {
+          return scope.$apply(function() {
+            return scope.show_select = false;
+          });
+        }
+      };
+      onDocumentClick = function(event) {
+        var target;
+        target = event.target;
+        while (target != null ? target.parentNode : void 0) {
+          if (target === element[0]) {
+            return;
+          }
+          target = target.parentNode;
+        }
+        return scope.$apply(function() {
+          return scope.show_select = false;
+        });
+      };
+      document.addEventListener('click', onDocumentClick);
+      document.addEventListener('keyup', onKeyup);
+      return scope.$on('$destroy', function() {
+        document.removeEventListener('click', onDocumentClick);
+        return document.removeEventListener('keyup', onKeyup);
+      });
+    }
+  };
+}]);
+
+'use strict';
+
+angular.module('shift.components.select').run(['$templateCache', function($templateCache) {
+
+  $templateCache.put('select/select.html', '<div ng-click="show()" class="select-container"><div ng-if="!option" class="select-option">{{ placeholder }}</div></div>');
+
+}]);
+
+/**
 A directive that displays a list of option, navigation using arrow
 keys + enter or mouse click.
 
@@ -217,6 +617,7 @@ angular.module('shift.components.selector', []).directive('shiftSelector', ['$co
     transclude: true,
     scope: {
       options: '=',
+      visible: '=',
       selected: '=?',
       onSelect: '&',
       onDiscard: '&'
@@ -226,7 +627,7 @@ angular.module('shift.components.selector', []).directive('shiftSelector', ['$co
       select_container = angular.element(document.createElement('div'));
       select_container.addClass('select-container');
       select_container.attr({
-        'ng-if': 'options.length'
+        'ng-if': 'visible'
       });
       option = angular.element(document.createElement('div'));
       option.addClass('select-option');
@@ -251,7 +652,7 @@ angular.module('shift.components.selector', []).directive('shiftSelector', ['$co
       }
       onKeyDown = function(event) {
         var key_code, ref;
-        if (!((ref = scope.options) != null ? ref.length : void 0)) {
+        if (!(((ref = scope.options) != null ? ref.length : void 0) && scope.visible)) {
           return;
         }
         key_code = event.which || event.keyCode;
@@ -362,125 +763,6 @@ angular.module('shift.components.selector', []).directive('shiftSelector', ['$co
   };
 }]);
 
-
-/**
-A directive to mimic HTML select but awesome.
-
-@module shift.components.select
-
-@param {array} options Options to be displayed and to choose from
-@param {object} option Option selected
-@param {function} onSelect Callback triggered when an option has been selected
-@param {function} onDiscard Callback triggered when an option has been de-selected
-@param {string} placeholder Text to display when no option are selected
-
-@example
-```jade
-  shift-select(
-    options = "options"
-    option = "selected_option"
-    on-select = "onSelect(selected)"
-    on-discard = "onDiscard(discarded)"
-    placeholder = "Click to make a selection..."
-  )
-    strong {{option.city}}, {{ option.state }}
-    div
-      i pop. {{option.population}}
-```
- */
-angular.module('shift.components.select', ['shift.components.selector']).directive('shiftSelect', ['$compile', function($compile) {
-  return {
-    restrict: 'E',
-    transclude: true,
-    templateUrl: 'select/select.html',
-    scope: {
-      options: '=',
-      option: '=',
-      onSelect: '&',
-      onDiscard: '&',
-      placeholder: '@'
-    },
-    link: function(scope, element, attrs, ctrl, transclude) {
-      var onDocumentClick, onKeyup, shift_selected, shift_selected_scope, shift_selector, shift_selector_scope;
-      scope.show_select = false;
-      shift_selected = angular.element(document.createElement('div'));
-      shift_selected.attr({
-        'ng-show': 'option',
-        'class': 'select-option'
-      });
-      shift_selector = angular.element(document.createElement('shift-selector'));
-      shift_selector.attr({
-        'ng-show': 'show_select',
-        'options': 'options',
-        'on-select': '_onSelect(selected)',
-        'on-discard': '_onDiscard(discarded)'
-      });
-      shift_selector_scope = scope.$new();
-      shift_selected_scope = scope.$new();
-      transclude(shift_selector_scope, function(clone) {
-        return shift_selector.append(clone);
-      });
-      transclude(shift_selected_scope, function(clone) {
-        return shift_selected.append(clone);
-      });
-      element.children().append(shift_selected);
-      element.append(shift_selector);
-      $compile(shift_selector)(shift_selector_scope);
-      $compile(shift_selected)(shift_selected_scope);
-      scope._onDiscard = function(discarded) {
-        scope.show_select = false;
-        scope.option = null;
-        return scope.onDiscard({
-          discarded: discarded
-        });
-      };
-      scope._onSelect = function(selected) {
-        scope.onSelect({
-          selected: selected
-        });
-        scope.option = selected;
-        return scope.show_select = false;
-      };
-      scope.show = function() {
-        return scope.show_select = true;
-      };
-      onKeyup = function(event) {
-        if (event.which === 27) {
-          return scope.$apply(function() {
-            return scope.show_select = false;
-          });
-        }
-      };
-      onDocumentClick = function(event) {
-        var target;
-        target = event.target;
-        while (target != null ? target.parentNode : void 0) {
-          if (target === element[0]) {
-            return;
-          }
-          target = target.parentNode;
-        }
-        return scope.$apply(function() {
-          return scope.show_select = false;
-        });
-      };
-      document.addEventListener('click', onDocumentClick);
-      document.addEventListener('keyup', onKeyup);
-      return scope.$on('$destroy', function() {
-        document.removeEventListener('click', onDocumentClick);
-        return document.removeEventListener('keyup', onKeyup);
-      });
-    }
-  };
-}]);
-
-'use strict';
-
-angular.module('shift.components.select').run(['$templateCache', function($templateCache) {
-
-  $templateCache.put('select/select.html', '<div ng-click="show()" class="select-container"><div ng-if="!option" class="select-option">{{ placeholder }}</div></div>');
-
-}]);
 
 /**
 Sortable directive to allow drag n' drop sorting of an array.
@@ -794,6 +1076,81 @@ angular.module('shift.components.time', []).directive('shiftTime', ['$timeout', 
             return scope.time = moment(scope.time);
           });
         }
+      });
+    }
+  };
+}]);
+
+
+/**
+Tooltip directive displays help text on custom action
+executed on the element it is attached to.
+
+@module shift.components.tooltip
+
+@param {string} shiftTooltip the text of the tooltip
+@param {string} shiftTooltipTrigger What triggers the tooltip ? click, hover
+or focus. Default to hover.
+@param {string} shiftTooltipPosition Default to 'top', can also be set to
+left, right and top.
+@param {attribute} fixed Use fixed positioning for the the tooltip. To be set
+when the trigger object is also fixed positioned.
+@param {string} shiftTooltipAttachTo a CSS selector where to put the tooltip
+element. Useful when the tooltip is appearing in a scrollable area.
+
+@example
+```jade
+span(
+  shift-tooltip = "lorem ipsum"
+  shift-tooltip-trigger = "click|hover|focus"
+  shift-tooltip-position = "top|bottom|left|right"
+  shift-tooltip-attach-to = ".scrollable.classname"
+  fixed
+) blah blah blah...
+```
+ */
+angular.module('shift.components.tooltip', []).directive('shiftTooltip', ['$http', '$compile', '$templateCache', function($http, $compile, $templateCache) {
+  var template;
+  template = '<div class="tooltip-container">{{ text }}</div>';
+  return {
+
+    /*
+     * Directive definition object
+     */
+    restrict: 'A',
+    scope: {
+      text: '@shiftTooltip',
+      position: '@shiftTooltipPosition',
+      trigger: '@shiftTooltipTrigger',
+      attachTo: '@shiftTooltipattachTo'
+    },
+    link: function(scope, element, attrs, controllers, transclude) {
+      var compile;
+      scope.parent_node = element[0];
+      (compile = function() {
+        var shift_floating;
+        shift_floating = angular.element('<shift-floating />');
+        shift_floating.attr({
+          parent: 'parent_node',
+          attachTo: scope.attachTo,
+          position: scope.position || 'top',
+          trigger: scope.trigger || 'hover',
+          offset: "2"
+        });
+        if (attrs.fixed) {
+          shift_floating.attr({
+            fixed: true
+          });
+        }
+        shift_floating.append($compile(template)(scope));
+        $('body').append($compile(shift_floating)(scope));
+        return void 0;
+      })();
+      return scope.$watch(attrs.title, function(new_value, old_value) {
+        if (new_value === old_value) {
+          return;
+        }
+        return compile();
       });
     }
   };
