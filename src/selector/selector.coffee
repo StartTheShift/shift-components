@@ -44,6 +44,7 @@ angular.module 'shift.components.selector', []
 
       scope:
         options: '='
+        visible: '='
         selected: '=?'
         onSelect: '&'
         onDiscard: '&'
@@ -53,7 +54,7 @@ angular.module 'shift.components.selector', []
         select_container = angular.element document.createElement 'div'
         select_container.addClass 'select-container'
         select_container.attr
-          'ng-if': 'options.length'
+          'ng-if': 'visible'
 
         # Build the base option element
         option = angular.element document.createElement 'div'
@@ -81,7 +82,7 @@ angular.module 'shift.components.selector', []
           scope.selected ?= []
 
         onKeyDown = (event) ->
-          return unless scope.options?.length
+          return unless scope.options?.length and scope.visible
 
           key_code = event.which or event.keyCode
 

@@ -49,8 +49,10 @@ angular.module 'shift.components.select', ['shift.components.selector']
           'class': 'select-option'
 
         shift_selector = angular.element document.createElement 'shift-selector'
+        shift_selector.css {width: $(element[0].parentNode).outerWidth() + 'px'}
         shift_selector.attr
-          'ng-show': 'show_select'
+          'class': 'shift-selector'
+          'visible': 'show_select'
           'options': 'options'
           'on-select': '_onSelect(selected)'
           'on-discard': '_onDiscard(discarded)'
