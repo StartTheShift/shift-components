@@ -85,6 +85,8 @@ angular.module 'shift.components.typeahead', [
           scope.onOptionDeselect({option})
 
         select_menu = angular.element document.createElement 'shift-selector'
+        select_menu.addClass 'shift-selector'
+        select_menu.css {width: $(element[0].parentNode).outerWidth() + 'px'}
         select_menu.attr
           'visible': 'show_select_menu && !selected'
           'options': 'options'
@@ -103,6 +105,7 @@ angular.module 'shift.components.typeahead', [
         # Create a new scope to transclude + compile the template with (we don't
         # want the child directives directly modifying the scope of shiftTypeahead)
         shift_select_scope = scope.$new()
+
 
         # Attach the transcluded template to shift-select
         transclude shift_select_scope, (clone) ->
