@@ -87,6 +87,10 @@ angular.module 'shift.components.popover', []
               template = "<div class=\"popover-container\">#{response.data}</div>"
               compile()
 
+        else if attrs.shiftPopoverTemplate
+          template = "<div class=\"popover-container\">#{attrs.shiftPopoverTemplate}</div>"
+          compile()
+
         else
           compile()
 

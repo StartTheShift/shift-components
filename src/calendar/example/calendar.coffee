@@ -1,7 +1,15 @@
 angular.module('examples', ['shift.components'])
+  .run ($templateCache) ->
+    template_content = '''
+      <shift-calendar ng-model="foo.date" class="naked range-calendar" />
+    '''
+    $templateCache.put('calendar_template.html', template_content);
+
   .controller 'CalendarCtrl', ($scope) ->
     min_date = moment().startOf('year').subtract(1, 'day')
     max_date = moment().endOf('year').add(1, 'day')
+
+    $scope.foo = {date: moment().add(4, 'day')}
 
     # Regular Calendar example
     $scope.onDateChange = (date) ->
@@ -51,3 +59,4 @@ angular.module('examples', ['shift.components'])
     $scope.outOfRangeDate = ->
       $scope.stop_date = moment(min_date).subtract(1, 'week')
       $scope.start_date = moment(min_date).subtract(3, 'week')
+

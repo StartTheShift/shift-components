@@ -64,7 +64,6 @@ div(ng-controller="CalendarCtrl")
       ng-click = "outOfRangeDate()"
     ) Out of range
 
-
   h3 Scope
   pre
     code.code
@@ -72,3 +71,28 @@ div(ng-controller="CalendarCtrl")
       | $scope.start_date = {{start_date}}
       | $scope.stop_date = {{stop_date}}
       | $scope.stop_date.diff($scope.start_date, 'day') = {{ stop_date.diff(start_date, 'days') }}
+
+  h2 Pop Date
+
+  p {{ foo.date.format('MMMM Do YYYY, h:mm:ss a') }}
+
+  button.button.inline(
+    shift-popover
+    shift-popover-template-url = "calendar_template.html"
+  )
+    i.fa.fa-calendar
+    | Calendar in a button with shift-popover
+
+  .button.inline
+    i.fa.fa-calendar
+    | Calendar in a div with shift-floating
+    shift-floating(position = "bottom")
+      shift-calendar.naked.single-calendar(
+        ng-model = "foo.date"
+      )
+
+  h3 Scope
+  pre
+    code.code
+      | // moment object
+      | $scope.foo.date = {{date}}

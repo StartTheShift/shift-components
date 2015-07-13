@@ -33,23 +33,18 @@ angular.module 'shift.components.floating', []
     ) ->
       restrict: 'E'
       transclude: true
-
-      scope:
-        position: '@'
-        trigger: '@'
-        offset: '@'
-        parent: '='
-        attachTo: '@'
+      scope: true
 
       link: (scope, element, attrs, controllers, transclude) ->
         is_visible = false
         onDestroy = null
 
-        offset = parseInt(scope.offset, 10) or 0
-        container = scope.parent or element[0].parentNode
+        offset = parseInt(attrs.offset, 10) or 0
+
+        container = (attrs.parent and scope.$eval(attrs.parent)) or element[0].parentNode
 
         floating_container = angular.element document.createElement 'div'
-        floating_container.addClass "floating-container floating-#{scope.position}"
+        floating_container.addClass "floating-container floating-#{attrs.position || 'left'}"
         floating_container.css {
           visibility: 'hidden'
           # To get an accurate offset, a top and left values need be defined
@@ -64,13 +59,10 @@ angular.module 'shift.components.floating', []
           return if is_visible
           is_visible = true
 
-          container_element = $(scope.attachTo or "body")
+          container_element = $(attrs.attachTo or "body")
 
           floating_container.empty()
-
-          # floating_container.append transclude()
-          transclude scope.$parent.$new(), (clone) ->
-            floating_container.append clone
+          floating_container.append transclude()
 
           scope.$apply ->
             container_element.append(floating_container)
@@ -86,7 +78,7 @@ angular.module 'shift.components.floating', []
             container_height = $(container).outerHeight()
             container_width = $(container).outerWidth()
 
-            switch scope.position
+            switch attrs.position
               when 'top'
                 floating_container.css
                   marginLeft: "#{container_width/2 - popover_width/2}px"
@@ -146,7 +138,7 @@ angular.module 'shift.components.floating', []
         ###
         Triggers
         ###
-        switch scope.trigger
+        switch attrs.trigger
           when 'hover'
             container.addEventListener 'mouseenter', scope.show
             container.addEventListener 'mouseout', scope.hide
