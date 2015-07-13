@@ -30,7 +30,6 @@ angular.module 'shift.components.floating', []
   .directive 'shiftFloating',
     (
       $compile
-      $timeout
     ) ->
       restrict: 'E'
       transclude: 'true'
@@ -49,13 +48,11 @@ angular.module 'shift.components.floating', []
         offset = parseInt(scope.offset, 10) or 0
         container = scope.parent or element[0].parentNode
 
-        console.debug container, $(container).offset(), scope.position
-
         floating_container = angular.element document.createElement 'div'
         floating_container.addClass "floating-container floating-#{scope.position}"
         floating_container.css {
           visibility: 'hidden'
-          # To retrieve offset, a top and left value should be defined
+          # To get an accurate offset, a top and left values need be defined
           top: 0
           left: 0
         }
@@ -77,7 +74,7 @@ angular.module 'shift.components.floating', []
 
           # no need for $timeout service, we are doing
           # straight CSS adjustment here
-          $timeout ->
+          setTimeout ->
             $(floating_container).offset $(container).offset()
 
             popover_height = $(floating_container[0]).outerHeight()

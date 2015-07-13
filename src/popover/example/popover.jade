@@ -11,15 +11,12 @@ div(ng-controller="PopoverCtrl")
     | sodales dolor. Pellentesque luctus id tortor malesuada mattis. Ut at
     | efficitur magna. Fusce viverra porta erat, a volutpat
 
-    span.highlight-word
-      |  nisi eleifend in
-
-      shift-popover(
-        title = "I am a title"
-        text = "I'm a content Lorem ipsum dolor sit amet (1st top)"
-        position = "top"
-        trigger = 'click'
-      )
+    span.highlight-word(
+      shift-popover = "I'm a content Lorem ipsum dolor sit amet (1st top)"
+      shift-popover-trigger = "click"
+      shift-popover-title = "I am a title"
+      shift-popover-position = "top"
+    )  nisi eleifend in
 
   p
     |  In velit lorem, semper vitae elit id, viverra elementum felis. Morbi
@@ -27,24 +24,22 @@ div(ng-controller="PopoverCtrl")
     | Pellentesque laoreet nulla eu nibh dapibus, id ornare metus porta. Integer
     | sed metus at risus accumsan posuere.
 
-    span.highlight-word
-      |  Nullam dignissim consequat nisl
-
-      shift-popover(
-        title = "I am a title"
-        text = "I'm a content Lorem ipsum dolor sit amet (2rd bottom)"
-        position = "bottom"
-        trigger = 'hover'
-      )
+    span.highlight-word(
+      shift-popover = "I'm a content Lorem ipsum dolor sit amet (2rd right)"
+      shift-popover-trigger = "hover"
+      shift-popover-title = "I am a title"
+      shift-popover-position = "left"
+    )  Nullam dignissim consequat nisl
 
     |  at pulvinar. Nullam rhoncus metus a turpis
 
-    span.highlight-word
-      |  malesuada condimentum. Aliquam
+    span.highlight-word(
+      shift-popover = "It can work on click (3rd auto)"
+    )   malesuada condimentum. Aliquam
 
-      shift-popover(
-        text="It can work on click (3rd auto)"
-      )
+      //- shift-popover(
+      //-   text="It can work on click (3rd auto)"
+      //- )
 
     |  rutrum neque nisi, at eleifend metus consequat at. Nunc sit amet sagittis
     | felis.

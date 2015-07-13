@@ -33,6 +33,11 @@ div(ng-controller="FloatingCtrl")
         trigger = "click"
       ) I'm floating on the bottom
 
+    button.button.inline Hover me!
+      shift-floating(
+        trigger = "hover"
+      ) I'm only appearing on hover
+
     button.button.inline floating on right
       shift-floating(
         position = "right"

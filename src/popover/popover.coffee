@@ -4,22 +4,30 @@ executed on the parent element.
 
 @module shift.components.popover
 
-@param {} date A moment object, default to now
-@param {function} dateChange Called when date is changed
-@param {function} dateValidator Method returning a Boolean indicating if
-the selected date is valid or not
-@param {function} dateHightlight Method returning a Boolean to highlight
-a days on the calendar.
-@param {Boolean} dateAllowNull Indicate if the date can be set to null
+@param {string} shiftPopover the text of the popover
+@param {string} shiftPopoverTitle (optional) The title of the popover
+@param {string} shiftPopoverTrigger What triggers the popover ? click, hover
+or focus.
+@param {string} shiftPopoverPosition Default to 'bottom', can also be set to
+left, right and top.
+@param {string} shiftPopoverTemplateUrl the template URL for rendering. When
+provided, the text and title attribute are ignored.
+@param {attribute} fixed Use fixed positioning for the the tooltip. To be set
+when the trigger object is also fixed positioned.
+@param {string} attachTo a CSS selector where to put the popover element. Useful
+when the popover is appearing in a scrollable area.
 
 @example
 ```jade
-shift-popover(
-  title = "date"
-  text = "lorem ipsum"
-  trigger = "click|hover|focus"
-  position = "top|bottom|left|right"
-  template-url = ""
+input(
+  type = "text"
+  ng-model = "foo"
+  shift-popover = "lorem ipsum"
+  shift-popover-title = "date"
+  shift-popover-trigger = "click|hover|focus"
+  shift-popover-position = "top|bottom|left|right"
+  shift-popover-template-url = ""
+  shift-popover-attach-to = ".scrollable.classname"
   fixed
 )
 ```
@@ -45,31 +53,35 @@ angular.module 'shift.components.popover', []
       # Directive definition object
       ###
 
-      restrict: 'E'
-      scope: true
+      restrict: 'A'
+      scope:
+        title: '@shiftPopoverTitle'
+        text: '@shiftPopover'
+        position: '@shiftPopoverPosition'
+        templateUrl: '@shiftPopoverTemplateUrl'
+        trigger: '@shiftPopoverTrigger'
+        attachTo: '@shiftPopoverattachTo'
 
       link: (scope, element, attrs, controllers, transclude) ->
-        scope.title = ''
-        scope.text = ''
-        scope.parent_node = element.parent()?[0]
+        scope.parent_node = element[0]
 
-        compile = (template) ->
-          element.empty()
+        do compile = (template=default_template) ->
+          #element.empty()
 
           shift_floating = angular.element '<shift-floating />'
 
           shift_floating.attr
             parent: 'parent_node'
-            position: attrs.position or 'bottom'
-            trigger: attrs.trigger or 'click'
+            attachTo: scope.attachTo
+            position: scope.position or 'bottom'
+            trigger: scope.trigger or 'click'
             offset: "5"
 
           if attrs.fixed
-            shift_floating.attr
-              fixed: true
+            shift_floating.attr {fixed: true}
 
           shift_floating.append $compile(template)(scope)
-          element.append $compile(shift_floating)(scope)
+          $('body').append $compile(shift_floating)(scope)
 
           undefined
 
@@ -79,14 +91,10 @@ angular.module 'shift.components.popover', []
         #   $http.get attrs.templateUrl, cache: $templateCache
         #     .success compile
 
-        # Recompile popover on title/text change
+        # # Recompile popover on title/text change
         # scope.$watch ->
         #   "#{attrs.title}, #{attrs.text}"
         # , (new_value, old_value) ->
-        #   return unless new_value
-        #   return if new_value isnt old_value
-
-        scope.title = attrs.title
-        scope.text = attrs.text
-        compile default_template
+        #   return if new_value is old_value
+        #   compile()
 
