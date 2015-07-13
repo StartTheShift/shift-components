@@ -60,15 +60,17 @@ angular.module 'shift.components.floating', []
         if 'fixed' of attrs
           floating_container.attr {fixed: true}
 
-        floating_container.append transclude()
-        # transclude scope.$parent, (clone) ->
-        #   floating_container.append clone
-
         scope.show = (event) ->
           return if is_visible
           is_visible = true
 
           container_element = $(scope.attachTo or "body")
+
+          floating_container.empty()
+
+          # floating_container.append transclude()
+          transclude scope.$parent.$new(), (clone) ->
+            floating_container.append clone
 
           scope.$apply ->
             container_element.append(floating_container)
