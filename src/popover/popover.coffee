@@ -42,10 +42,10 @@ angular.module 'shift.components.popover', []
       default_template = '''
         <div class="popover-container">
           <h3
-            ng-show = "title"
+            ng-if = "foo.title"
             class = "popover-title"
-          > {{ title }} </h3>
-          <p>{{ text }}</p>
+          > {{ foo.title }} </h3>
+          <p>{{ foo.text }}</p>
         </div>
       '''
 
@@ -55,8 +55,8 @@ angular.module 'shift.components.popover', []
 
       restrict: 'A'
       scope:
-        title: '@shiftPopoverTitle'
         text: '@shiftPopover'
+        title: '@shiftPopoverTitle'
         position: '@shiftPopoverPosition'
         templateUrl: '@shiftPopoverTemplateUrl'
         trigger: '@shiftPopoverTrigger'
@@ -66,9 +66,10 @@ angular.module 'shift.components.popover', []
         scope.parent_node = element[0]
 
         do compile = (template=default_template) ->
-          #element.empty()
-
           shift_floating = angular.element '<shift-floating />'
+
+          scope.foo = {title: scope.title, text: scope.text}
+          console.log scope.title
 
           shift_floating.attr
             parent: 'parent_node'
@@ -98,3 +99,9 @@ angular.module 'shift.components.popover', []
         #   return if new_value is old_value
         #   compile()
 
+        scope.$watch attrs.title, (new_value, old_value) ->
+          return if new_value is old_value
+          compile()
+          #$compile(shift_floating)(scope)
+          # element.html(newValue);
+          # $compile(element.contents())(scope);
