@@ -57,8 +57,9 @@ angular.module 'shift.components.popover', []
 
       link: (scope, element, attrs, controllers, transclude) ->
         scope.parent_node = element[0]
+        template = default_template
 
-        do compile = (template=default_template) ->
+        compile = ->
           shift_floating = angular.element '<shift-floating />'
 
           scope.title = attrs.shiftPopoverTitle
@@ -80,17 +81,20 @@ angular.module 'shift.components.popover', []
 
           undefined
 
-        # Recompile popover on template change
-        # attrs.$observe 'templateUrl', ->
-        #   return unless attrs.templateUrl
-        #   $http.get attrs.templateUrl, cache: $templateCache
-        #     .success compile
+        if attrs.shiftPopoverTemplateUrl
+          $http.get attrs.shiftPopoverTemplateUrl, cache: $templateCache
+            .then (response) ->
+              template = "<div class=\"popover-container\">#{response.data}</div>"
+              compile()
 
-        scope.$watch attrs.title, (new_value, old_value) ->
-          return if new_value is old_value
+        else
           compile()
 
-        scope.$watch attrs.text, (new_value, old_value) ->
-          return if new_value is old_value
-          compile()
+          # only watch title and text if no template were provided
+          scope.$watch attrs.title, (new_value, old_value) ->
+            return if new_value is old_value
+            compile()
 
+          scope.$watch attrs.text, (new_value, old_value) ->
+            return if new_value is old_value
+            compile()
