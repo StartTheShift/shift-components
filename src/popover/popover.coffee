@@ -14,8 +14,8 @@ left, right and top.
 provided, the text and title attribute are ignored.
 @param {attribute} fixed Use fixed positioning for the the tooltip. To be set
 when the trigger object is also fixed positioned.
-@param {string} attachTo a CSS selector where to put the popover element. Useful
-when the popover is appearing in a scrollable area.
+@param {string} shiftPopoverAttachTo a CSS selector where to put the popover
+element. Useful when the popover is appearing in a scrollable area.
 
 @example
 ```jade
@@ -26,12 +26,13 @@ input(
   shift-popover-title = "date"
   shift-popover-trigger = "click|hover|focus"
   shift-popover-position = "top|bottom|left|right"
-  shift-popover-template-url = ""
+  shift-popover-template-url = "xyz.html"
   shift-popover-attach-to = ".scrollable.classname"
   fixed
 )
 ```
 ###
+
 angular.module 'shift.components.popover', []
   .directive 'shiftPopover',
     (

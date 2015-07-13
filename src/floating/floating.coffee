@@ -8,7 +8,7 @@ executed on the parent element.
 @param {string} position The positioning of the element relative to its parent
 @param {string} fixed if provided, the floating element will be fixed positioned
 @param {number} offset margin from the parent element
-@param {DOM element} parent Parent object relative to
+@param {element} parent Parent object relative to
 @param {string} attachTo Optional css selector of the scrollable element
 containing the element. default to "body", the selector will be matched
 against the parent of the container.
