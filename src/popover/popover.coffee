@@ -43,25 +43,17 @@ angular.module 'shift.components.popover', []
       default_template = '''
         <div class="popover-container">
           <h3
-            ng-if = "foo.title"
-            class = "popover-title"
-          > {{ foo.title }} </h3>
-          <p>{{ foo.text }}</p>
+            ng-if = "title"
+            class = "popover-title">{{ title }}</h3>
+          <p>{{ text }}</p>
         </div>
       '''
 
       ###
       # Directive definition object
       ###
-
       restrict: 'A'
-      scope:
-        text: '@shiftPopover'
-        title: '@shiftPopoverTitle'
-        position: '@shiftPopoverPosition'
-        templateUrl: '@shiftPopoverTemplateUrl'
-        trigger: '@shiftPopoverTrigger'
-        attachTo: '@shiftPopoverattachTo'
+      scope: true
 
       link: (scope, element, attrs, controllers, transclude) ->
         scope.parent_node = element[0]
@@ -69,20 +61,21 @@ angular.module 'shift.components.popover', []
         do compile = (template=default_template) ->
           shift_floating = angular.element '<shift-floating />'
 
-          scope.foo = {title: scope.title, text: scope.text}
-          console.log scope.title
+          scope.title = attrs.shiftPopoverTitle
+          scope.text = attrs.shiftPopover
 
           shift_floating.attr
             parent: 'parent_node'
-            attachTo: scope.attachTo
-            position: scope.position or 'bottom'
-            trigger: scope.trigger or 'click'
+            attachTo: attrs.shiftPopoverattachTo
+            position: attrs.shiftPopoverPosition or 'bottom'
+            trigger: attrs.shiftPopoverTrigger or 'click'
             offset: "5"
 
           if attrs.fixed
             shift_floating.attr {fixed: true}
 
-          shift_floating.append $compile(template)(scope)
+          shift_floating.html(template)
+
           $('body').append $compile(shift_floating)(scope)
 
           undefined
@@ -93,16 +86,11 @@ angular.module 'shift.components.popover', []
         #   $http.get attrs.templateUrl, cache: $templateCache
         #     .success compile
 
-        # # Recompile popover on title/text change
-        # scope.$watch ->
-        #   "#{attrs.title}, #{attrs.text}"
-        # , (new_value, old_value) ->
-        #   return if new_value is old_value
-        #   compile()
-
         scope.$watch attrs.title, (new_value, old_value) ->
           return if new_value is old_value
           compile()
-          #$compile(shift_floating)(scope)
-          # element.html(newValue);
-          # $compile(element.contents())(scope);
+
+        scope.$watch attrs.text, (new_value, old_value) ->
+          return if new_value is old_value
+          compile()
+
