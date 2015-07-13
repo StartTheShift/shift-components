@@ -70,3 +70,16 @@ div(ng-controller="FloatingCtrl")
         trigger = "focus"
         attach-to = ".panel"
       ) I'm floating on the right
+
+  div.button(style = 'width: 200px; border: 1px solid #ddd')
+    | Click to display form
+
+    shift-floating(position = "right")
+      form
+        label {{ foo.bar }}
+        input(
+          type="text"
+          ng-model = "foo.bar"
+          placeholder = "Should display foo.bar value"
+        )
+

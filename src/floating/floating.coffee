@@ -32,7 +32,7 @@ angular.module 'shift.components.floating', []
       $compile
     ) ->
       restrict: 'E'
-      transclude: 'true'
+      transclude: true
 
       scope:
         position: '@'
@@ -61,6 +61,8 @@ angular.module 'shift.components.floating', []
           floating_container.attr {fixed: true}
 
         floating_container.append transclude()
+        # transclude scope.$parent, (clone) ->
+        #   floating_container.append clone
 
         scope.show = (event) ->
           return if is_visible
