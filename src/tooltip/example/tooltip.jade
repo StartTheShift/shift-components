@@ -1,0 +1,36 @@
+div(ng-controller="TooltipCtrl")
+  h1 Shift Tooltip
+  p
+    | A directive to display a tooltip on custom event
+
+  h2 On text tooltip
+
+  p
+    | Lorem ipsum dolor sit amet, consectetur adipiscing elit.
+    span Maecenas venenatis
+    | sodales dolor. Pellentesque luctus id tortor malesuada mattis. Ut at
+    | efficitur magna. Fusce viverra porta erat, a volutpat
+
+    span.highlight-word(
+      shift-tooltip = "I'm a content Lorem ipsum dolor sit amet (1st top)"
+    )  nisi eleifend in
+
+  p
+    |  In velit lorem, semper vitae elit id, viverra elementum felis. Morbi
+    | ullamcorper quam vitae metus posuere elementum. Sed ac vehicula magna.
+    | Pellentesque laoreet nulla eu nibh dapibus, id ornare metus porta. Integer
+    | sed metus at risus accumsan posuere.
+
+    span.highlight-word(
+      shift-tooltip = "I'm a content Lorem ipsum dolor sit amet (2rd right)"
+    )  Nullam dignissim consequat nisl
+
+    |  at pulvinar. Nullam rhoncus metus a turpis In velit lorem, semper vitae
+    | elit id, viverra elementum felis.
+
+    span.highlight-word(
+      shift-tooltip = "It can work on click (3rd auto)"
+    )   malesuada condimentum. Aliquam
+
+    |  rutrum neque nisi, at eleifend metus consequat at. Nunc sit amet sagittis
+    | felis.
