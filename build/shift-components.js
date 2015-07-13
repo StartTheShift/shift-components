@@ -1238,6 +1238,10 @@ angular.module('shift.components.typeahead', ['shift.components.selector']).dire
         });
       };
       select_menu = angular.element(document.createElement('shift-selector'));
+      select_menu.addClass('shift-selector');
+      select_menu.css({
+        width: $(element[0].parentNode).outerWidth() + 'px'
+      });
       select_menu.attr({
         'visible': 'show_select_menu && !selected',
         'options': 'options',
