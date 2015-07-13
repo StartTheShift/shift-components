@@ -86,7 +86,7 @@ angular.module 'shift.components.typeahead', [
 
         select_menu = angular.element document.createElement 'shift-selector'
         select_menu.attr
-          'ng-show': 'show_select_menu && !selected'
+          'visible': 'show_select_menu && !selected'
           'options': 'options'
           'selected': 'selected'
           'on-select': 'onSelect(selected)'
