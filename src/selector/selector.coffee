@@ -51,14 +51,12 @@ angular.module 'shift.components.selector', []
 
       link: (scope, element, attrs, ctrl, transclude) ->
         # Build the select container
-        select_container = angular.element document.createElement 'div'
-        select_container.addClass 'select-container'
+        select_container = angular.element document.createElement 'ul'
+        select_container.addClass 'select-list'
         select_container.attr
-          'ng-if': 'visible'
+          'ng-if': 'visible && options.length'
 
-        # Build the base option element
-        option = angular.element document.createElement 'div'
-        option.addClass 'select-option'
+        option = angular.element document.createElement 'li'
         option.attr
           'ng-repeat': 'option in options'
           'ng-class': 'getClass($index)'

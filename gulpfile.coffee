@@ -171,7 +171,8 @@ gulp.task 'connect', ->
   connect.server {
     port: 2288,
     root: EXAMPLES_DEST,
-    livereload: true
+    livereload:
+      port: 62123
   }
 
 ###
@@ -199,7 +200,7 @@ gulp.task 'examples', ['compile_coffee', 'compile_template', 'compile_example'],
     .pipe gulp.dest("#{EXAMPLES_DEST}/js")
 
   third_party_css = gulp.src([
-      'bower_components/skeletor/dist/skeletor.css'
+      'bower_components/skeletor/skeletor.css'
       'bower_components/normalize.css/normalize.css'
       'bower_components/prism/themes/prism.css'
     ])
