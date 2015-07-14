@@ -619,13 +619,12 @@ angular.module('shift.components.selector', []).directive('shiftSelector', ['$co
     },
     link: function(scope, element, attrs, ctrl, transclude) {
       var autoScroll, isSelected, onKeyDown, option, previous_client_y, select_container, startListening, stopListening;
-      select_container = angular.element(document.createElement('div'));
-      select_container.addClass('select-container');
+      select_container = angular.element(document.createElement('ul'));
+      select_container.addClass('select-list');
       select_container.attr({
-        'ng-if': 'visible'
+        'ng-if': 'visible && options.length'
       });
-      option = angular.element(document.createElement('div'));
-      option.addClass('select-option');
+      option = angular.element(document.createElement('li'));
       option.attr({
         'ng-repeat': 'option in options',
         'ng-class': 'getClass($index)',
@@ -996,6 +995,81 @@ angular.module('shift.components.sortable', []).service('shiftSortableService', 
 
 
 /**
+Tooltip directive displays help text on custom action
+executed on the element it is attached to.
+
+@module shift.components.tooltip
+
+@param {string} shiftTooltip the text of the tooltip
+@param {string} shiftTooltipTrigger What triggers the tooltip ? click, hover
+or focus. Default to hover.
+@param {string} shiftTooltipPosition Default to 'top', can also be set to
+left, right and top.
+@param {attribute} fixed Use fixed positioning for the the tooltip. To be set
+when the trigger object is also fixed positioned.
+@param {string} shiftTooltipAttachTo a CSS selector where to put the tooltip
+element. Useful when the tooltip is appearing in a scrollable area.
+
+@example
+```jade
+span(
+  shift-tooltip = "lorem ipsum"
+  shift-tooltip-trigger = "click|hover|focus"
+  shift-tooltip-position = "top|bottom|left|right"
+  shift-tooltip-attach-to = ".scrollable.classname"
+  fixed
+) blah blah blah...
+```
+ */
+angular.module('shift.components.tooltip', []).directive('shiftTooltip', ['$http', '$compile', '$templateCache', function($http, $compile, $templateCache) {
+  var template;
+  template = '<div class="tooltip-container">{{ text }}</div>';
+  return {
+
+    /*
+     * Directive definition object
+     */
+    restrict: 'A',
+    scope: {
+      text: '@shiftTooltip',
+      position: '@shiftTooltipPosition',
+      trigger: '@shiftTooltipTrigger',
+      attachTo: '@shiftTooltipattachTo'
+    },
+    link: function(scope, element, attrs, controllers, transclude) {
+      var compile;
+      scope.parent_node = element[0];
+      (compile = function() {
+        var shift_floating;
+        shift_floating = angular.element('<shift-floating />');
+        shift_floating.attr({
+          parent: 'parent_node',
+          attachTo: scope.attachTo,
+          position: scope.position || 'top',
+          trigger: scope.trigger || 'hover',
+          offset: "2"
+        });
+        if (attrs.fixed) {
+          shift_floating.attr({
+            fixed: true
+          });
+        }
+        shift_floating.append($compile(template)(scope));
+        $('body').append($compile(shift_floating)(scope));
+        return void 0;
+      })();
+      return scope.$watch(attrs.title, function(new_value, old_value) {
+        if (new_value === old_value) {
+          return;
+        }
+        return compile();
+      });
+    }
+  };
+}]);
+
+
+/**
 Time directive displays a text input guessing the time entered.
 
 @module shift.components.time
@@ -1071,81 +1145,6 @@ angular.module('shift.components.time', []).directive('shiftTime', ['$timeout', 
             return scope.time = moment(scope.time);
           });
         }
-      });
-    }
-  };
-}]);
-
-
-/**
-Tooltip directive displays help text on custom action
-executed on the element it is attached to.
-
-@module shift.components.tooltip
-
-@param {string} shiftTooltip the text of the tooltip
-@param {string} shiftTooltipTrigger What triggers the tooltip ? click, hover
-or focus. Default to hover.
-@param {string} shiftTooltipPosition Default to 'top', can also be set to
-left, right and top.
-@param {attribute} fixed Use fixed positioning for the the tooltip. To be set
-when the trigger object is also fixed positioned.
-@param {string} shiftTooltipAttachTo a CSS selector where to put the tooltip
-element. Useful when the tooltip is appearing in a scrollable area.
-
-@example
-```jade
-span(
-  shift-tooltip = "lorem ipsum"
-  shift-tooltip-trigger = "click|hover|focus"
-  shift-tooltip-position = "top|bottom|left|right"
-  shift-tooltip-attach-to = ".scrollable.classname"
-  fixed
-) blah blah blah...
-```
- */
-angular.module('shift.components.tooltip', []).directive('shiftTooltip', ['$http', '$compile', '$templateCache', function($http, $compile, $templateCache) {
-  var template;
-  template = '<div class="tooltip-container">{{ text }}</div>';
-  return {
-
-    /*
-     * Directive definition object
-     */
-    restrict: 'A',
-    scope: {
-      text: '@shiftTooltip',
-      position: '@shiftTooltipPosition',
-      trigger: '@shiftTooltipTrigger',
-      attachTo: '@shiftTooltipattachTo'
-    },
-    link: function(scope, element, attrs, controllers, transclude) {
-      var compile;
-      scope.parent_node = element[0];
-      (compile = function() {
-        var shift_floating;
-        shift_floating = angular.element('<shift-floating />');
-        shift_floating.attr({
-          parent: 'parent_node',
-          attachTo: scope.attachTo,
-          position: scope.position || 'top',
-          trigger: scope.trigger || 'hover',
-          offset: "2"
-        });
-        if (attrs.fixed) {
-          shift_floating.attr({
-            fixed: true
-          });
-        }
-        shift_floating.append($compile(template)(scope));
-        $('body').append($compile(shift_floating)(scope));
-        return void 0;
-      })();
-      return scope.$watch(attrs.title, function(new_value, old_value) {
-        if (new_value === old_value) {
-          return;
-        }
-        return compile();
       });
     }
   };
@@ -1238,10 +1237,7 @@ angular.module('shift.components.typeahead', ['shift.components.selector']).dire
         });
       };
       select_menu = angular.element(document.createElement('shift-selector'));
-      select_menu.addClass('shift-selector');
-      select_menu.css({
-        width: $(element[0].parentNode).outerWidth() + 'px'
-      });
+      element.addClass('popover active');
       select_menu.attr({
         'visible': 'show_select_menu && !selected',
         'options': 'options',
@@ -1255,7 +1251,7 @@ angular.module('shift.components.typeahead', ['shift.components.selector']).dire
           'multiple': 'true',
           'on-select': 'onSelectMultiOption(selected)',
           'on-discard': 'onDeselectMultiOption(discarded)',
-          'ng-show': 'show_select_menu'
+          'visible': 'show_select_menu'
         });
       }
       shift_select_scope = scope.$new();
@@ -1353,6 +1349,6 @@ angular.module('shift.components.typeahead', ['shift.components.selector']).dire
 
 angular.module('shift.components.typeahead').run(['$templateCache', function($templateCache) {
 
-  $templateCache.put('typeahead/typeahead.html', '<input type="text" ng-blur="hide($event)" ng-class="{\'select-menu-visible\': show_select_menu &amp;&amp; options.length}" ng-focus="onFocus($event)" ng-model="query" placeholder="{{placeholder}}">');
+  $templateCache.put('typeahead/typeahead.html', '<div class="typeahead"><div class="clear-icon"></div><div class="search-icon"></div><input type="text" ng-blur="hide($event)" ng-focus="onFocus($event)" ng-model="query" placeholder="{{placeholder}}"></div>');
 
 }]);
